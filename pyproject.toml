@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcmc"
+version = "0.1.0"
+description = "Markov Chain Monte-Carlo Methods for Structure Learning"
+requires-python = ">= 3.8"
+dependencies = [
+  "numpy",
+  "pandas",
+  "scipy",
+  "scikit-learn",
+  "matplotlib",
+  "networkx",
+  "igraph",
+  "gmpy2"
+]
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Human Technology Institute", email = "hti@uts.edu.au"}
+]

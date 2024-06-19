@@ -1,0 +1,8 @@
+__pycache__
+.DS_Store
+.ipynb_checkpoints/
+build/
+dist/
+src/.DS_Store
+src/mcmc.egg-info/
+src/mcmc/.DS_Store
