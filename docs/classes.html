@@ -1,0 +1,130 @@
+<html>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+      <div class="mermaid">
+    
+        classDiagram
+          class BDeuScore {
+            graph : DiGraph
+            compute(alpha: float)
+          }
+          class BDscore {
+            alpha : float
+            graph : DiGraph
+            compute()
+          }
+          class BGeScore {
+            am
+            parameters
+            reg_coefficients
+            compute()
+            compute_BGe_with_edge(node: str, parents: list)
+            compute_BGe_with_graph()
+            compute_BGe_with_node(node: str)
+            compute_node(node: str)
+          }
+          class GraphProposal {
+            operations : list
+            prob_Gcurr_Gprop
+            prob_Gprop_Gcurr
+            prob_Gcurr_Gprop_f()
+            prob_Gprop_Gcurr_f()
+            propose_DAG()
+          }
+          class MCMC {
+            data
+            initial_graph
+            max_iter
+            node_labels
+            num_nodes
+            proposal_object
+            score_object
+            run()*
+          }
+          class MarginalLogLikelihood {
+            a : float
+            b : float
+            parameters : dict
+            reg_coefficients : dict
+            compute()
+            compute_marginal_log_likelihood_from_data()
+            compute_marginal_log_likelihood_with_graph()
+            compute_marginal_log_likelihood_with_node(node: str)
+            compute_node(node)
+            recover_regr_params(parameters: dict)
+            to_string()
+          }
+          class Score {
+            adj_matrix
+            data
+            graph
+            incidence
+            is_log_space
+            node_label_to_index
+            node_labels
+            to_string
+            compute()*
+            compute_node()*
+          }
+          class StructureLearningProposal {
+            blacklist
+            current_graph
+            node_labels
+            num_nodes
+            operation
+            proposed_graph
+            whitelist
+            prob_Gcurr_Gprop_f(G_prop: nx.DiGraph)*
+            prob_Gprop_Gcurr_f(G_prop: nx.DiGraph)*
+            propose_DAG()*
+          }
+          class StructureMCMC {
+            to_string
+            acceptance_ratio(posterior_Gcurr: float, posterior_Gprop: float, Q_Gcurr_Gprop: float, Q_Gprop_Gcurr: float)
+            get_mcmc_res_accepted_graphs(results)
+            get_mcmc_res_graphs(results)
+            get_mcmc_res_operations(results)
+            get_mcmc_res_scores(results)
+            log_acceptance_ratio(posterior_Gcurr: float, posterior_Gprop: float, Q_Gcurr_Gprop: float, Q_Gprop_Gcurr: float)
+            run()
+          }
+          class SyntheticDataset {
+            P
+            W
+            adj_mat : DataFrame
+            data : DataFrame
+            degree : float
+            graph_type : str
+            node_labels : list
+            noise_scale : float
+            num_nodes : float
+            num_obs : float
+            true_dag : NoneType
+            w_range : tuple
+            simulate_data(W, n, noise_scale, sigmas)
+            simulate_data_V1(W, n, noise_scale, sigmas)
+            simulate_data_from_dag(DAG: np.ndarray, num_obs, num_nodes, node_labels, w_range, noise_scale)
+            simulate_gaussian_dag(d, w_std)
+            simulate_random_dag(d, degree, graph_type, w_range)
+          }
+          class WeightedBGeScore {
+            penalty_coefficient : float
+            calculate_complexity_penalty()
+            calculate_node_complexity_penalty(num_parents)
+            compute_BGe_with_graph()
+            compute_BGe_with_node(node: str)
+          }
+          StructureMCMC --|> MCMC
+          GraphProposal --|> StructureLearningProposal
+          BDscore --|> Score
+          BDeuScore --|> Score
+          BGeScore --|> Score
+          WeightedBGeScore --|> BGeScore
+          MarginalLogLikelihood --|> Score
+          StructureLearningProposal --o StructureMCMC : _proposal_object
+          Score --o MCMC : _score_object
+          Score --o StructureMCMC : _score_object
+  
+       </div>
+  </body>
+</html>
