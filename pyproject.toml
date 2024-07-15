@@ -3,9 +3,9 @@ requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mcmc"
+name = "structure_mcmc"
 version = "0.1.0"
-description = "Markov Chain Monte-Carlo Methods for Structure Learning"
+description = "Structure MCMC for graph structure learning in Bayesian networks."
 requires-python = ">= 3.8"
 dependencies = [
   "numpy",
@@ -20,5 +20,7 @@ dependencies = [
 readme = "README.md"
 license = {file = "LICENSE"}
 authors = [
-    {name = "Human Technology Institute", email = "hti@uts.edu.au"}
+    {name = "Kristopher Delas Peñas", email = "kristopher.delaspenas@uts.edu.au"},
+    {name = "Roman Marchant", email = "roman.marchant@uts.edu.au"},
+    {name = "Catarina Pinto Moreira"}
 ]

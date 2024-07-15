@@ -1,3 +1,5 @@
+examples/nodes_*
+venv/
 __pycache__
 .DS_Store
 .ipynb_checkpoints/
@@ -5,4 +7,5 @@ build/
 dist/
 src/.DS_Store
 src/mcmc.egg-info/
+src/structure_mcmc.egg-info/
 src/mcmc/.DS_Store
