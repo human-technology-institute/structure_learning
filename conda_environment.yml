@@ -204,4 +204,5 @@ dependencies:
   - pip:
       - igraph==0.11.5
       - texttable==1.7.0
+      - seaborn==0.13.2
 prefix: /Users/165421/miniforge3/envs/structure_mcmc

@@ -3,9 +3,9 @@ requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "structure_mcmc"
+name = "structure_learning"
 version = "0.1.0"
-description = "Structure MCMC for graph structure learning in Bayesian networks."
+description = "MCMC for graph structure learning in Bayesian networks."
 requires-python = ">= 3.8"
 dependencies = [
   "numpy",
@@ -15,12 +15,13 @@ dependencies = [
   "matplotlib",
   "networkx",
   "igraph",
-  "gmpy2"
+  "gmpy2",
+  "seaborn"
 ]
 readme = "README.md"
 license = {file = "LICENSE"}
 authors = [
-    {name = "Kristopher Delas Peñas", email = "kristopher.delaspenas@uts.edu.au"},
+    {name = "Kristofer Delas Peñas", email = "kristofer.delaspenas@uts.edu.au"},
     {name = "Roman Marchant", email = "roman.marchant@uts.edu.au"},
     {name = "Catarina Pinto Moreira"}
 ]
