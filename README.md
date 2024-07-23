@@ -1,21 +1,19 @@
 # Structure MCMC for Causal Discovery
 
-Structure MCMC (Markov Chain Monte Carlo) is a Bayesian method used for learning the structure of probabilistic graphical models, such as Bayesian networks. This technique involves sampling from the posterior distribution of possible structures given the data, allowing for the estimation of the most probable graph structures that represent the dependencies among variables. The method effectively navigates the high-dimensional space of possible graph structures using MCMC, making it suitable for complex models where traditional methods might struggle.
+Structure MCMC (Markov Chain Monte Carlo) is a Bayesian method used for learning the structure of probabilistic graphical models, such as Bayesian networks. This technique involves sampling from the posterior distribution of possible structures given the data, allowing for the estimation of the most probable graph structures that represent the dependencies among variables. The method effectively navigates the high-dimensional space of possible graph structures using MCMC, making it suitable for complex models where traditional methods might struggle. Structure MCMC is one of the first and most straightforward approaches for sampling graphs. Its simplicity and foundational role make it an essential tool for understanding and developing more advanced graph sampling techniques. Structure MCMC has proven to be a powerful tool for probabilistic structure learning, enabling the discovery of complex dependencies in data-rich environments. By iterating through possible structures and utilizing Bayesian scoring methods, it provides robust and interpretable models for a wide range of applications.
 
-Structure MCMC is one of the first and most straightforward approaches for sampling graphs, compared to more complex methods such as Partition MCMC, Layering, or Order MCMC. Its simplicity and foundational role make it an essential tool for understanding and developing more advanced graph sampling techniques.
-
-Structure MCMC has proven to be a powerful tool for probabilistic structure learning, enabling the discovery of complex dependencies in data-rich environments. By iterating through possible structures and utilizing Bayesian scoring methods, it provides robust and interpretable models for a wide range of applications.
+Partition MCMC utilises the underlying combinatorial structure of directed acyclic graphs to improve convergence while retaining unbiased sampling.
 
 In addition to this Python implementation, similar approaches can be found in the R packages [BiDAG](https://cran.r-project.org/package=BiDAG) and **bnlearn**, which provide tools for structure learning in Bayesian networks, including MCMC methods.
 
 # Installation
 ## Dependencies
-This code depends on the following libraries: `numpy`, `scipy`, `scikit-learn`, `pandas`, `matplotlib`, `networkx`, `igraph`, and `gmpy2`. 
+This code depends on the following libraries: `numpy`, `scipy`, `scikit-learn`, `pandas`, `matplotlib`, `networkx`, `igraph`, and `gmpy2`.
 
 ## Via conda
 For convenience, the file `conda_environment.yml` can be used to resolve these dependencies: `conda env create -f conda_environment.yml`.
 
-Activate the conda environment and add the path to `structure_mcmc/src` to be able to import the mcmc modules.
+Activate the conda environment and add the path to `structure_learning/src` to be able to import the mcmc modules.
 
 ## Via pip
 
@@ -72,7 +70,7 @@ pip install dist/mcmc-0.1.0-py3-none-any.whl
 
 # Reference
 1. **Friedman, N., & Koller, D. (2003).** "Being Bayesian about network structure: A Bayesian approach to structure discovery in Bayesian networks." *Machine Learning*, 50(1), 95-125.
-   
+
 2. **Madigan, D., & York, J. (1995).** "Bayesian graphical models for discrete data." *International Statistical Review/Revue Internationale de Statistique*, 215-232.
 
 3. **Giudici, P., & Castelo, R. (2003).** "Improving Markov Chain Monte Carlo model search for data mining." *Machine Learning*, 50(1), 127-158.

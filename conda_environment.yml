@@ -38,7 +38,6 @@ dependencies:
   - freetype=2.12.1
   - glpk=5.0
   - gmp=6.3.0
-  - gmpy2=2.1.5
   - h11=0.14.0
   - h2=4.1.0
   - hpack=4.0.0

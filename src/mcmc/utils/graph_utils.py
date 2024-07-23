@@ -5,13 +5,12 @@ import itertools
 import re
 import zipfile
 from collections import Counter
-from math import comb
+from math import comb, factorial
 import pickle
 import numpy as np
 import pandas as pd
 import networkx as nx
 import igraph
-import gmpy2
 import matplotlib.pyplot as plt
 
 def count_dags(n : int):
@@ -901,7 +900,7 @@ def count_all_valid_orderings(graph : np.ndarray):
 
     # if the graph has no edges, then return N!
     if all([all([not graph[i][j] for j in range(n)]) for i in range(n)]):
-        return gmpy2.fac(n)
+        return factorial(n)
 
     for i in range(n):
         for j in range(n):
