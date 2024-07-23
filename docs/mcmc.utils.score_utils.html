@@ -1,38 +1,37 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: module mcmc.utils.score_utils</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-</head><body bgcolor="#f0f0f8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module mcmc.utils.score_utils</title>
+</head><body>
 
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
-<tr bgcolor="#7799ee">
-<td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mcmc.html"><font color="#ffffff">mcmc</font></a>.<a href="mcmc.utils.html"><font color="#ffffff">utils</font></a>.score_utils</strong></big></big></font></td
-><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/165421/Documents/code/mcmc/utils/score_utils.py">/Users/165421/Documents/code/mcmc/utils/score_utils.py</a></font></td></tr></table>
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="mcmc.html" class="white">mcmc</a>.<a href="mcmc.utils.html" class="white">utils</a>.score_utils</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/Users/165421/miniforge3/envs/structure_mcmc/lib/python3.12/site-packages/mcmc/utils/score_utils.py">/Users/165421/miniforge3/envs/structure_mcmc/lib/python3.12/site-packages/mcmc/utils/score_utils.py</a></td></tr></table>
     <p></p>
 <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#aa55cc">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
     
-<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
-</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#eeaa77">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="numpy.html">numpy</a><br>
+</td><td class="multicolumn"><a href="torch.html">torch</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
     
-<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-filter_nans"><strong>filter_nans</strong></a>(row)</dt><dd><tt>Filter&nbsp;out&nbsp;nans&nbsp;from&nbsp;an&nbsp;iterable&nbsp;object&nbsp;of&nbsp;floats.<br>
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-filter_nans"><strong>filter_nans</strong></a>(row)</dt><dd><span class="code">Filter&nbsp;out&nbsp;nans&nbsp;from&nbsp;an&nbsp;iterable&nbsp;object&nbsp;of&nbsp;floats.<br>
 &nbsp;<br>
 Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;row&nbsp;(iterable):&nbsp;list&nbsp;of&nbsp;floats&nbsp;and&nbsp;nans<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(iterable):&nbsp;the&nbsp;input&nbsp;with&nbsp;all&nbsp;the&nbsp;nans&nbsp;removed</tt></dd></dl>
- <dl><dt><a name="-list_possible_parents"><strong>list_possible_parents</strong></a>(max_parents, elements)</dt><dd><tt>Generate&nbsp;a&nbsp;matrix&nbsp;with&nbsp;all&nbsp;the&nbsp;possible&nbsp;parents&nbsp;of&nbsp;a&nbsp;given&nbsp;node<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(iterable):&nbsp;the&nbsp;input&nbsp;with&nbsp;all&nbsp;the&nbsp;nans&nbsp;removed</span></dd></dl>
+ <dl><dt><a name="-list_possible_parents"><strong>list_possible_parents</strong></a>(max_parents, elements)</dt><dd><span class="code">Generate&nbsp;a&nbsp;matrix&nbsp;with&nbsp;all&nbsp;the&nbsp;possible&nbsp;parents&nbsp;of&nbsp;a&nbsp;given&nbsp;node<br>
 up&nbsp;to&nbsp;the&nbsp;maximum&nbsp;number&nbsp;of&nbsp;parents.<br>
 &nbsp;<br>
 Parameters:<br>
@@ -40,9 +39,9 @@ Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;elements&nbsp;(list):&nbsp;nodes<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(list):&nbsp;all&nbsp;possible&nbsp;parents</tt></dd></dl>
- <dl><dt><a name="-partition_score"><strong>partition_score</strong></a>(scorenodes, parenttable, scoretable, permy, party, posy)</dt></dl>
- <dl><dt><a name="-sample_score"><strong>sample_score</strong></a>(n, scores, parenttable, node_label_to_idx)</dt></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;(list):&nbsp;all&nbsp;possible&nbsp;parents</span></dd></dl>
+ <dl><dt><a name="-partition_score"><strong>partition_score</strong></a>(score_nodes, node_labels, parenttable, scoretable, permy, party, posy)</dt></dl>
+ <dl><dt><a name="-sample_score"><strong>sample_score</strong></a>(n, node_labels, scores, parenttable, node_label_to_idx)</dt></dl>
  <dl><dt><a name="-score_possible_parents"><strong>score_possible_parents</strong></a>(parent_table, node_labels, score_object)</dt></dl>
  <dl><dt><a name="-table_dag_score"><strong>table_dag_score</strong></a>(parent_rows, node, score_object)</dt></dl>
 </td></tr></table>
