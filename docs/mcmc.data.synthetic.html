@@ -1,59 +1,56 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: module mcmc.data.synthetic</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-</head><body bgcolor="#f0f0f8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module mcmc.data.synthetic</title>
+</head><body>
 
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
-<tr bgcolor="#7799ee">
-<td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="mcmc.html"><font color="#ffffff">mcmc</font></a>.<a href="mcmc.data.html"><font color="#ffffff">data</font></a>.synthetic</strong></big></big></font></td
-><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/165421/Documents/code/mcmc/data/synthetic.py">/Users/165421/Documents/code/mcmc/data/synthetic.py</a></font></td></tr></table>
-    <p><tt>##&nbsp;Simulate&nbsp;data<br>
-##&nbsp;<a href="https://github.com/ermongroup/BCD-Nets/blob/main/dag_utils.py">https://github.com/ermongroup/BCD-Nets/blob/main/dag_utils.py</a></tt></p>
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="mcmc.html" class="white">mcmc</a>.<a href="mcmc.data.html" class="white">data</a>.synthetic</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/Users/165421/miniforge3/envs/structure_mcmc/lib/python3.12/site-packages/mcmc/data/synthetic.py">/Users/165421/miniforge3/envs/structure_mcmc/lib/python3.12/site-packages/mcmc/data/synthetic.py</a></td></tr></table>
+    <p><span class="code">##&nbsp;Simulate&nbsp;data<br>
+##&nbsp;<a href="https://github.com/ermongroup/BCD-Nets/blob/main/dag_utils.py">https://github.com/ermongroup/BCD-Nets/blob/main/dag_utils.py</a></span></p>
 <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#aa55cc">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
     
-<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="numpy.html">numpy</a><br>
-</td><td width="25%" valign=top><a href="networkx.html">networkx</a><br>
-</td><td width="25%" valign=top><a href="pandas.html">pandas</a><br>
-</td><td width="25%" valign=top><a href="scipy.stats.html">scipy.stats</a><br>
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="numpy.html">numpy</a><br>
+</td><td class="multicolumn"><a href="networkx.html">networkx</a><br>
+</td><td class="multicolumn"><a href="pandas.html">pandas</a><br>
+</td><td class="multicolumn"><a href="scipy.stats.html">scipy.stats</a><br>
 </td></tr></table></td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ee77aa">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
     
-<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl>
-<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
-</font></dt><dd>
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="builtins.html#object">builtins.object</a>
+</dt><dd>
 <dl>
-<dt><font face="helvetica, arial"><a href="mcmc.data.synthetic.html#SyntheticDataset">SyntheticDataset</a>
-</font></dt></dl>
+<dt class="heading-text"><a href="mcmc.data.synthetic.html#SyntheticDataset">SyntheticDataset</a>
+</dt></dl>
 </dd>
 </dl>
  <p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#ffc8d8">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="SyntheticDataset">class <strong>SyntheticDataset</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="SyntheticDataset">class <strong>SyntheticDataset</strong></a>(<a href="builtins.html#object">builtins.object</a>)</td></tr>
     
-<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#SyntheticDataset">SyntheticDataset</a>(num_nodes:&nbsp;float,&nbsp;num_obs:&nbsp;float,&nbsp;node_labels:&nbsp;list,&nbsp;degree:&nbsp;float,&nbsp;graph_type:&nbsp;str&nbsp;=&nbsp;'erdos-renyi',&nbsp;noise_scale:&nbsp;float&nbsp;=&nbsp;1.0,&nbsp;true_dag=None)<br>
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#SyntheticDataset">SyntheticDataset</a>(num_nodes:&nbsp;float,&nbsp;num_obs:&nbsp;float,&nbsp;node_labels:&nbsp;list,&nbsp;degree:&nbsp;float,&nbsp;graph_type:&nbsp;str&nbsp;=&nbsp;'erdos-renyi',&nbsp;noise_scale:&nbsp;float&nbsp;=&nbsp;1.0,&nbsp;true_dag=None)<br>
 &nbsp;<br>
-Generate&nbsp;synthetic&nbsp;data&nbsp;from&nbsp;graphs.<br>&nbsp;</tt></td></tr>
+Generate&nbsp;synthetic&nbsp;data&nbsp;from&nbsp;graphs.<br>&nbsp;</span></td></tr>
 <tr><td>&nbsp;</td>
-<td width="100%">Methods defined here:<br>
-<dl><dt><a name="SyntheticDataset-__init__"><strong>__init__</strong></a>(self, num_nodes: float, num_obs: float, node_labels: list, degree: float, graph_type: str = 'erdos-renyi', noise_scale: float = 1.0, true_dag=None)</dt><dd><tt>Initialise&nbsp;<a href="#SyntheticDataset">SyntheticDataset</a>&nbsp;instance</tt></dd></dl>
+<td class="singlecolumn">Methods defined here:<br>
+<dl><dt><a name="SyntheticDataset-__init__"><strong>__init__</strong></a>(self, num_nodes: float, num_obs: float, node_labels: list, degree: float, graph_type: str = 'erdos-renyi', noise_scale: float = 1.0, true_dag=None)</dt><dd><span class="code">Initialise&nbsp;<a href="#SyntheticDataset">SyntheticDataset</a>&nbsp;instance</span></dd></dl>
 
 <hr>
 Static methods defined here:<br>
-<dl><dt><a name="SyntheticDataset-simulate_data"><strong>simulate_data</strong></a>(W, n, noise_scale=1.0, sigmas=None)</dt><dd><tt>Simulate&nbsp;samples&nbsp;from&nbsp;SEM&nbsp;with&nbsp;specified&nbsp;type&nbsp;of&nbsp;noise.<br>
+<dl><dt><a name="SyntheticDataset-simulate_data"><strong>simulate_data</strong></a>(W, n, noise_scale=1.0, sigmas=None)</dt><dd><span class="code">Simulate&nbsp;samples&nbsp;from&nbsp;SEM&nbsp;with&nbsp;specified&nbsp;type&nbsp;of&nbsp;noise.<br>
 &nbsp;<br>
 Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;W&nbsp;(numpy.ndarray):&nbsp;weigthed&nbsp;DAG<br>
@@ -62,9 +59,9 @@ Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;sigmas&nbsp;(numpy.ndarray):&nbsp;noise&nbsp;vector<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray)&nbsp;[n,d]&nbsp;sample&nbsp;matrix</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray)&nbsp;[n,d]&nbsp;sample&nbsp;matrix</span></dd></dl>
 
-<dl><dt><a name="SyntheticDataset-simulate_data_V1"><strong>simulate_data_V1</strong></a>(W, n, noise_scale=1.0, sigmas=None)</dt><dd><tt>Simulate&nbsp;samples&nbsp;from&nbsp;SEM&nbsp;with&nbsp;specified&nbsp;type&nbsp;of&nbsp;noise.<br>
+<dl><dt><a name="SyntheticDataset-simulate_data_V1"><strong>simulate_data_V1</strong></a>(W, n, noise_scale=1.0, sigmas=None)</dt><dd><span class="code">Simulate&nbsp;samples&nbsp;from&nbsp;SEM&nbsp;with&nbsp;specified&nbsp;type&nbsp;of&nbsp;noise.<br>
 &nbsp;<br>
 Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;W&nbsp;(numpy.ndarray):&nbsp;weigthed&nbsp;DAG<br>
@@ -73,9 +70,9 @@ Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;sigmas&nbsp;(numpy.ndarray):&nbsp;noise&nbsp;vector<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray)&nbsp;[n,d]&nbsp;sample&nbsp;matrix</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray)&nbsp;[n,d]&nbsp;sample&nbsp;matrix</span></dd></dl>
 
-<dl><dt><a name="SyntheticDataset-simulate_data_from_dag"><strong>simulate_data_from_dag</strong></a>(DAG: numpy.ndarray, num_obs, num_nodes, node_labels, w_range, noise_scale)</dt><dd><tt>Simulate&nbsp;samples&nbsp;from&nbsp;ground&nbsp;truth&nbsp;DAG.<br>
+<dl><dt><a name="SyntheticDataset-simulate_data_from_dag"><strong>simulate_data_from_dag</strong></a>(DAG: numpy.ndarray, num_obs, num_nodes, node_labels, w_range, noise_scale)</dt><dd><span class="code">Simulate&nbsp;samples&nbsp;from&nbsp;ground&nbsp;truth&nbsp;DAG.<br>
 &nbsp;<br>
 Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;DAG&nbsp;(numpy.ndarray):&nbsp;ground&nbsp;truth&nbsp;DAG<br>
@@ -86,9 +83,9 @@ Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;noise_scale&nbsp;(float):&nbsp;scale&nbsp;parameter&nbsp;of&nbsp;noise&nbsp;distribution<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;[n,d]&nbsp;sample&nbsp;matrix</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;[n,d]&nbsp;sample&nbsp;matrix</span></dd></dl>
 
-<dl><dt><a name="SyntheticDataset-simulate_gaussian_dag"><strong>simulate_gaussian_dag</strong></a>(d, w_std)</dt><dd><tt>Simulate&nbsp;dense&nbsp;DAG&nbsp;adjacency&nbsp;matrix<br>
+<dl><dt><a name="SyntheticDataset-simulate_gaussian_dag"><strong>simulate_gaussian_dag</strong></a>(d, w_std)</dt><dd><span class="code">Simulate&nbsp;dense&nbsp;DAG&nbsp;adjacency&nbsp;matrix<br>
 &nbsp;<br>
 Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;d&nbsp;(int):&nbsp;number&nbsp;of&nbsp;nodes<br>
@@ -98,9 +95,9 @@ Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;weighted&nbsp;DAG<br>
 &nbsp;&nbsp;&nbsp;&nbsp;None<br>
 &nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;permutation&nbsp;matrix<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;lower&nbsp;triangular&nbsp;matrix</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;lower&nbsp;triangular&nbsp;matrix</span></dd></dl>
 
-<dl><dt><a name="SyntheticDataset-simulate_random_dag"><strong>simulate_random_dag</strong></a>(d, degree, graph_type, w_range)</dt><dd><tt>Simulate&nbsp;random&nbsp;DAG&nbsp;with&nbsp;some&nbsp;expected&nbsp;degree.<br>
+<dl><dt><a name="SyntheticDataset-simulate_random_dag"><strong>simulate_random_dag</strong></a>(d, degree, graph_type, w_range)</dt><dd><span class="code">Simulate&nbsp;random&nbsp;DAG&nbsp;with&nbsp;some&nbsp;expected&nbsp;degree.<br>
 &nbsp;<br>
 Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;d&nbsp;(int):&nbsp;number&nbsp;of&nbsp;nodes<br>
@@ -111,22 +108,21 @@ Parameters:<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;weighted&nbsp;DAG<br>
 &nbsp;&nbsp;&nbsp;&nbsp;None<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;permutation&nbsp;matrix</tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;permutation&nbsp;matrix</span></dd></dl>
 
 <hr>
 Data descriptors defined here:<br>
 <dl><dt><strong>__dict__</strong></dt>
-<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
 </dl>
 <dl><dt><strong>__weakref__</strong></dt>
-<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
 </dl>
 </td></tr></table></td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#55aa55">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
     
-<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><strong>multivariate_normal</strong> = &lt;scipy.stats._multivariate.multivariate_normal_gen object&gt;</td></tr></table>
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>multivariate_normal</strong> = &lt;scipy.stats._multivariate.multivariate_normal_gen object&gt;</td></tr></table>
 </body></html>

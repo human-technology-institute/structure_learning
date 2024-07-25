@@ -3,6 +3,8 @@
 """
 from itertools import combinations
 import numpy as np
+import torch
+from torch.distributions.categorical import Categorical
 
 # This function produces
 def list_possible_parents(max_parents, elements):
@@ -80,124 +82,80 @@ def score_possible_parents(parent_table, node_labels, score_object):
 
     return listy
 
-def partition_score(scorenodes, parenttable, scoretable, permy, party, posy):
+def partition_score(score_nodes, node_labels, parenttable, scoretable, permy, party, posy):
     """
 
     """
-    n = len(scorenodes)
-
-    partition_scores = {}
-
-    all_scores = {}  # Use lists to hold multiple scores
+    n = len(score_nodes)
+    partition_scores = {node:0 for node in score_nodes}
+    all_scores = {}
     allowed_score_rows = {}
-    allowed_rows = {}
+    m = len(party)
 
-    max_parents = parenttable[0].shape[1]
+    tablesize = parenttable[0].shape[1]
 
-    # Convert permy to indices for easier comparison
-    permy_indices = {node: index for index, node in enumerate(sorted(permy))}
-
-    for i, node in enumerate(scorenodes):
-
+    for node in score_nodes:
+        i = node_labels.index(node)
         position = permy.index(node)
         partyelement = posy[position]
 
-        i = permy_indices[node]
-
-        if partyelement == 0:
-            #print("Enter here")
-            partition_scores[i] = scoretable[i][0]
-
-
-            all_scores[i] = partition_scores[i]
-            allowed_score_rows[i] = np.array([0])
-
-            # if partition_scores[i] is of type array, then convert it to a scalar
-            if isinstance(partition_scores[i], np.ndarray):
-                partition_scores[i] = partition_scores[i][0]
+        if partyelement == 0: # no parents are allowed
+            partition_scores[node] = scoretable[i][0]
+            all_scores[node] = partition_scores[node]
+            allowed_score_rows[node] = np.array([0])
 
         else:
-            banned_nodes = [permy[i] for i in range(len(permy)) if posy[i] >= partyelement]
-            required_nodes = [permy[i] for i in range(len(permy)) if posy[i] == partyelement - 1]
-            allowed_rows = list(range(1, parenttable[i].shape[0] ))
+            bannednodes = set([permy[k] for k in range(len(permy)) if posy[k] >= partyelement])
+            requirednodes = set([permy[k] for k in range(len(permy)) if posy[k] == partyelement-1])
+            allowedrows = set(list(range(1, parenttable[i].shape[0])))
 
-            for j in range(max_parents):
+            for j in range(parenttable[i].shape[1]):
+                bannedrows = [row for row in allowedrows if parenttable[i][row,j] in bannednodes]
+                allowedrows = allowedrows - set(bannedrows)
 
-                # Find banned rows: rows where the element in the j-th column is in bannednodes
-                banned_rows = [row for row in allowed_rows if parenttable[i][row, j] in banned_nodes]
+            notrequiredrows = allowedrows.copy()
+            for j in range(parenttable[i].shape[1]):
+                requiredrows = [row for row in notrequiredrows if parenttable[i][row,j] in requirednodes]
+                notrequiredrows = notrequiredrows - set(requiredrows)
 
-                # Update allowedrows by removing bannedrows
-                # Convert bannedrows to a set for efficient removal
-                banned_rows_set = set(banned_rows)
+            allowedrows = list(allowedrows - notrequiredrows)
 
-                if len(banned_rows_set) > 0:
-                    allowed_rows = [row for row in allowed_rows if row not in banned_rows_set]
+            all_scores[node] = scoretable[i][allowedrows, 0] if len(allowedrows) > 0 else np.array([-np.inf])
+            allowed_score_rows[node] = allowedrows
+            maxallowed = max(all_scores[node]) if len(allowedrows) > 0 else -np.inf
+            try:
+                partition_scores[node] = maxallowed + np.log(np.sum(np.exp(all_scores[node] - maxallowed)))
+            except:
+                partition_scores[node] = -np.inf
+        if isinstance(partition_scores[node], np.ndarray):
+            partition_scores[node] = partition_scores[node][0]
 
-            not_required_rows = allowed_rows.copy()
-            for j in range(max_parents):
-                required_rows = [row for row in not_required_rows if parenttable[i][row, j] in required_nodes]
-                if len(required_rows) > 0:
-                    not_required_rows = [row for row in not_required_rows if row not in required_rows]
+    scores = {}
+    scores['all_possible_scores_node'] = all_scores
+    scores['allowed_rows'] = allowed_score_rows
+    scores['total_scores'] = partition_scores
 
-            allowed_rows = list(set(allowed_rows) - set(not_required_rows))
-
-            # Check if allowed_rows is empty
-            if len(allowed_rows) == 0:
-                # CATARINA ADDED THIS SO IT WOULD NOT FREEZE
-                # Handle the case where there are no allowed rows (e.g., set to a low default value or other logic)
-                max_allowed = -np.inf  # Example default value
-                all_scores[i] = np.array([max_allowed])
-                print("\n[WARNING] No allowed rows for node ", node, " with parent set ",
-                      required_nodes, " and banned set ", banned_nodes, "\n")
-            else:
-                all_scores[i] = scoretable[i][allowed_rows, 0]
-                max_allowed = np.max(all_scores[i])
-
-            allowed_score_rows[i] = np.array(allowed_rows)
-
-            partition_scores[i] = max_allowed + np.log(np.sum(np.exp(all_scores[i] - max_allowed)))
-
-            # if partition_scores[i] is of type array, then convert it to a scalar
-            if isinstance(partition_scores[i], np.ndarray):
-                partition_scores[i] = partition_scores[i][0]
-
-    scores = {
-        'all_possible_scores_node': all_scores,
-        'allowed_rows': allowed_score_rows,
-        'total_scores': partition_scores
-    }
     return scores
 
-def sample_score(n, scores, parenttable, node_label_to_idx):
+def sample_score(n, node_labels, scores, parenttable, node_label_to_idx):
     """
 
     """
-    # Initialize the adjacency matrix
     incidence = np.zeros((n, n))
-    sampled_score = 0
-
-    # Loop over each node
-    for i in list(scores['all_possible_scores_node'].keys()):
-
-        score_length = len(scores['all_possible_scores_node'][i])
-
-        print(scores['all_possible_scores_node'][i], scores['total_scores'][i],
-              np.exp(scores['all_possible_scores_node'][i] - scores['total_scores'][i]))
-        probabilities = np.exp(scores['all_possible_scores_node'][i] - scores['total_scores'][i])
-        probabilities /= np.sum(probabilities)  # Normalize to sum to 1
-
-        k = np.random.choice(score_length, 1, p=probabilities)[0]
-
-        parent_row = parenttable[i][scores['allowed_rows'][i][k], :]
-
-        # Filter out NaN values. np.isnan can only be applied to numeric values.
-        parent_set = [node_label_to_idx[parent_row[j]] for j in range(len(parent_row))
-                      if not (isinstance(parent_row[j], float) and np.isnan(parent_row[j]))]
-
-        # Fill in elements of the adjacency matrix
-        incidence[parent_set, i] = 1
-        # Add the score
-        sampled_score += scores['all_possible_scores_node'][i][k]
-
-    # Return the DAG as a dictionary
-    return {'incidence': incidence, 'logscore': sampled_score}
+    sample_score = 0
+    for i in range(n):
+        node = node_labels[i]
+        try:
+            cat = Categorical(logits=torch.from_numpy(scores['all_possible_scores_node'][node] - scores['total_scores'][node])) # using torch here so we don't have to normalize and exponentiate the logits (np.random.choice)
+            k = cat.sample().numpy()
+            parent_row = parenttable[i][scores['allowed_rows'][node][k],:]# Filter out NaN values. np.isnan can only be applied to numeric values.
+            parent_set = [node_label_to_idx[parent_row[j]] for j in range(len(parent_row)) if not (isinstance(parent_row[j], float) and np.isnan(parent_row[j]))]
+            incidence[parent_set,i] = 1
+            sample_score += scores['all_possible_scores_node'][node][k]
+        except:
+            print('Possible inf')
+            sample_score += -np.inf
+    DAG = {}
+    DAG['incidence'] = incidence
+    DAG['logscore'] = sample_score
+    return DAG
