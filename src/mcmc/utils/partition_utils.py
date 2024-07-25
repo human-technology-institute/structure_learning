@@ -84,10 +84,10 @@ def convert_partition_to_party_permy_posy( part_g : OrderedPartition):
     posy = []
 
     for i in range(num_partitions):
-        num_nodes = part_g.get_partitions()[i].size
+        num_nodes = part_g.partitions[i].size
         party.append( num_nodes )
         posy.append( [i]*num_nodes )
-        permy.append(list(part_g.get_partitions()[i].get_nodes()))
+        permy.append(list(part_g.partitions[i].nodes))
 
     flatten = lambda l: [item for sublist in l for item in sublist]
     posy = flatten(posy)

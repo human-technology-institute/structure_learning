@@ -29,7 +29,7 @@ class PartitionProposal():
 
     def update_partition(self, new_partition):
         self.ordered_partition = new_partition
-        self.num_part = len(self.ordered_partition.get_partitions())
+        self.num_part = len(self.ordered_partition.partitions)
         self.nbh_size, self.nbh = self.compute_neighborhoods()
         self.nodes = self.ordered_partition.get_all_nodes()
         self.num_nodes = len(self.nodes)
@@ -39,7 +39,7 @@ class PartitionProposal():
         Compute the number of neighborhoods of an ordered partiion by using the equation
         sum_{i=1}^{m} ( sum_{c=1}^{k_i-1} ( comb( k_i, c) ) ) + m - 1
         """
-        comb_lst = [sum(math.comb(part_i.size, c) for c in range(1, part_i.size)) for part_i in self.ordered_partition.get_partitions()]
+        comb_lst = [sum(math.comb(part_i.size, c) for c in range(1, part_i.size)) for part_i in self.ordered_partition.partitions]
         return np.sum(comb_lst) + self.num_part - 1, comb_lst
 
     def propose_partition(self):
@@ -95,16 +95,16 @@ class PartitionProposal():
         p = np.array(possible_permutations_neighbors(sum(party), party))
         part_idx = np.random.choice(new_ordered_partition.size - 1, p=p/p.sum())
         # choose a node from partition at part_idx
-        node_left = np.random.choice(list(new_ordered_partition.get_partitions()[part_idx].get_nodes()))
+        node_left = np.random.choice(list(new_ordered_partition.partitions[part_idx].nodes))
         # choose a node from partition at part_idx+1
-        node_right = np.random.choice(list(new_ordered_partition.get_partitions()[part_idx+1].get_nodes()))
+        node_right = np.random.choice(list(new_ordered_partition.partitions[part_idx+1].nodes))
 
         # swap
-        new_ordered_partition.get_partitions()[part_idx].remove_single_node(node_left)
-        new_ordered_partition.get_partitions()[part_idx].add_single_node(node_right)
+        new_ordered_partition.partitions[part_idx].remove_single_node(node_left)
+        new_ordered_partition.partitions[part_idx].add_single_node(node_right)
 
-        new_ordered_partition.get_partitions()[part_idx+1].remove_single_node(node_right)
-        new_ordered_partition.get_partitions()[part_idx+1].add_single_node(node_left)
+        new_ordered_partition.partitions[part_idx+1].remove_single_node(node_right)
+        new_ordered_partition.partitions[part_idx+1].add_single_node(node_left)
 
         # mark nodes to rescore
         self.to_rescore = self.to_rescore.union(new_ordered_partition.get_all_nodes_from_right(part_idx+1))
@@ -129,16 +129,16 @@ class PartitionProposal():
         left_part_idx, right_part_idx = sorted([part_idx_1, part_idx_2])
 
         # choose a node from partition at left_part_idx
-        node_left = np.random.choice(list(new_ordered_partition.get_partitions()[left_part_idx].get_nodes()))
+        node_left = np.random.choice(list(new_ordered_partition.partitions[left_part_idx].nodes))
         # choose a node from partition at right_part_idx
-        node_right = np.random.choice(list(new_ordered_partition.get_partitions()[right_part_idx].get_nodes()))
+        node_right = np.random.choice(list(new_ordered_partition.partitions[right_part_idx].nodes))
 
         # swap
-        new_ordered_partition.get_partitions()[left_part_idx].remove_single_node(node_left)
-        new_ordered_partition.get_partitions()[left_part_idx].add_single_node(node_right)
+        new_ordered_partition.partitions[left_part_idx].remove_single_node(node_left)
+        new_ordered_partition.partitions[left_part_idx].add_single_node(node_right)
 
-        new_ordered_partition.get_partitions()[right_part_idx].remove_single_node(node_right)
-        new_ordered_partition.get_partitions()[right_part_idx].add_single_node(node_left)
+        new_ordered_partition.partitions[right_part_idx].remove_single_node(node_right)
+        new_ordered_partition.partitions[right_part_idx].add_single_node(node_left)
 
         # mark nodes to rescore
         self.to_rescore = self.to_rescore.union(new_ordered_partition.get_all_nodes_from_right(left_part_idx))
@@ -155,7 +155,7 @@ class PartitionProposal():
         node = np.random.choice(list(self.ordered_partition.all_nodes), p=p/p.sum())
         idx = self.ordered_partition.find_node(node)
 
-        can_split = self.ordered_partition.get_partitions()[idx].size >= 2
+        can_split = self.ordered_partition.partitions[idx].size >= 2
         if can_split and np.random.choice([0,1]):
             return self.split_move(idx)
         else:
@@ -165,15 +165,15 @@ class PartitionProposal():
 
         self.chosen_move = self.SPLIT_PARTITIONS
         new_ordered_partition = self.ordered_partition.copy()
-        assert new_ordered_partition.get_partitions()[idx].size >= 2
+        assert new_ordered_partition.partitions[idx].size >= 2
 
         # randomly select which nodes at partition idx will be at the new left partition
-        n_nodes_left = np.random.randint(1, new_ordered_partition.get_partitions()[idx].size)
-        nodes_involved = list(new_ordered_partition.get_partitions()[idx].nodes)
+        n_nodes_left = np.random.randint(1, new_ordered_partition.partitions[idx].size)
+        nodes_involved = list(new_ordered_partition.partitions[idx].nodes)
         nodes_left = np.random.choice(nodes_involved, replace=False, size=n_nodes_left)
 
         # split
-        new_ordered_partition.get_partitions()[idx].remove_nodes(nodes_left)
+        new_ordered_partition.partitions[idx].remove_nodes(nodes_left)
         new_ordered_partition.insert_partition(idx, set(nodes_left))
 
         # mark nodes to rescore
@@ -201,10 +201,10 @@ class PartitionProposal():
         left_part_idx, right_part_idx = sorted([idx, idx+adj])
 
         # join partitions at idx and idx+1
-        nodes_right = new_ordered_partition.get_partitions()[right_part_idx].nodes
-        new_ordered_partition.get_partitions()[right_part_idx].remove_nodes(nodes_right)
-        nodes_left = new_ordered_partition.get_partitions()[left_part_idx].nodes
-        new_ordered_partition.get_partitions()[left_part_idx].add_nodes(nodes_right)
+        nodes_right = new_ordered_partition.partitions[right_part_idx].nodes
+        new_ordered_partition.partitions[right_part_idx].remove_nodes(nodes_right)
+        nodes_left = new_ordered_partition.partitions[left_part_idx].nodes
+        new_ordered_partition.partitions[left_part_idx].add_nodes(nodes_right)
 
         # mark nodes to rescore
         self.to_rescore = self.to_rescore.union(new_ordered_partition.get_all_nodes_from_right(left_part_idx))
@@ -235,8 +235,8 @@ class PartitionProposal():
         target_partition_idx = np.random.choice(list(set(range(new_ordered_partition.size)).difference({current_partition_idx})))
 
         # move
-        new_ordered_partition.get_partitions()[current_partition_idx].remove_single_node(node_to_move)
-        new_ordered_partition.get_partitions()[target_partition_idx].add_single_node(node_to_move)
+        new_ordered_partition.partitions[current_partition_idx].remove_single_node(node_to_move)
+        new_ordered_partition.partitions[target_partition_idx].add_single_node(node_to_move)
 
         # mark nodes to rescore
         min_idx, max_idx = sorted([current_partition_idx, target_partition_idx])
@@ -266,14 +266,14 @@ class PartitionProposal():
 
         # sample where to go
         target_partition_idx = np.random.choice(p[list(nodes).index(node_to_move)])
-        if new_ordered_partition.get_partitions()[current_partition_idx].size == 1:
+        if new_ordered_partition.partitions[current_partition_idx].size == 1:
             if target_partition_idx >= current_partition_idx:
                 target_partition_idx += 1
-                if current_partition_idx < new_ordered_partition.size-1 and new_ordered_partition.get_partitions()[current_partition_idx+1].size == 1:
+                if current_partition_idx < new_ordered_partition.size-1 and new_ordered_partition.partitions[current_partition_idx+1].size == 1:
                     target_partition_idx += 1
 
         # remove node from current partition
-        new_ordered_partition.get_partitions()[current_partition_idx].remove_single_node(node_to_move)
+        new_ordered_partition.partitions[current_partition_idx].remove_single_node(node_to_move)
 
         # insert new partition containing the node to target index
         new_ordered_partition.insert_partition(target_partition_idx,  {node_to_move})
@@ -336,7 +336,7 @@ class PartitionProposal():
 
     def set_ordered_partition(self, new_partition):
         self.ordered_partition = new_partition
-        self.num_part = len(self.ordered_partition.get_partitions())
+        self.num_part = len(self.ordered_partition.partitions)
         self.nbh_size, self.nbh = self.compute_neighborhoods()
 
         party, _, posy = convert_partition_to_party_permy_posy( self.ordered_partition )

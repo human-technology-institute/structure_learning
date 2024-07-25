@@ -5,7 +5,7 @@ import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
 from mcmc.scores import Score
-from utils.graph_utils import (has_cycle,
+from mcmc.utils.graph_utils import (has_cycle,
                                 all_valid_orderings,
                                 create_zeros_matrix,
                                 generate_graph_from_key,

@@ -1,9 +1,8 @@
-import math
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-class Partition():
+class Partition:
 
     def __init__(self, ID : int, nodes : set ):
         self.ID = ID
@@ -105,7 +104,7 @@ class Partition():
         plt.show()
 
 class OrderedPartition:
-    def __init__(self, partitions: list):
+    def __init__(self, partitions: list[Partition]):
         self._partitions = partitions
 
     @property
@@ -117,7 +116,7 @@ class OrderedPartition:
         return set.union(*(partition.nodes for partition in self.partitions))
 
     @property
-    def partitions(self):
+    def partitions(self) -> list[Partition]:
         return self._partitions
 
     @partitions.setter

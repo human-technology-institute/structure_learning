@@ -1,44 +1,34 @@
-from abc import ABC, abstractmethod
+"""
+
+"""
 import time
 from copy import deepcopy
 import numpy as np
-
 from mcmc.utils.graph_utils import *
 from mcmc.utils.partition_utils import *
 from mcmc.utils.score_utils import *
-
 from mcmc.proposals import StructureLearningProposal
 from mcmc.proposals import PartitionProposal
 from mcmc.data_structures import OrderedPartition
 from mcmc.scores import Score
-
 from mcmc.mcmc import MCMC
 
+class PartitionMCMC(MCMC):
+    """
 
-
-class PartitionMCMC():
-
+    """
     def __init__(self, init_part : OrderedPartition, max_iter : int, proposal_object : StructureLearningProposal, score_object : Score):
         #super().__init__(init_part, proposal_object, score_object)
 
         self.to_string = "Partition MCMC"
+        super().__init__(score_object.data, None, max_iter, score_object, proposal_object)
         self.init_part = init_part
-        self.max_iter = max_iter
 
-        self.score_object = score_object
-        self.proposal_object = proposal_object
+        self._node_label_to_idx = node_label_to_index(self.node_labels)
 
-        self.data = score_object.data
-        self.num_nodes = len(self.data.columns)
-        self.node_labels = list(self.data.columns)
+        self._max_parents = self.num_nodes - 1
 
-        self.node_label_to_idx = { self.node_labels[i] : i for i in range(self.num_nodes) }
-        self.node_idx_to_label = { i : self.node_labels[i] for i in range(self.num_nodes) }
-
-        self.max_parents = self.num_nodes - 1
-
-        print("Pre Scoring Nodes...")
-        self.parent_table = list_possible_parents( self.max_parents, self.node_labels)
+        self.parent_table = list_possible_parents( self._max_parents, self.node_labels)
         self.score_table = score_possible_parents(self.parent_table, self.node_labels, self.score_object)
 
         self.mcmc_res = {}
@@ -80,7 +70,7 @@ class PartitionMCMC():
         nbh_create_curr = self.proposal_object.get_nbh_create_new()         # get the number of ways to create new partitions from the current partition
 
         # Sample a DAG from the initial partition
-        G = sample_score(self.num_nodes, self.node_labels, all_scores_curr , self.parent_table, self.node_label_to_idx)['incidence']
+        G = sample_score(self.num_nodes, self.node_labels, all_scores_curr , self.parent_table, self._node_label_to_idx)['incidence']
         self.update_MCMC_res(0, G, P_curr, party_curr, permy_curr, posy_curr, "MCMC Start", -1, score_P_curr, -1, -1 ) # save the results
 
         t = time.time()
@@ -124,7 +114,7 @@ class PartitionMCMC():
             t = time.time()
             rescored_scores_prop_dict = partition_score(list( nodes_to_rescore), self.node_labels, self.parent_table, self.score_table, permy_prop, party_prop, posy_prop )
 
-            rescored_scores_prop_dict2 = partition_score(self.node_labels, self.node_labels, self.parent_table, self.score_table, permy_prop, party_prop, posy_prop )
+            # rescored_scores_prop_dict2 = partition_score(self.node_labels, self.node_labels, self.parent_table, self.score_table, permy_prop, party_prop, posy_prop )
             #rescored_scores_prop_indx = rescored_scores_prop_dict['total_scores']
             #rescored_curr = [ all_scores_curr['total_scores'][i] for i in   list( rescored_scores_prop_indx.keys()   ) ]
             #score_P_prop = (score_P_curr - sum(rescored_curr) + sum( list(rescored_scores_prop_dict['total_scores'].values())))
@@ -167,7 +157,7 @@ class PartitionMCMC():
             iter += 1
 
             t = time.time()
-            G = sample_score(self.num_nodes, self.node_labels, all_scores_curr , self.parent_table, self.node_label_to_idx)['incidence']
+            G = sample_score(self.num_nodes, self.node_labels, all_scores_curr , self.parent_table, self._node_label_to_idx)['incidence']
             # print('Sample: ', '{:.5f}'.format(time.time()-t))
             self.update_MCMC_res(iter, G, P_curr, party_curr, permy_curr, posy_curr,  chosen_move, is_accepted, score_P_curr, score_P_prop, acceptance_prob )
 
