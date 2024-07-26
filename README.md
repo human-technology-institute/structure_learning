@@ -8,7 +8,7 @@ In addition to this Python implementation, similar approaches can be found in th
 
 # Installation
 ## Dependencies
-This code depends on the following libraries: `numpy`, `scipy`, `scikit-learn`, `pandas`, `matplotlib`, `networkx`, `igraph`, and `gmpy2`.
+This code depends on the following libraries: `numpy`, `scipy`, `scikit-learn`, `pandas`, `matplotlib`, `networkx`, and `igraph`.
 
 ## Via conda
 For convenience, the file `conda_environment.yml` can be used to resolve these dependencies: `conda env create -f conda_environment.yml`.
@@ -31,11 +31,11 @@ pip install -q build
 python -m build
 ```
 
-If successful, you should have `mcmc-0.1.0-py3-none-any.whl` and `mcmc-0.1.0.tar.gz` inside `dist`.
+If successful, you should have `mcmc-0.2.0-py3-none-any.whl` and `mcmc-0.2.0.tar.gz` inside `dist`.
 Finally, run
 
 ```sh
-pip install dist/mcmc-0.1.0-py3-none-any.whl
+pip install dist/mcmc-0.2.0-py3-none-any.whl
 ```
 
 # Running Structure MCMC
@@ -68,6 +68,37 @@ pip install dist/mcmc-0.1.0-py3-none-any.whl
     graphs = M.get_mcmc_res_graphs(mcmc_results)
 ```
 
+# Running Partition MCMC
+
+```
+    import numpy as np
+    from mcmc.mcmc import PartitionMCMC
+    from mcmc.proposals import PartitionProposal
+    from mcmc.scores import BGeScore
+    from mcmc.utils.partition_utils import build_partition
+
+    ...
+
+    # start with a random initial graph
+    initial_graph = np.random.choice([0,1], size=(n_nodes, n_nodes))*np.tri(n_nodes, n_nodes, -1)
+    p = np.random.permutation(n_nodes)
+    initial_graph = initial_graph[p, :]
+    initial_graph = initial_graph[:, p]
+
+    # create score and proposal objects
+    score = BGeScore(data, initial_graph)
+    initial_partition = build_partition(incidence=initial_graph, node_labels=node_labels)
+    proposal = PartitionProposal(initial_partition)
+
+    # initialise structure MCMC
+    M = PartitionMCMC(initial_partition, n_iterations, proposal, score)
+
+    # run MCMC
+    mcmc_results, acceptance = M.run()
+
+    # get chain of graphs
+    graphs = M.get_mcmc_res_graphs(mcmc_results)
+```
 # Reference
 1. **Friedman, N., & Koller, D. (2003).** "Being Bayesian about network structure: A Bayesian approach to structure discovery in Bayesian networks." *Machine Learning*, 50(1), 95-125.
 
@@ -76,5 +107,4 @@ pip install dist/mcmc-0.1.0-py3-none-any.whl
 3. **Giudici, P., & Castelo, R. (2003).** "Improving Markov Chain Monte Carlo model search for data mining." *Machine Learning*, 50(1), 127-158.
 
 # TODO
-- Add Partition MCMC
 - Support for parallel computation
