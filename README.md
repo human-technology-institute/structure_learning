@@ -8,7 +8,7 @@ In addition to this Python implementation, similar approaches can be found in th
 
 # Installation
 ## Dependencies
-This code depends on the following libraries: `numpy`, `scipy`, `scikit-learn`, `pandas`, `matplotlib`, `networkx`, and `igraph`.
+This code depends on the following libraries: `numpy`, `scipy`, `scikit-learn`, `pandas`, `matplotlib`, `pytorch`, `networkx`, and `igraph`.
 
 ## Via conda
 For convenience, the file `conda_environment.yml` can be used to resolve these dependencies: `conda env create -f conda_environment.yml`.
