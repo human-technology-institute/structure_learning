@@ -205,4 +205,6 @@ dependencies:
       - igraph==0.11.5
       - texttable==1.7.0
       - seaborn==0.13.2
+      - conditional_independence==0.1a6
+      - pcalg
 prefix: /Users/165421/miniforge3/envs/structure_mcmc

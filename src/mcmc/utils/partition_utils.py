@@ -26,8 +26,6 @@ def build_partition(incidence : np.ndarray , node_labels : list):
     remaining_nodes = set(range(len(graph_matrix)))
     partition_id = 1
 
-
-
     while remaining_nodes:
         parent_nodes = find_parent_nodes(graph_matrix)
         if not parent_nodes:

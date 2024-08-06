@@ -3,16 +3,16 @@
 """
 import random
 import numpy as np
-from mcmc.utils.graph_utils import collect_node_scores, compare_graphs, index_to_node_label
-from mcmc.proposals import StructureLearningProposal
-from mcmc.scores import Score
+from mcmc.utils.graph_utils import collect_node_scores, compare_graphs, index_to_node_label, initial_graph_pc, generate_DAG
+from mcmc.proposals import StructureLearningProposal, GraphProposal
+from mcmc.scores import Score, BGeScore
 from mcmc.mcmc import MCMC
 
 class StructureMCMC(MCMC):
     """
     Implementation of Structure MCMC.
     """
-    def __init__(self, initial_graph : np.ndarray, max_iter : int, proposal_object : StructureLearningProposal, score_object : Score):
+    def __init__(self, initial_graph : np.ndarray = None, max_iter : int = 30000, proposal_object : StructureLearningProposal = None, score_object : Score = None, data = None, pc_init = True):
         """
         Initilialise Structure MCMC instance.
 
@@ -22,6 +22,33 @@ class StructureMCMC(MCMC):
             proposal_object (StructureLearningProposal): A proposal object.
             score_object (Score): A score object implementing compute().
         """
+        if initial_graph is None:
+            if pc_init:
+                print('Running PC algorithm')
+                if score_object is None and data is None:
+                    raise Exception("Data must be provided.")
+                initial_graph = initial_graph_pc(score_object.data if score_object else data)
+            else: # start with random
+                n_nodes = len(score_object.data.columns)
+                initial_graph = generate_DAG(n_nodes, 0.5)
+
+        if score_object is None:
+            if data is None:
+                raise Exception("Data must be provided.")
+            else:
+                score_object = BGeScore(data=data, incidence=initial_graph)
+        elif type(score_object) == str:
+            if score_object.lower() == 'bge':
+                if data is None:
+                    raise Exception("Data must be provided")
+                else:
+                    score_object = BGeScore(data=data, incidence=initial_graph)
+            else:
+                raise Exception(f"Unsupported score {score_object}")
+
+        if proposal_object is None:
+            proposal_object = GraphProposal(initial_graph)
+
         super().__init__(score_object.data, initial_graph, max_iter, score_object, proposal_object)
 
         self.to_string = f"Struct_MCMC_n_{self._num_nodes}_iter_{self._max_iter}"

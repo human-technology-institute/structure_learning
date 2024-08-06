@@ -16,7 +16,9 @@ dependencies = [
   "networkx",
   "igraph",
   "seaborn",
-  "pytorch"
+  "pytorch",
+  "pcalg",
+  "conditional_indepence"
 ]
 readme = "README.md"
 license = {file = "LICENSE"}

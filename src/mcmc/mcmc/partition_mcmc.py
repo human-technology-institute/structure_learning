@@ -3,26 +3,55 @@
 """
 import time
 from copy import deepcopy
+from typing import Union
 import numpy as np
+import pandas as pd
+import networkx as nx
+import pcalg
 from mcmc.utils.graph_utils import *
 from mcmc.utils.partition_utils import *
 from mcmc.utils.score_utils import *
 from mcmc.proposals import StructureLearningProposal
 from mcmc.proposals import PartitionProposal
 from mcmc.data_structures import OrderedPartition
-from mcmc.scores import Score
+from mcmc.scores import Score, BGeScore
 from mcmc.mcmc import MCMC
 
 class PartitionMCMC(MCMC):
     """
 
     """
-    def __init__(self, init_part : OrderedPartition, max_iter : int, proposal_object : StructureLearningProposal, score_object : Score):
-        #super().__init__(init_part, proposal_object, score_object)
+    def __init__(self, init_part : OrderedPartition = None, max_iter : int = 30000, proposal_object : StructureLearningProposal = None, score_object : Union[str, Score] = None, data : pd.DataFrame = None, pc_init = True):
 
         self.to_string = "Partition MCMC"
-        super().__init__(score_object.data, None, max_iter, score_object, proposal_object)
+
+        if score_object is None:
+            if data is None:
+                raise Exception("Data must be provided")
+            else:
+                score_object = BGeScore(data=data, incidence=None)
+        elif type(score_object) == str:
+            if score_object.lower() == 'bge':
+                if data is None:
+                    raise Exception("Data must be provided")
+                else:
+                    score_object = BGeScore(data=data, incidence=None)
+            else:
+                raise Exception(f"Unsupported score {score_object}")
+
+        if proposal_object is None:
+            if init_part is None:
+                if pc_init:
+                    print('Running PC algorithm')
+                    initial_graph = initial_graph_pc(score_object.data)
+                else: # start with random
+                    n_nodes = len(score_object.data.columns)
+                    initial_graph = generate_DAG(n_nodes, 0.5)
+                init_part = build_partition(incidence=initial_graph, node_labels=list(score_object.data.columns))
+            proposal_object = PartitionProposal(init_part)
+
         self.init_part = init_part
+        super().__init__(score_object.data, None, max_iter, score_object, proposal_object)
 
         self._node_label_to_idx = node_label_to_index(self.node_labels)
 
@@ -81,64 +110,42 @@ class PartitionMCMC(MCMC):
             is_accepted = 0
             acceptance_prob = 0
 
-            # Propose a new partition
-            # print("Current Partition: ", P_curr.__str__())
-
             t = time.time()
             self.proposal_object = PartitionProposal( P_curr )
-            # print("Current Partition: ", P_curr.__str__())
             P_prop = self.proposal_object.propose_partition()
-            # print("Proposed Partition: ", P_prop.__str__())
-            # print('Rescoring: ', self.proposal_object.to_rescore)
             self.proposal_object.set_ordered_partition( P_prop )
             chosen_move =  self.proposal_object.get_chosen_move()
             nodes_to_rescore = self.proposal_object.get_to_rescore()
-            # print('Propose: ', '{:.5f}'.format(time.time()-t))
-            # print("Proposed Partition: ", P_prop.__str__())
 
             t = time.time()
             neigh_size_prop, _  = self.proposal_object.compute_neighborhoods()  # get the size of the neighborhood of the proposed partition
             nbh_join_prop = self.proposal_object.get_nbh_join_existing()        # get the number of ways to join partitions from the proposed partition
             nbh_create_prop = self.proposal_object.get_nbh_create_new()         # get the number of ways to create new partitions from the proposed partition
-            # print('Compute neighborhood: ', '{:.5f}'.format(time.time()-t))
 
             if chosen_move == "stay_still":
                 self.update_MCMC_res(iter, G, P_curr, party_curr, permy_curr, posy_curr,  chosen_move, 0, score_P_curr, score_P_curr, acceptance_prob )
                 iter += 1
                 continue
 
-            # Get the party, permy and posy of the proposed partition
-            # self.proposal_object.set_ordered_partition( P_prop )
             party_prop, permy_prop, posy_prop = convert_partition_to_party_permy_posy( P_prop )
 
             t = time.time()
             rescored_scores_prop_dict = partition_score(list( nodes_to_rescore), self.node_labels, self.parent_table, self.score_table, permy_prop, party_prop, posy_prop )
-
-            # rescored_scores_prop_dict2 = partition_score(self.node_labels, self.node_labels, self.parent_table, self.score_table, permy_prop, party_prop, posy_prop )
-            #rescored_scores_prop_indx = rescored_scores_prop_dict['total_scores']
-            #rescored_curr = [ all_scores_curr['total_scores'][i] for i in   list( rescored_scores_prop_indx.keys()   ) ]
-            #score_P_prop = (score_P_curr - sum(rescored_curr) + sum( list(rescored_scores_prop_dict['total_scores'].values())))
-
             all_scores_prop = deepcopy(all_scores_curr)
             for key in all_scores_prop:
                 all_scores_prop[key].update( rescored_scores_prop_dict[key])
 
             score_P_prop = sum(all_scores_prop['total_scores'].values())
-            # print('Score: ', '{:.5f}'.format(time.time()-t))
 
             # sample alpha uniformly from [0,1]
             alpha = np.log( np.random.uniform(0, 1) )
-            #print("Score P curr", score_P_curr)
             acceptance_prob = self.log_acceptance_ratio( chosen_move, score_P_curr, score_P_prop, neigh_size_curr, neigh_size_prop, nbh_join_prop, nbh_join_curr, nbh_create_prop, nbh_create_curr )
-            # print('Score: ', score_P_prop, score_P_curr, acceptance_prob, alpha)
 
             try:
                 acceptance_prob = acceptance_prob[0]
             except Exception:
                 acceptance_prob
 
-            # print("acceptance_prob: ", acceptance_prob)
-            # print("\n")
             if alpha < acceptance_prob:
 
                 ACCEPT += 1
@@ -158,12 +165,9 @@ class PartitionMCMC(MCMC):
 
             t = time.time()
             G = sample_score(self.num_nodes, self.node_labels, all_scores_curr , self.parent_table, self._node_label_to_idx)['incidence']
-            # print('Sample: ', '{:.5f}'.format(time.time()-t))
             self.update_MCMC_res(iter, G, P_curr, party_curr, permy_curr, posy_curr,  chosen_move, is_accepted, score_P_curr, score_P_prop, acceptance_prob )
 
-
         return self.mcmc_res, np.round(ACCEPT / self.max_iter,4)
-
 
     def log_acceptance_ratio( self, chosen_move, score_P_curr, score_P_prop, neigh_size_curr, neigh_size_prop, nbh_join_prop, nbh_join_curr, nbh_create_prop, nbh_create_curr ):
 

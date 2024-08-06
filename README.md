@@ -48,18 +48,8 @@ pip install dist/mcmc-0.2.0-py3-none-any.whl
 
     ...
 
-    # start with a random initial graph
-    initial_graph = np.random.choice([0,1], size=(n_nodes, n_nodes))*np.tri(n_nodes, n_nodes, -1)
-    p = np.random.permutation(n_nodes)
-    initial_graph = initial_graph[p, :]
-    initial_graph = initial_graph[:, p]
-
-    # create score and proposal objects
-    score = BGeScore(data, initial_graph)
-    proposal = GraphProposal(initial_graph)
-
     # initialise structure MCMC
-    M = StructureMCMC(initial_graph, n_iterations, proposal, score)
+    M = StructureMCMC(max_iter=n_iterations, data=data) # data is a pd Dataframe
 
     # run MCMC
     mcmc_results, acceptance = M.run()
@@ -79,19 +69,8 @@ pip install dist/mcmc-0.2.0-py3-none-any.whl
 
     ...
 
-    # start with a random initial graph
-    initial_graph = np.random.choice([0,1], size=(n_nodes, n_nodes))*np.tri(n_nodes, n_nodes, -1)
-    p = np.random.permutation(n_nodes)
-    initial_graph = initial_graph[p, :]
-    initial_graph = initial_graph[:, p]
-
-    # create score and proposal objects
-    score = BGeScore(data, initial_graph)
-    initial_partition = build_partition(incidence=initial_graph, node_labels=node_labels)
-    proposal = PartitionProposal(initial_partition)
-
-    # initialise structure MCMC
-    M = PartitionMCMC(initial_partition, n_iterations, proposal, score)
+    # initialise partition MCMC
+    M = PartitionMCMC(data=data, max_iter=n_iterations) # data is a pd Dataframe
 
     # run MCMC
     mcmc_results, acceptance = M.run()

@@ -11,6 +11,8 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 import igraph
+import pcalg
+from conditional_independence import partial_correlation_suffstat, partial_correlation_test
 import matplotlib.pyplot as plt
 
 def count_dags(n : int):
@@ -847,7 +849,7 @@ def calculate_in_degree(adjMatrix):
 
     return in_degree
 
-def generate_DAG(N : int, prob : float , random_seed: int = 42):
+def generate_DAG(N : int, prob : float , random_seed: int = None):
     """
     Generate a random DAG, represented by a lower triangular adjacency matrix.
 
@@ -860,7 +862,8 @@ def generate_DAG(N : int, prob : float , random_seed: int = 42):
         (numpy.ndarray): adjacency matrix
 
     """
-    np.random.seed(random_seed)
+    if random_seed is not None:
+        np.random.seed(random_seed)
     adjmat = np.zeros((N, N))
     adjmat[np.tril_indices_from(adjmat, k=-1)] = np.random.binomial(1, prob, size=int(N * (N - 1) / 2))
     return adjmat
@@ -1032,3 +1035,38 @@ def node_label_to_index(node_labels):
         (dict): dictionary with labels as keys and index as values
     """
     return {node_label: indx for indx, node_label in enumerate(node_labels)}
+
+def indep_test_func(data, i, j, k):
+    """
+    Conditional independence test on data variables (columns)
+
+    """
+    suffstat = partial_correlation_suffstat(data)
+    return partial_correlation_test(suffstat, i, j, k)['p_value']
+
+def cpdag_to_dag(cpdag):
+    """
+    Returns a DAG from a CPDAG
+    """
+    nodes = np.arange(cpdag.shape[0])
+    num_parents = cpdag.sum(axis=0)
+    idx = np.argsort(num_parents)
+    nodes = nodes[idx]
+
+    dag = cpdag.copy()
+    for i,node in enumerate(nodes):
+        for j,node2 in enumerate(nodes[i+1:]):
+            if cpdag[node,node2] == 1:
+                dag[node2,node] = 0
+
+    return dag
+
+def initial_graph_pc(data: pd.DataFrame):
+    """
+    Runs PC Algorithm and returns a DAG
+    """
+    (g, sep_set) = pcalg.estimate_skeleton(indep_test_func=indep_test_func, data_matrix=data.values, alpha=0.01)
+    g = pcalg.estimate_cpdag(skel_graph=g, sep_set=sep_set)
+    initial_graph = nx.to_numpy_array(g)
+    initial_graph = cpdag_to_dag(initial_graph)
+    return initial_graph
