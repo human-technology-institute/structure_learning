@@ -207,4 +207,5 @@ dependencies:
       - seaborn==0.13.2
       - conditional_independence==0.1a6
       - pcalg
+      - xlrd
 prefix: /Users/165421/miniforge3/envs/structure_mcmc

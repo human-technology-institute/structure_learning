@@ -17,10 +17,12 @@ class StructureMCMC(MCMC):
         Initilialise Structure MCMC instance.
 
         Parameters:
-            initial_graph (numpy.ndarray | None): Initial graph for the MCMC simulation. If None, simulation starts with a graph with no edges.
-            max_iter (int): The number of MCMC iterations to run.
-            proposal_object (StructureLearningProposal): A proposal object.
-            score_object (Score): A score object implementing compute().
+            initial_graph (numpy.ndarray | None): Initial graph for the MCMC simulation. If None, simulation starts with a random graph or a graph constructed from PC algorithm.
+            max_iter (int): The number of MCMC iterations to run. Default: 30000.
+            proposal_object (StructureLearningProposal): A proposal object. If None, a GraphProposal instance is used. Default: None.
+            score_object (Score): A score object implementing compute(). If None, BGeScore is used (data must be provided). Default: None.
+            data (pd.DataFrame): Dataset. Optional if score_object is given.
+            pc_init (bool): If True and initial_graph is not given, PC algorithm will be used to generate initial graph.
         """
         if initial_graph is None:
             if pc_init:
@@ -40,7 +42,7 @@ class StructureMCMC(MCMC):
         elif type(score_object) == str:
             if score_object.lower() == 'bge':
                 if data is None:
-                    raise Exception("Data must be provided")
+                    raise Exception("Data must be provided.")
                 else:
                     score_object = BGeScore(data=data, incidence=initial_graph)
             else:
