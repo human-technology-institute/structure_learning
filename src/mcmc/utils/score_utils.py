@@ -7,7 +7,7 @@ import torch
 from torch.distributions.categorical import Categorical
 
 # This function produces
-def list_possible_parents(max_parents, elements):
+def list_possible_parents(max_parents, elements, whitelist=None, blacklist=None):
     """
     Generate a matrix with all the possible parents of a given node
     up to the maximum number of parents.
@@ -21,19 +21,34 @@ def list_possible_parents(max_parents, elements):
     """
     listy = [None] * len(elements)
 
+    if not isinstance(elements, np.ndarray):
+        elements = np.array(elements)
+
+    print(type(elements))
+
     for i, element in enumerate(elements):
         remaining_elements = [e for e in elements if e != element]
+
+        # get required parent nodes
+        required_parents = tuple(elements[whitelist[:, i]==1]) if whitelist is not None else []
+        n_required = len(required_parents)
+
+        # get banned parent nodes
+        banned_parents = elements[blacklist[:, i]==1] if blacklist is not None else []
+
+        remaining_elements = set(remaining_elements) - set(required_parents) - set(banned_parents)
 
         # Initialize an empty list to store tuples of possible parents
         matrix_of_parents_list = []
 
         # Adding the "empty" tuple first, filled with np.nan
-        matrix_of_parents_list.append(tuple([np.nan] * max_parents))
+        if n_required == 0:
+            matrix_of_parents_list.append(tuple([np.nan] * max_parents))
 
-        for r in range(1, max_parents + 1):
+        for r in range(1, max_parents + 1 - n_required):
             possible_parents = list(combinations(remaining_elements, r))
             # Fill the remaining spaces with np.nan if necessary
-            possible_parents = [pp + (np.nan,) * (max_parents - r) for pp in possible_parents]
+            possible_parents = [tuple(required_parents) + tuple(pp) + (np.nan,) * (max_parents - r - n_required) for pp in possible_parents]
             matrix_of_parents_list.extend(possible_parents)
 
         # Convert the list of tuples into a NumPy array with dtype='object'
@@ -152,7 +167,8 @@ def sample_score(n, node_labels, scores, parenttable, node_label_to_idx):
             parent_set = [node_label_to_idx[parent_row[j]] for j in range(len(parent_row)) if not (isinstance(parent_row[j], float) and np.isnan(parent_row[j]))]
             incidence[parent_set,i] = 1
             sample_score += scores['all_possible_scores_node'][node][k]
-        except:
+        except Exception as e:
+            print(e)
             print('Possible inf')
             sample_score += -np.inf
     DAG = {}
