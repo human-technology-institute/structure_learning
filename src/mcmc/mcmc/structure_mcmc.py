@@ -1,18 +1,19 @@
 """
 
 """
+from typing import Union
 import random
 import numpy as np
 from mcmc.utils.graph_utils import collect_node_scores, compare_graphs, index_to_node_label, initial_graph_pc, generate_DAG
 from mcmc.proposals import StructureLearningProposal, GraphProposal
-from mcmc.scores import Score, BGeScore
+from mcmc.scores import Score, BGeScore, BDeuScore
 from mcmc.mcmc import MCMC
 
 class StructureMCMC(MCMC):
     """
     Implementation of Structure MCMC.
     """
-    def __init__(self, initial_graph : np.ndarray = None, max_iter : int = 30000, proposal_object : StructureLearningProposal = None, score_object : Score = None, data = None, pc_init = True):
+    def __init__(self, initial_graph : np.ndarray = None, max_iter : int = 30000, proposal_object : StructureLearningProposal = None, score_object : Union[str, Score] = None, data = None, pc_init = True):
         """
         Initilialise Structure MCMC instance.
 
@@ -29,9 +30,11 @@ class StructureMCMC(MCMC):
                 print('Running PC algorithm')
                 if score_object is None and data is None:
                     raise Exception("Data must be provided.")
-                initial_graph = initial_graph_pc(score_object.data if score_object else data)
+                initial_graph = initial_graph_pc(score_object.data if score_object and isinstance(score_object, Score) else data)
             else: # start with random
-                n_nodes = len(score_object.data.columns)
+                if data is None:
+                    raise Exception("Data must be provided.")
+                n_nodes = len(score_object.data.columns if score_object and isinstance(score_object, Score) else data.columns)
                 initial_graph = generate_DAG(n_nodes, 0.5)
 
         if score_object is None:
@@ -45,6 +48,11 @@ class StructureMCMC(MCMC):
                     raise Exception("Data must be provided.")
                 else:
                     score_object = BGeScore(data=data, incidence=initial_graph)
+            elif score_object.lower() in ['bde', 'bdeu']:
+                if data is None:
+                    raise Exception("Data must be provided")
+                else:
+                    score_object = BDeuScore(data=data, incidence=initial_graph)
             else:
                 raise Exception(f"Unsupported score {score_object}")
 

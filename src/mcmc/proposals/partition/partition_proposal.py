@@ -17,7 +17,7 @@ class PartitionProposal():
 
     possible_moves = [SWAP_ADJACENT, SWAP_GLOBAL, SPLIT_OR_MERGE, MOVE_NODE_TO_NEW_OR_EXISTING, STAY_STILL]
 
-    def __init__(self, ordered_partition: OrderedPartition ):
+    def __init__(self, ordered_partition: OrderedPartition, whitelist: np.ndarray = None, blacklist: np.ndarray = None):
 
         self.update_partition(ordered_partition)
         self.chosen_move = None
@@ -26,6 +26,8 @@ class PartitionProposal():
         self.nbh_join_existing = None
         self.nbh_create_new = None
         self.move_probs = self.calculate_move_probs()
+        self.blacklist = blacklist
+        self.whitelist = whitelist
 
     def update_partition(self, new_partition):
         self.ordered_partition = new_partition
@@ -156,10 +158,16 @@ class PartitionProposal():
         idx = self.ordered_partition.find_node(node)
 
         can_split = self.ordered_partition.partitions[idx].size >= 2
-        if can_split and np.random.choice([0,1]):
+        can_merge = self.ordered_partition.size > 1
+
+        choice = np.random.choice([0,1])
+        if can_split and choice==0:
             return self.split_move(idx)
-        else:
+        elif can_merge and choice==1:
             return self.join_move(idx)
+        else:
+            self.chosen_move = self.STAY_STILL
+            return self.ordered_partition.copy()
 
     def split_move(self, idx : int):
 

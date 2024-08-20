@@ -41,7 +41,7 @@ class Score(ABC):
         pass
 
     @abstractmethod
-    def compute_node(self, node : str):
+    def compute_local(self, node : str, parents: list):
         """
         Implements a score function (e.g. BGe, Marginal Likelihood, etc) for a specific node
         """

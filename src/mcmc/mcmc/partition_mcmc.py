@@ -7,21 +7,20 @@ from typing import Union
 import numpy as np
 import pandas as pd
 import networkx as nx
-import pcalg
 from mcmc.utils.graph_utils import *
 from mcmc.utils.partition_utils import *
 from mcmc.utils.score_utils import *
 from mcmc.proposals import StructureLearningProposal
 from mcmc.proposals import PartitionProposal
 from mcmc.data_structures import OrderedPartition
-from mcmc.scores import Score, BGeScore
+from mcmc.scores import Score, BGeScore, BDeuScore
 from mcmc.mcmc import MCMC
 
 class PartitionMCMC(MCMC):
     """
 
     """
-    def __init__(self, init_part : OrderedPartition = None, max_iter : int = 30000, proposal_object : StructureLearningProposal = None, score_object : Union[str, Score] = None, data : pd.DataFrame = None, pc_init = True):
+    def __init__(self, init_part : OrderedPartition = None, max_iter : int = 30000, proposal_object : StructureLearningProposal = None, score_object : Union[str, Score] = None, data : pd.DataFrame = None, pc_init: bool = True, blacklist = None, whitelist = None, plus1: bool = False):
 
         self.to_string = "Partition MCMC"
 
@@ -36,30 +35,37 @@ class PartitionMCMC(MCMC):
                     raise Exception("Data must be provided")
                 else:
                     score_object = BGeScore(data=data, incidence=None)
+            elif score_object.lower() in ['bde', 'bdeu']:
+                if data is None:
+                    raise Exception("Data must be provided")
+                else:
+                    score_object = BDeuScore(data=data, incidence=None)
             else:
                 raise Exception(f"Unsupported score {score_object}")
 
         if proposal_object is None:
             if init_part is None:
+                n_nodes = len(score_object.data.columns)
                 if pc_init:
                     print('Running PC algorithm')
-                    initial_graph = initial_graph_pc(score_object.data)
+                    initial_graph, cpdag = initial_graph_pc(score_object.data, True)
                 else: # start with random
-                    n_nodes = len(score_object.data.columns)
+                    cpdag = None
                     initial_graph = generate_DAG(n_nodes, 0.5)
-                init_part = build_partition(incidence=initial_graph, node_labels=list(score_object.data.columns))
-            proposal_object = PartitionProposal(init_part)
+                init_part = build_partition(incidence=initial_graph if not plus1 else np.zeros((n_nodes, n_nodes)), node_labels=list(score_object.data.columns))
+            proposal_object = PartitionProposal(ordered_partition=init_part, whitelist=whitelist, blacklist=blacklist)
 
         self.init_part = init_part
         super().__init__(score_object.data, None, max_iter, score_object, proposal_object)
+        self.blacklist = blacklist
+        self.whitelist = whitelist
 
         self._node_label_to_idx = node_label_to_index(self.node_labels)
 
         self._max_parents = self.num_nodes - 1
 
-        self.parent_table = list_possible_parents( self._max_parents, self.node_labels)
+        self.parent_table = list_possible_parents(self._max_parents, self.node_labels, whitelist=whitelist, blacklist=blacklist, plus1=plus1, init_cpdag=cpdag)
         self.score_table = score_possible_parents(self.parent_table, self.node_labels, self.score_object)
-
         self.mcmc_res = {}
 
     def update_MCMC_res( self, iteration, graph, partition, party, permy, posy,  operation, isAccepted, score_P_curr, score_P_prop, acceptance_prob ):
@@ -103,7 +109,6 @@ class PartitionMCMC(MCMC):
         self.update_MCMC_res(0, G, P_curr, party_curr, permy_curr, posy_curr, "MCMC Start", -1, score_P_curr, -1, -1 ) # save the results
 
         t = time.time()
-        print('Initialise: ', '{:.5f}'.format(time.time()-t))
 
         for _ in range( self.max_iter):
 
@@ -112,7 +117,12 @@ class PartitionMCMC(MCMC):
 
             t = time.time()
             self.proposal_object = PartitionProposal( P_curr )
-            P_prop = self.proposal_object.propose_partition()
+            while True:
+                P_prop = self.proposal_object.propose_partition()
+                if self.is_valid_partition(P_prop):
+                    break
+                print('Reproposing...')
+
             self.proposal_object.set_ordered_partition( P_prop )
             chosen_move =  self.proposal_object.get_chosen_move()
             nodes_to_rescore = self.proposal_object.get_to_rescore()
@@ -198,10 +208,43 @@ class PartitionMCMC(MCMC):
     def to_string(self):
         return self.to_string
 
-
-
     def get_mcmc_res_graphs(self, results):
         mcmc_graph_lst = []
         for i in results:
             mcmc_graph_lst.append( results[i]['graph'] )
         return mcmc_graph_lst
+
+    def is_valid_partition(self, partition: OrderedPartition):
+
+        node_labels = np.array(self.node_labels)
+
+        if self.whitelist is None and self.blacklist is None:
+            return True
+
+        if self.whitelist is not None: # check if partition adheres to node ordering based on required edges
+            for node in self._node_label_to_idx:
+                idx = self._node_label_to_idx[node]
+                part_idx = partition.find_node(node)
+
+                required_parents = node_labels[self.whitelist[:,idx]==1]
+
+                for parent in required_parents:
+                    part_idx_parent = partition.find_node(parent)
+                    if part_idx >= part_idx_parent:
+                        return False
+
+        if self.blacklist is not None: # check if partition adheres to node ordering based on banned edges
+            for node in self._node_label_to_idx:
+                idx = self._node_label_to_idx[node]
+                part_idx = partition.find_node(node)
+
+                banned_parents = node_labels[self.blacklist[:,idx]==1]
+
+                for parent in banned_parents:
+                    part_idx_parent = partition.find_node(parent)
+
+                    if part_idx == part_idx_parent+1: # parent node appears in partition immediately to the left
+                        if partition.partitions[part_idx_parent].size == 1:
+                            return False
+
+        return True

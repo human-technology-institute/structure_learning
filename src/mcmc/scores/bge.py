@@ -152,7 +152,7 @@ class BGeScore(Score):
 
         return score
 
-    def compute_BGe_with_edge(self, node : str, parents: list):
+    def compute_local(self, node : str, parents: list):
         """
         Compute the BGE for edge(s)
 
