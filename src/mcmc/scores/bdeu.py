@@ -33,12 +33,16 @@ class BDeuScore(Score):
         """
         BDeu_score = 0.0
 
+        parameters = {}
         for idx,node in enumerate(self.node_labels):
             parents = [self.node_labels[i] for i in find_parents(self.graph, idx)]
-            BDeu_score += self.compute_local(node, parents, alpha)['score']
+            node_score = self.compute_local(node, parents, alpha)
+            parameters[node] = node_score['parameters'][node]
+            BDeu_score += node_score['score']
 
         score = {
-            'score': BDeu_score
+            'score': BDeu_score,
+            'parameters': parameters
         }
         return score
 
@@ -81,8 +85,16 @@ class BDeuScore(Score):
             - counts_size * gammaln(beta)
         )
 
+        parameters = {}
+        parameters[node] = {'parents': parents, 'score': score}
+
         score = {
             'score': score,
-            'parameters': parents
+            'parameters': parameters
         }
         return score
+
+    def compute_node(self, node):
+        node_idx = self.node_label_to_index[node]
+        parents = [self.node_labels[i] for i in find_parents(self.graph, node_idx)]
+        return self.compute_local(node, parents)
