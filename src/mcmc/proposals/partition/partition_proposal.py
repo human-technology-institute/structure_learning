@@ -158,10 +158,16 @@ class PartitionProposal():
         idx = self.ordered_partition.find_node(node)
 
         can_split = self.ordered_partition.partitions[idx].size >= 2
-        if can_split and np.random.choice([0,1]):
+        can_merge = self.ordered_partition.size > 1
+
+        choice = np.random.choice([0,1])
+        if can_split and choice==0:
             return self.split_move(idx)
-        else:
+        elif can_merge and choice==1:
             return self.join_move(idx)
+        else:
+            self.chosen_move = self.STAY_STILL
+            return self.ordered_partition.copy()
 
     def split_move(self, idx : int):
 

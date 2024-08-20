@@ -7,7 +7,7 @@ import torch
 from torch.distributions.categorical import Categorical
 
 # This function produces
-def list_possible_parents(max_parents, elements, whitelist=None, blacklist=None):
+def list_possible_parents(max_parents, elements, whitelist=None, blacklist=None, plus1=False, init_cpdag=None):
     """
     Generate a matrix with all the possible parents of a given node
     up to the maximum number of parents.
@@ -24,10 +24,12 @@ def list_possible_parents(max_parents, elements, whitelist=None, blacklist=None)
     if not isinstance(elements, np.ndarray):
         elements = np.array(elements)
 
-    print(type(elements))
-
     for i, element in enumerate(elements):
-        remaining_elements = [e for e in elements if e != element]
+        remaining_elements = [e for e in elements if e != element] # all nodes except self
+
+        possible_parent_nodes = remaining_elements if init_cpdag is None or not plus1 else elements[init_cpdag[:,i]==1] # possible parents
+
+        remaining_elements = set(remaining_elements) - set(possible_parent_nodes) # possible plus 1
 
         # get required parent nodes
         required_parents = tuple(elements[whitelist[:, i]==1]) if whitelist is not None else []
@@ -36,7 +38,8 @@ def list_possible_parents(max_parents, elements, whitelist=None, blacklist=None)
         # get banned parent nodes
         banned_parents = elements[blacklist[:, i]==1] if blacklist is not None else []
 
-        remaining_elements = set(remaining_elements) - set(required_parents) - set(banned_parents)
+        possible_parent_nodes = set(possible_parent_nodes) - set(required_parents) - set(banned_parents) # remove required nodes and blacklisted nodes from set of possible parents
+        remaining_elements = set(remaining_elements) - set(required_parents) - set(banned_parents) # remove required nodes and  blacklisted nodes from possible plus 1
 
         # Initialize an empty list to store tuples of possible parents
         matrix_of_parents_list = []
@@ -45,10 +48,16 @@ def list_possible_parents(max_parents, elements, whitelist=None, blacklist=None)
         if n_required == 0:
             matrix_of_parents_list.append(tuple([np.nan] * max_parents))
 
-        for r in range(1, max_parents + 1 - n_required):
-            possible_parents = list(combinations(remaining_elements, r))
+        for r in range(1, len(possible_parent_nodes) + 1):
+            possible_parents = list(combinations(possible_parent_nodes, r))
+            possible_parents_plus1 = list(combinations(remaining_elements, 1)) + [[np.nan]]
+
             # Fill the remaining spaces with np.nan if necessary
-            possible_parents = [tuple(required_parents) + tuple(pp) + (np.nan,) * (max_parents - r - n_required) for pp in possible_parents]
+            if len(possible_parents_plus1) > 1:
+                possible_parents = [list(required_parents) + list(pp) + list(remaining_element) + [np.nan,] * (max_parents - r - n_required - len(remaining_element)) for pp in possible_parents for remaining_element in possible_parents_plus1]
+            else:
+                possible_parents = [tuple(required_parents) + tuple(pp) + (np.nan,) * (max_parents - r - n_required) for pp in possible_parents]
+
             matrix_of_parents_list.extend(possible_parents)
 
         # Convert the list of tuples into a NumPy array with dtype='object'
@@ -79,7 +88,7 @@ def table_dag_score(parent_rows, node, score_object):
 
     for i in range(nrows):
         parent_nodes = filter_nans(parent_rows[i])
-        p_local[i] = score_object.compute_BGe_with_edge(node,parent_nodes)['score']
+        p_local[i] = score_object.compute_local(node,parent_nodes)['score']
 
     return p_local
 
@@ -139,7 +148,7 @@ def partition_score(score_nodes, node_labels, parenttable, scoretable, permy, pa
             allowed_score_rows[node] = allowedrows
             maxallowed = max(all_scores[node]) if len(allowedrows) > 0 else -np.inf
             try:
-                partition_scores[node] = maxallowed + np.log(np.sum(np.exp(all_scores[node] - maxallowed)))
+                partition_scores[node] = (maxallowed + np.log(np.sum(np.exp(all_scores[node] - maxallowed)))) if not np.isinf(maxallowed) else -np.inf
             except:
                 partition_scores[node] = -np.inf
         if isinstance(partition_scores[node], np.ndarray):

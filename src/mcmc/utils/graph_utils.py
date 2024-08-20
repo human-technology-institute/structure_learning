@@ -1061,12 +1061,12 @@ def cpdag_to_dag(cpdag):
 
     return dag
 
-def initial_graph_pc(data: pd.DataFrame):
+def initial_graph_pc(data: pd.DataFrame, return_cpdag=False):
     """
     Runs PC Algorithm and returns a DAG
     """
     (g, sep_set) = pcalg.estimate_skeleton(indep_test_func=indep_test_func, data_matrix=data.values, alpha=0.01)
     g = pcalg.estimate_cpdag(skel_graph=g, sep_set=sep_set)
-    initial_graph = nx.to_numpy_array(g)
-    initial_graph = cpdag_to_dag(initial_graph)
-    return initial_graph
+    cpdag = nx.to_numpy_array(g)
+    dag = cpdag_to_dag(cpdag)
+    return (dag, cpdag) if return_cpdag else dag
