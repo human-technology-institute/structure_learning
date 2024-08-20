@@ -31,11 +31,11 @@ pip install -q build
 python -m build
 ```
 
-If successful, you should have `mcmc-0.2.1-py3-none-any.whl` and `mcmc-0.2.1.tar.gz` inside `dist`.
+If successful, you should have `mcmc-0.3.0-py3-none-any.whl` and `mcmc-0.3.0.tar.gz` inside `dist`.
 Finally, run
 
 ```sh
-pip install dist/mcmc-0.2.0-py3-none-any.whl
+pip install dist/mcmc-0.3.0-py3-none-any.whl
 ```
 
 # Running Structure MCMC
