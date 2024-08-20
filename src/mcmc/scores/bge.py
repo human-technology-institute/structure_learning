@@ -61,34 +61,13 @@ class BGeScore(Score):
         Returns:
             (dict): score and parameters
         """
-        return self.compute_BGe_with_graph()
-
-    def compute_node(self, node : str):
-        """
-        Compute the BGE for a node
-
-        Parameter:
-            node (str): node label
-
-        Returns:
-            (dict): score and parameters
-        """
-        return self.compute_BGe_with_node( node )
-
-    def compute_BGe_with_graph(self):
-        """
-        Compute the BGE for the data
-
-        Returns:
-            (dict): score and parameters
-        """
         total_log_ml = 0
         parameters = {}  # Dictionary to store the parameters for each node
 
         # Loop through each node in the graph
         for node in self.node_labels:
 
-            log_ml_node = self.compute_BGe_with_node( node )['score']
+            log_ml_node = self.compute_node( node )['score']
 
             # Save the parameters for the node
             parameters[node] = {
@@ -108,51 +87,7 @@ class BGeScore(Score):
         }
         return score
 
-    def compute_BGe_with_node(self, node : str):
-        """
-        Compute the BGE for a node
-
-        Parameter:
-            node (str): node label
-
-        Returns:
-            (dict): score and parameters
-        """
-        parameters = {}  # Dictionary to store the parameters for each node
-
-        node_indx = self.node_label_to_index[node]
-        parentnodes = find_parents(self.incidence, node_indx)
-        num_parents = len(parentnodes) # number of parents
-
-        awpNd2 = (self._awpN - self._num_cols + num_parents + 1) / 2
-
-        A = self._TN[node_indx, node_indx]
-
-        if num_parents == 0:  # just a single term if no parents
-            corescore = self._scoreconstvec[num_parents] - awpNd2 * np.log(A)
-        else:
-            D = self._TN[np.ix_(parentnodes, parentnodes)]
-            choltemp = np.linalg.cholesky(D)
-            logdetD = 2 * np.sum(np.log(np.diag(choltemp)))
-
-            B = self._TN[np.ix_([node_indx], parentnodes)]
-            logdetpart2 = np.log( A - np.sum(np.linalg.solve(choltemp, B.T)**2) )
-            corescore = self._scoreconstvec[num_parents] - awpNd2 * logdetpart2 - logdetD / 2
-
-        # Save the parameters for the node
-        parameters[node] = {
-            'parents': parentnodes
-        }
-        self._parameters = parameters
-
-        score = {
-            'score': corescore,
-            'parameters': parameters
-        }
-
-        return score
-
-    def compute_local(self, node : str, parents: list):
+    def compute_node_with_edges(self, node : str, parents: list):
         """
         Compute the BGE for edge(s)
 
@@ -271,7 +206,7 @@ class WeightedBGeScore(BGeScore):
         # Loop through each node in the graph
         for node in self.node_labels:
 
-            log_ml_node = self.compute_BGe_with_node( node )['score']
+            log_ml_node = self.compute_node( node )['score']
 
             # Save the parameters for the node
             parameters[node] = {

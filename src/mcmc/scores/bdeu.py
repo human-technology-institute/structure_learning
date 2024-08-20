@@ -10,7 +10,7 @@ class BDeuScore(Score):
     """
     BDeu Score
     """
-    def __init__(self, data : pd.DataFrame, incidence : Union[np.ndarray, nx.DiGraph] = None):
+    def __init__(self, data : pd.DataFrame, incidence : Union[np.ndarray, nx.DiGraph] = None, alpha=10):
         """
         Initialise BDeuScore instance.
 
@@ -22,9 +22,10 @@ class BDeuScore(Score):
         self.incidence = incidence
         if incidence is not None and not isinstance(incidence, np.ndarray):
             self.incidence = nx.from_numpy_array(incidence, create_using=nx.DiGraph)
+        self.alpha = 10.0
 
     # todo: for larger datasets, this function is very slow.
-    def compute(self, alpha: float = 10.0):
+    def compute(self):
         """
         Compute BDeu score.
 
@@ -36,7 +37,7 @@ class BDeuScore(Score):
         parameters = {}
         for idx,node in enumerate(self.node_labels):
             parents = [self.node_labels[i] for i in find_parents(self.graph, idx)]
-            node_score = self.compute_local(node, parents, alpha)
+            node_score = self.compute_node_with_edges(node, parents)
             parameters[node] = node_score['parameters'][node]
             BDeu_score += node_score['score']
 
@@ -46,7 +47,7 @@ class BDeuScore(Score):
         }
         return score
 
-    def compute_local(self, node, parents, a=10):
+    def compute_node_with_edges(self, node: str, parents: list):
         """
         Adapted from https://github.com/pgmpy/pgmpy/blob/dev/pgmpy/estimators/StructureScore.py
         """
@@ -61,8 +62,8 @@ class BDeuScore(Score):
         # counts size is different because reindex=False is dropping columns.
         counts_size = num_parents_states * var_states
 
-        alpha = a / num_parents_states
-        beta = a / counts_size
+        alpha = self.alpha / num_parents_states
+        beta = self.alpha / counts_size
         # Compute log(gamma(counts + beta))
         log_gamma_counts = gammaln(counts + beta)
 
@@ -93,8 +94,3 @@ class BDeuScore(Score):
             'parameters': parameters
         }
         return score
-
-    def compute_node(self, node):
-        node_idx = self.node_label_to_index[node]
-        parents = [self.node_labels[i] for i in find_parents(self.graph, node_idx)]
-        return self.compute_local(node, parents)

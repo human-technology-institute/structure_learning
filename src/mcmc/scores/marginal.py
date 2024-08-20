@@ -44,20 +44,7 @@ class MarginalLogLikelihood(Score):
         return self.compute_marginal_log_likelihood_with_graph() if self.incidence is not None \
             else self.compute_marginal_log_likelihood_from_data()
 
-    def compute_node(self, node):
-        """
-        Compute the marginal likelihood for a node.
-
-        Parameter:
-            node (str): node label
-
-        Returns:
-            (dict): score and parameters
-        """
-        return self.compute_marginal_log_likelihood_with_node(node)
-
-
-    def compute_marginal_log_likelihood_with_node(self, node: str):
+    def compute_node_with_edges(self, node: str, parents: list):
         """
         Compute the marginal likelihood for a node.
 
@@ -75,9 +62,7 @@ class MarginalLogLikelihood(Score):
 
         parameters = {} # Dictionary to store the parameters for each node
 
-        node_indx = self._node_label_to_index[node] # Convert node str to index
-        parentnodes = find_parents(self.incidence, node_indx)
-        num_parents = len(parentnodes) # number of parents
+        num_parents = len(parents) # number of parents
 
         # Extract the data for the node
         y = self.data[node].values
@@ -85,7 +70,7 @@ class MarginalLogLikelihood(Score):
         # If the node has parents
         if num_parents > 0:
             # Extract the data for the node's parents
-            X = self.data.iloc[:,parentnodes].values
+            X = self.data.iloc[:,parents].values
             X = np.concatenate((np.ones((X.shape[0],1)), X), axis=1)
         else:
             # For root nodes, X is just an intercept term
@@ -153,7 +138,7 @@ class MarginalLogLikelihood(Score):
         # Loop through each node in the graph
         for node in self.node_labels:
 
-            score_node = self.compute_marginal_log_likelihood_with_node( node )
+            score_node = self.compute_node( node )
 
             log_ml_node = score_node['score']
 
