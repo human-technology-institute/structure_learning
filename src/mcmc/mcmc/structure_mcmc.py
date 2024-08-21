@@ -5,7 +5,7 @@ from typing import Union
 import random
 import numpy as np
 import pandas as pd
-from mcmc.utils.graph_utils import collect_node_scores, compare_graphs, index_to_node_label, initial_graph_pc, generate_DAG
+from mcmc.utils.graph_utils import collect_node_scores
 from mcmc.proposals import StructureLearningProposal, GraphProposal
 from mcmc.scores import Score, BGeScore, BDeuScore
 from mcmc.mcmc import MCMC
@@ -37,35 +37,28 @@ class StructureMCMC(MCMC):
         """
 
         super().__init__(data=data, initial_state=initial_graph, max_iter=max_iter, score_object=score_object,
-                         proposal_object='graph' if proposal_object is None else proposal_object, pc_init=pc_init, blacklist=blacklist, whitelist=whitelist)
+                         proposal_object='graph' if proposal_object is None else proposal_object, pc_init=pc_init,
+                         blacklist=blacklist, whitelist=whitelist)
 
         self._to_string = f"Structure_MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
+
+        self.score_object.incidence = self.proposal_object.current_state
+        state_score = self.score_object.compute()
+        self.scores = collect_node_scores(state_score)
+        result = {'current_state': self.proposal_object.current_state, 'proposed_state': None, 'score_current': state_score['score'],
+                  'operation': 'initial', 'accepted': False, 'acceptance_prob': 0, 'score_proposed': state_score['score']}
+        self.update_results(0, result)
 
     def __str__(self):
         return self._to_string
 
-    def run(self):
+    def step(self):
         """
-        Run MCMC simulation.
+        Perform one MCMC iteration
 
         Returns:
-            (list (dict)): information on graph samples
-            (float): acceptance rate
+            (dict): information on one MCMC iteration
         """
-        self.score_object.incidence = self.proposal_object.current_state
-        state_score = self.score_object.compute()
-        self.scores = collect_node_scores(state_score)
-        result = {'current_state': self.proposal_object.current_state, 'proposed_state': None, 'score_current': state_score['score'], 'operation': 'initial', 'accepted': False, 'acceptance_prob': 0, 'score_proposed': state_score['score']}
-        self.update_results(0, result)
-
-        for iter in range(self.max_iter):
-            result = self.step(result)
-            self.update_results(iter, result)
-
-        return self.results, self.n_accepted/self.max_iter
-
-    def step(self, previous_iteration):
-
         proposed_state, operation = self.proposal_object.propose()
         nodes_to_rescore = [self.node_labels[node] for node in self.proposal_object.get_nodes_to_rescore()]
 
@@ -92,7 +85,8 @@ class StructureMCMC(MCMC):
             is_accepted = False
             acceptance_prob = proposed_state_score = 0
 
-        return {'current_state': current_state, 'proposed_state': proposed_state, 'score_current': current_state_score, 'operation': operation, 'accepted': is_accepted, 'acceptance_prob': acceptance_prob, 'score_proposed': proposed_state_score}
+        return {'current_state': current_state, 'proposed_state': proposed_state, 'score_current': current_state_score,
+                'operation': operation, 'accepted': is_accepted, 'acceptance_prob': acceptance_prob, 'score_proposed': proposed_state_score}
 
     def get_graphs(self, results, filter_accepted=False):
         """

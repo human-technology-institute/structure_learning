@@ -95,7 +95,6 @@ class MCMC(ABC):
         self.scores = None
         self.results = {}
 
-    @abstractmethod
     def run(self) -> Tuple[dict, float]:
         """
         Run MCMC simulation.
@@ -105,8 +104,8 @@ class MCMC(ABC):
         """
         for iter in range(self.max_iter):
             result = self.step()
-            self.update_results(**result)
-        return self.results
+            self.update_results(iter, result)
+        return self.results, self.n_accepted/self.max_iter
 
     @abstractmethod
     def step(self) -> dict:
