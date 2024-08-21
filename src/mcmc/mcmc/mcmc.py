@@ -48,6 +48,7 @@ class MCMC(ABC):
         self.data  = data
         self.node_labels = list(data.columns)
         self.num_nodes = len(self.node_labels)
+        self.cpdag = None
 
         if score_object is None:
             print('Using default BGe score')
@@ -70,7 +71,7 @@ class MCMC(ABC):
                 if isinstance(initial_state, np.ndarray):
                     proposal_object = GraphProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist)
                 elif isinstance(initial_state, OrderedPartition):
-                    proposal_object = PartitionProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist, plus1=plus1)
+                    proposal_object = PartitionProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist)
                 else:
                     print('Invalid initial state')
             else:
@@ -80,20 +81,23 @@ class MCMC(ABC):
                 else: # start with random
                     cpdag = None
                     initial_state = generate_DAG(self.num_nodes, 0.5)
+                self.cpdag = cpdag
                 if proposal_object is None or proposal_object == 'partition':
                     initial_state = build_partition(incidence=initial_state if not plus1 else np.zeros((self.num_nodes, self.num_nodes)), node_labels=self.node_labels)
-                    proposal_object = PartitionProposal(initial_state, whitelist=whitelist, blacklist=blacklist, plus1=plus1)
+                    proposal_object = PartitionProposal(initial_state, whitelist=whitelist, blacklist=blacklist)
                 else:
                     proposal_object = GraphProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist)
         elif not isinstance(proposal_object, StructureLearningProposal):
             raise Exception('Unsupported proposal', proposal_object)
         self.initial_state = initial_state
         self.proposal_object = proposal_object
-
+        self.blacklist = blacklist
+        self.whitelist = whitelist
         self.max_iter = max_iter
         self.n_accepted = 0
         self.scores = None
         self.results = {}
+        self._to_string = f"MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
 
     def run(self) -> Tuple[dict, float]:
         """
@@ -116,3 +120,21 @@ class MCMC(ABC):
 
     def update_results(self, iteration, info):
         self.results[iteration] = info
+
+    def get_graphs(self, results, filter_accepted=False):
+        """
+        Returns list of sampled graphs from MCMC simulation results.
+
+        Parameters:
+            results (dict): MCMC simulation results.
+
+        Returns:
+            (list): sampled graphs
+        """
+        return self.get_chain_info(results)
+
+    def get_chain_info(self, results, key='graph', filter_accepted=False):
+        return [result[key] for _,(i,result) in enumerate(results.items()) if (not filter_accepted or result['accepted'])]
+
+    def __str__(self):
+        return self._to_string

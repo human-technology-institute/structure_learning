@@ -49,9 +49,6 @@ class StructureMCMC(MCMC):
                   'operation': 'initial', 'accepted': False, 'acceptance_prob': 0, 'score_proposed': state_score['score']}
         self.update_results(0, result)
 
-    def __str__(self):
-        return self._to_string
-
     def step(self):
         """
         Perform one MCMC iteration
@@ -85,20 +82,5 @@ class StructureMCMC(MCMC):
             is_accepted = False
             acceptance_prob = proposed_state_score = 0
 
-        return {'current_state': current_state, 'proposed_state': proposed_state, 'score_current': current_state_score,
+        return {'graph': current_state, 'current_state': current_state, 'proposed_state': proposed_state, 'score_current': current_state_score,
                 'operation': operation, 'accepted': is_accepted, 'acceptance_prob': acceptance_prob, 'score_proposed': proposed_state_score}
-
-    def get_graphs(self, results, filter_accepted=False):
-        """
-        Returns list of sampled graphs from MCMC simulation results.
-
-        Parameters:
-            results (dict): MCMC simulation results.
-
-        Returns:
-            (list): sampled graphs
-        """
-        return self.get_chain_info(results)
-
-    def get_chain_info(self, results, key='current_state', filter_accepted=False):
-        return [result[key] for _,(i,result) in enumerate(results.items()) if (not filter_accepted or result['accepted'])]

@@ -30,12 +30,7 @@ class StructureLearningProposal(ABC):
         self.initial_state = initial_state
         self.current_state = initial_state
         self.proposed_state = None
-
-        self.blacklist = blacklist
-        self.whitelist = whitelist
         self.operation = None
-
-        self._operation = None
 
     @abstractmethod
     def propose(self) -> Tuple[State, str]:

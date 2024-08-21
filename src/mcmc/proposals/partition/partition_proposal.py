@@ -63,7 +63,6 @@ class PartitionProposal(StructureLearningProposal):
             self._Q_current_proposed = sum(self._compute_neighborhoods_new_existing_partition(self.current_state))
             self._Q_proposed_current = sum(self._compute_neighborhoods_new_existing_partition(self.proposed_state))
         else:
-            # print(self.operation)
             raise Exception("Invalid operation ", self.operation)
 
         numerator = proposed_state_score + np.log(self._Q_current_proposed)
