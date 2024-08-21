@@ -2,10 +2,17 @@
 
 """
 from abc import ABC, abstractmethod
+from typing import TypeVar, Union, Tuple
 import pandas as pd
 import networkx as nx
 import numpy as np
-from mcmc.scores import Score
+from mcmc.scores import Score, BGeScore, BDeuScore
+from mcmc.proposals import StructureLearningProposal, GraphProposal, PartitionProposal
+from mcmc.data_structures import OrderedPartition
+from mcmc.utils.graph_utils import initial_graph_pc, generate_DAG
+from mcmc.utils.partition_utils import build_partition
+
+State = TypeVar('State')
 
 class MCMC(ABC):
     """
@@ -13,131 +20,100 @@ class MCMC(ABC):
     Inheriting classes must implement the following methods:
         run()
     """
-    def __init__(self, data, initial_graph, max_iter, score_object, proposal_object):
+    def __init__(self, data: pd.DataFrame, initial_state: State, max_iter: int = 30000, score_object: Union[str, Score] = None,
+                 proposal_object: Union[str, StructureLearningProposal] = None, pc_init: bool = True,
+                 blacklist: np.ndarray = None, whitelist: np.ndarray = None, plus1: bool = False):
         """
-        Initialise MCMC object.
+        Initilialise MCMC instance.
 
         Parameters:
-            data (pandas.DataFrame): data
-            initial_graph (numpy.ndarray): initial graph
-            max_iter (int): number of iterations to run
-            score_object (Score): a Score object
-            proposal_object (Proposal): a Proposal object
+            data (pd.DataFrame):                            Dataset. Optional if score_object is given.
+            initial_state (State):                          Initial state for the MCMC simulation.
+                                                            If None, simulation starts with a random graph or a graph
+                                                            constructed from PC algorithm.
+            max_iter (int):                                 The number of MCMC iterations to run. Default: 30000.
+            score_object (Score):                           A score object implementing compute(). If None, BGeScore is used
+                                                            (data must be provided). Default: None.
+            proposal_object (StructureLearningProposal):    A proposal object. If None, a GraphProposal instance is used.
+                                                            Default: None.
+            pc_init (bool):                                 If True and initial_graph is not given, PC algorithm will be used
+                                                            to generate initial graph.
+            blacklist (numpy.ndarray):                      Mask for edges to ignore in the proposal
+            whitelist (numpy.ndarray):                      Mask for edges to include
+            plus1 (bool):                                   Use plus1 neighborhood
         """
-        self._data  = data
-        self._node_labels = list(data.columns)
-        self._num_nodes = len(self._node_labels)
 
-        self._proposal_object = proposal_object
-        self._score_object = score_object
-        self._max_iter = max_iter
+        if data is None or not isinstance(data, pd.DataFrame):
+            raise Exception("Data (as pandas dataframe) must be provided")
+        self.data  = data
+        self.node_labels = list(data.columns)
+        self.num_nodes = len(self.node_labels)
 
-        if initial_graph is None:
-            self._initial_graph = np.zeros((self._num_nodes, self._num_nodes))
-        else:
-            self._initial_graph = initial_graph
+        if score_object is None:
+            print('Using default BGe score')
+            score_object = BGeScore(data=data, incidence=None)
+        elif isinstance(score_object, str):
+            if score_object.lower() == 'bge':
+                score_object = BGeScore(data=data, incidence=None)
+            elif score_object.lower() in ['bde', 'bdeu']:
+                score_object = BDeuScore(data=data, incidence=None)
+            else:
+                raise Exception(f"Unsupported score {score_object}")
+        elif not isinstance(score_object, Score):
+            raise Exception(f"Unsupported score {score_object}")
+        self.score_object = score_object
+
+        if proposal_object is None or isinstance(proposal_object, str):
+            if isinstance(proposal_object, str) and proposal_object not in ['graph', 'partition']:
+                raise Exception('Unsupported proposal', proposal_object)
+            if initial_state is not None:
+                if isinstance(initial_state, np.ndarray):
+                    proposal_object = GraphProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist)
+                elif isinstance(initial_state, OrderedPartition):
+                    proposal_object = PartitionProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist, plus1=plus1)
+                else:
+                    print('Invalid initial state')
+            else:
+                if pc_init:
+                    print('Running PC algorithm')
+                    initial_state, cpdag = initial_graph_pc(score_object.data, True)
+                else: # start with random
+                    cpdag = None
+                    initial_state = generate_DAG(self.num_nodes, 0.5)
+                if proposal_object is None or proposal_object == 'partition':
+                    initial_state = build_partition(incidence=initial_state if not plus1 else np.zeros((self.num_nodes, self.num_nodes)), node_labels=self.node_labels)
+                    proposal_object = PartitionProposal(initial_state, whitelist=whitelist, blacklist=blacklist, plus1=plus1)
+                else:
+                    proposal_object = GraphProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist)
+        elif not isinstance(proposal_object, StructureLearningProposal):
+            raise Exception('Unsupported proposal', proposal_object)
+        self.initial_state = initial_state
+        self.proposal_object = proposal_object
+
+        self.max_iter = max_iter
+        self.n_accepted = 0
+        self.scores = None
+        self.results = {}
 
     @abstractmethod
-    def run(self):
+    def run(self) -> Tuple[dict, float]:
         """
         Run MCMC simulation.
+
+        Returns:
+            (dict): dictionary (iteration number as keys) of MCMC state chain information
+        """
+        for iter in range(self.max_iter):
+            result = self.step()
+            self.update_results(**result)
+        return self.results
+
+    @abstractmethod
+    def step(self) -> dict:
+        """
+        Perform one MCMC iteration
         """
         pass
 
-    @property
-    def data(self):
-        return self._data
-
-    @data.setter
-    def data(self, d : pd.DataFrame):
-        """
-        Set data for MCMC simulation.
-
-        Parameter:
-            d (pandas.DataFrame): data
-        """
-        self._data = d
-
-    @property
-    def score_object(self):
-        return self._score_object
-
-    @score_object.setter
-    def score_object(self, score : Score):
-        """
-        Set score object to use for MCMC simulation.
-
-        Parameter:
-            score (mcmc.scores.Score): score object
-        """
-        self._score_object = score
-
-    @property
-    def proposal_object(self):
-        return self._proposal_object
-
-    @proposal_object.setter
-    def proposal_object(self, proposal):
-        """
-        Set proposal object to use for MCMC simulation.
-
-        Parameter:
-            proposal (mcmc.proposals.StructureLearningProposal): proposal object
-        """
-        self._proposal_object = proposal
-
-    @property
-    def initial_graph(self):
-        return self._initial_graph
-
-    @initial_graph.setter
-    def initial_graph(self, graph : np.ndarray):
-        """
-        Set graph to use for MCMC simulation.
-
-        Parameter:
-            graph (numpy.npdarray): initial graph
-        """
-        self._initial_graph = graph
-
-    @property
-    def num_nodes(self):
-        return self._num_nodes
-
-    @num_nodes.setter
-    def num_nodes(self, n_nodes : int):
-        """
-        Set number of nodes.
-
-        Parameter:
-            n_nodes (int): number of nodes
-        """
-        self._num_nodes = n_nodes
-
-    @property
-    def node_labels(self):
-        return self._node_labels
-
-    @node_labels.setter
-    def node_labels(self, labels : list):
-        """
-        Set node labels.
-
-        Parameter:
-            labels (list (str)): node labels
-        """
-        self._node_labels = labels
-
-    @property
-    def max_iter(self):
-        return self._max_iter
-
-    @max_iter.setter
-    def max_iter(self, it: int):
-        """
-        Set number of iterations for MCMC simulation.
-
-        Parameter:
-            it (int): number of MCMC iterations
-        """
-        self._max_iter = it
+    def update_results(self, iteration, info):
+        self.results[iteration] = info

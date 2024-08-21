@@ -35,9 +35,8 @@ class BDeuScore(Score):
         BDeu_score = 0.0
 
         parameters = {}
-        for idx,node in enumerate(self.node_labels):
-            parents = [self.node_labels[i] for i in find_parents(self.graph, idx)]
-            node_score = self.compute_node_with_edges(node, parents)
+        for node in self.node_labels:
+            node_score = self.compute_node(node)
             parameters[node] = node_score['parameters'][node]
             BDeu_score += node_score['score']
 

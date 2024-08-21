@@ -2,19 +2,23 @@
 
 """
 from abc import ABC, abstractmethod
-from typing import Union
+from typing import Any, TypeVar, Tuple, List
 import networkx as nx
 import numpy as np
 
+State = TypeVar("State")
 class StructureLearningProposal(ABC):
     """
     Base class for proposal classes for structure learning using MCMC.
     All inheriting classes must implement the following methods:
-        propose_DAG() -> graph : numpy.ndarray, operation : str
-        prob_Gcurr_Gprop_f() -> float
-        prob_Gcurr_Gprop_f() -> float
+        propose() -> graph : numpy.ndarray, operation : str
+        compute_acceptance_ratio() -> float
     """
-    def __init__(self, graph : Union[np.ndarray, nx.DiGraph], blacklist = None, whitelist = None):
+    STAY_STILL = 'stay_still'
+
+    operations = [STAY_STILL]
+
+    def __init__(self, initial_state : State, blacklist = None, whitelist = None):
         """
         Initialise StructureLearningProposal instance.
 
@@ -23,111 +27,31 @@ class StructureLearningProposal(ABC):
             blacklist (numpy.ndarray): mask for edges to ignore in the proposal
             whitelist (numpy.ndarray): mask for edges to include in the proposal
         """
-        self._G_curr = graph.copy()
-        self._G_prop = None
+        self.initial_state = initial_state
+        self.current_state = initial_state
+        self.proposed_state = None
 
-        self.node_labels = graph.nodes() if isinstance(graph, nx.DiGraph) else [str(i) for i in range(graph.shape[1])]
-        self.num_nodes = len(self.node_labels)
-
-        if blacklist is None:
-            self._blacklist = np.zeros((self.num_nodes, self.num_nodes))
-        else:
-            self._blacklist = blacklist
-
-        if whitelist is None:
-            self._whitelist = np.zeros((self.num_nodes, self.num_nodes))
-        else:
-            self._whitelist = whitelist
+        self.blacklist = blacklist
+        self.whitelist = whitelist
+        self.operation = None
 
         self._operation = None
 
     @abstractmethod
-    def propose_DAG(self):
+    def propose(self) -> Tuple[State, str]:
         """
         Propose a DAG
         """
         pass
 
     @abstractmethod
-    def prob_Gcurr_Gprop_f(self):
-        """
-        Compute transition probability Q(G_curr|G_prop)
-        """
+    def compute_acceptance_ratio(self) -> float:
         pass
 
     @abstractmethod
-    def prob_Gprop_Gcurr_f(self):
-        """
-        Compute transition probability Q(G_prop|G_curr)
-        """
+    def get_nodes_to_rescore(self) -> List[str]:
         pass
 
-    @property
-    def current_graph(self):
-        return self._G_curr
-
-    @current_graph.setter
-    def current_graph(self, graph):
-        """
-        Set current graph.
-
-        Parameter:
-            graph (numpy.ndarray): current graph
-        """
-        self._G_curr = graph
-
-    @property
-    def proposed_graph(self):
-        return self._G_prop
-
-    @proposed_graph.setter
-    def proposed_graph(self, graph):
-        """
-        Set proposed graph.
-
-        Parameter:
-            graph (numpy.ndarray): proposed graph
-        """
-        self._G_prop = graph
-
-    @property
-    def whitelist(self):
-        return self._whitelist
-
-    @whitelist.setter
-    def whitelist(self, arcs):
-        """
-        Set whitelist edges.
-
-        Parameter:
-            arcs (numpy.ndarray): whitelist edges
-        """
-        self._whitelist = arcs
-
-    @property
-    def blacklist(self):
-        return self._blacklist
-
-    @blacklist.setter
-    def blacklist(self, arcs):
-        """
-        Set whitelist edges.
-
-        Parameter:
-            arcs (numpy.ndarray): blacklist edges
-        """
-        self._blacklist = arcs
-
-    @property
-    def operation(self):
-        return self._operation
-
-    @operation.setter
-    def operation(self, op):
-        """
-        Set operation for proposal.
-
-        Parameter:
-            op (str): operation
-        """
-        self._operation = op
+    def accept(self):
+        self.current_state = self.proposed_state
+        self.proposed_state = None
