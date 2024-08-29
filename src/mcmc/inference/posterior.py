@@ -108,7 +108,7 @@ def generate_all_dags( data : pd.DataFrame, my_score : Score, isScoreLogSpace = 
         if gen_augmented_priors:
             base_dag_dict[key]["log_score_orderings"] = np.log(base_dag_dict[key]["num_orderings"]) + base_dag_dict[key]["log_score"]
 
-    base_dag_dict_norm = normalise_scores( base_dag_dict )
+    base_dag_dict_norm = normalise_scores(base_dag_dict, gen_augmented_priors)
 
     print(f"Total {num_nodes} node DAGs generated = {len(base_dag_dict.keys())}")
 

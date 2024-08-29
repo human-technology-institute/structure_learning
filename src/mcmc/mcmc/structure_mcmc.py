@@ -218,7 +218,8 @@ class StructureMCMC(MCMC):
                                     "Q_Gcurr_Gprop" : Q_Gcurr_Gprop,
                                     "score_Gprop" : score_Gprop,
                                     "score_Gcurr" : score_Gcurr,
-                                    "acceptance_prob" : acceptance_prob}
+                                    "acceptance_prob" : acceptance_prob,
+                                    "Gprop": G_prop}
             # reset index
             accept_indx = 0
             iter_indx += 1
