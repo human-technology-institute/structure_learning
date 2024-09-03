@@ -20,7 +20,7 @@ class PartitionMCMC(MCMC):
     """
 
     """
-    def __init__(self, init_part : OrderedPartition = None, max_iter : int = 30000, proposal_object : StructureLearningProposal = None, score_object : Union[str, Score] = None, data : pd.DataFrame = None, pc_init: bool = True, blacklist = None, whitelist = None, plus1: bool = False):
+    def __init__(self, init_part : Union[OrderedPartition, np.ndarray] = None, max_iter : int = 30000, proposal_object : StructureLearningProposal = None, score_object : Union[str, Score] = None, data : pd.DataFrame = None, pc_init: bool = True, blacklist = None, whitelist = None, plus1: bool = False):
 
         self.to_string = "Partition MCMC"
 
@@ -43,6 +43,7 @@ class PartitionMCMC(MCMC):
             else:
                 raise Exception(f"Unsupported score {score_object}")
 
+        cpdag = None
         if proposal_object is None:
             if init_part is None:
                 n_nodes = len(score_object.data.columns)
@@ -50,13 +51,15 @@ class PartitionMCMC(MCMC):
                     print('Running PC algorithm')
                     initial_graph, cpdag = initial_graph_pc(score_object.data, True)
                 else: # start with random
-                    cpdag = None
                     initial_graph = generate_DAG(n_nodes, 0.5)
                 init_part = build_partition(incidence=initial_graph if not plus1 else np.zeros((n_nodes, n_nodes)), node_labels=list(score_object.data.columns))
+            elif isinstance(init_part, np.ndarray):
+                init_part = build_partition(init_part, list(score_object.data.columns))
             proposal_object = PartitionProposal(ordered_partition=init_part, whitelist=whitelist, blacklist=blacklist)
 
-        self.init_part = init_part
         super().__init__(score_object.data, None, max_iter, score_object, proposal_object)
+
+        self.init_part = self.proposal_object.ordered_partition
         self.blacklist = blacklist
         self.whitelist = whitelist
 
