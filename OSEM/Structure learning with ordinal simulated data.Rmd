@@ -1,0 +1,293 @@
+---
+title: "Bayesian Structure learning with ordinal data"
+author: "Linduni Rodrigo"
+date: "2024-09-10"
+output:
+  html_document:
+    fig_caption: yes
+    number_sections: yes
+    theme: flatly
+    toc: true
+    toc_depth: 3
+    toc_float: false
+    code_folding: hide
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = F, warning = F )
+```
+
+## Setting the working directory
+
+```{r}
+#setwd("LSAC/OSEM")
+```
+
+## Loading Required Packages
+
+```{r, message=FALSE}
+library(BiDAG)
+library(Rgraphviz)
+library(pcalg)
+library(graph)
+library(bnlearn)
+library(MXM)
+library(sbgcop)
+library(infotheo)
+library(rpart)
+library(devtools)
+library(readr) #read csv
+library(ggplot2)
+library(pROC)  # for ROC curve and AUC calculation
+source_url("https://raw.githubusercontent.com/cuiruifei/CausalMissingValues/master/R/inferCopulaModel.R")
+```
+
+## Source external R scripts
+
+```{r}
+# Major file containing the OSEM algorithm
+source("ordinalScore.R") 
+
+# Modified version of the existing functions in the BiDAG package
+insertSource("spacefns.R",package = "BiDAG")
+insertSource("usrscorefns.R",package = "BiDAG")
+insertSource("initpar.R",package = "BiDAG")
+insertSource("scoreagainstdag.R",package = "BiDAG")
+```
+
+# Structure learning with simulated data
+
+## Data simulation
+
+```{r True_DAGs}
+set.seed(222)
+
+N <- 500
+n <- 10
+# Generate a regular DAGs with n nodes with 4 number of neighbors
+trueDAG <- randDAG(n = n, d = 4, method = "er", wFUN = list(mywFUN))
+
+
+```
+
+```{r Plot_true_DAG}
+# Plot true DAG structures
+plot(trueDAG, main=paste0("True DAG with ", n, " nodes"))
+
+
+```
+
+
+```{r Generate_Gaussian}
+## generate 500 observations from the DAG using standard normal error distribution
+set.seed(222)
+gaussian_data_n10 <- rmvDAG2(N, trueDAG_n10)
+
+```
+
+
+```{r Gaussian_to_Ordinal}
+set.seed(222)
+# Convert the Gaussian dataset into an ordinal dataset
+ordinal_data <- generateOrdinal(N, n[1], trueDAG_n10, exp_levels = 4, concent_param = 2)
+ordinal_data_df <- as.data.frame(ordinal_data_n10)
+ordinal_data_df[] <- lapply(ordinal_data_n10_df[], as.ordered)
+```
+
+
+```{r #levels}
+# No. of levels in each variable 
+(ordinal_levels <- apply(ordinal_data, 2, function(x) length(unique(x))))
+```
+
+
+## DAG structure learning using OSEM algorithm
+
+```{r run_OSEM, results='hide', cache = TRUE}
+# the OSEM algorithm
+set.seed(123)
+OSEMfit <- ordinalStructEM(n, ordinal_data,
+                           usrpar = list(penType = "other",
+                                         L = 5,
+                                         lambda = 8,
+                                         preLevels = NULL))
+```
+
+```{r Estimated_DAG_OSEM, echo=FALSE}
+# Plot OSEM estimated vs true DAG structure
+par(mfrow = c(1,2))
+plot(trueDAG, main = "True DAG with 10 nodes")
+tempgraph <- graphAM(as.matrix(OSEMfit$DAG), edgemode = "directed")
+plot(tempgraph, main= "OSEM estiamted DAG")
+```
+
+
+## DAG structure learning using hybrid method with the BDe score and NPC as initial search space (BDe) - binary data
+
+### Binarise data
+
+```{r Binarise_Ordinal}
+# Convert the ordianl dataset into binary dataset
+
+# Function to binarize ordered factors based on a threshold
+binarize_factor <- function(col) {
+    l <- length(unique(col))
+    if (l ==2){
+      return(as.numeric(col))
+    }else{
+       # Convert ordered factors to binary values based on the threshold
+       binary_var <- ifelse(as.numeric(col) > l/2, 1, 0)
+       return(as.numeric(binary_var))
+    }
+   
+}
+
+binary_data <- as.matrix(apply(ordinal_data_df,2,binarize_factor))
+
+# View the result
+print(head(binary_data))
+
+```
+
+### Learn DAG structure with BDe 
+
+```{r run_BDe, results='hide', cache = TRUE}
+set.seed(123)
+# hybrid method with the BDe score and the nominal PC output as the initial search space
+BDE <- scoreparameters("bdecat",data.frame(binary_data),bdecatpar = list(chi = 0.5))
+BDEfit <- iterativeMCMC(BDE)
+```
+
+```{r Estimated_DAG_BDe, echo = FALSE}
+# Plot BDe estimated vs true DAG structure for 10 nodes
+par(mfrow = c(1,2))
+plot(trueDAG, main = "True DAG with 10 nodes")
+tempgraph <- graphAM(as.matrix(BDEfit$DAG), edgemode = "directed")
+plot(tempgraph, main= "BDe estimated DAG")
+```
+
+### Evaluating the performance
+
+#### Calculate performance measures (SHD, Precision,TPR and FPR)
+
+```{r Compare_TPR&FPR, message=FALSE}
+library(knitr)
+library(kableExtra)
+
+OSEMfit = OSEMfit
+BDEfit = BDEfit
+trueDAG = trueDAG
+
+# Calculate "SHD", "Precision","TPR","FPR_N","FPR_P"
+data_frame <- data.frame(rbind(comparePatterns(as.matrix(OSEMfit$DAG),trueDAG,hardP2P = FALSE), comparePatterns(as.matrix(BDEfit$DAG),trueDAG,hardP2P = FALSE)))
+row.names(data_frame) <- c("OSEM","BDe")
+
+# Use kable to create a Markdown table
+kable(data_frame[,c(1,6:9)], col.names = c("SHD", "Precision","TPR","FPR_N","FPR_P"), 
+      caption = "Table of TPR and FPR for structure learned from different methods", 
+      row.names = T)%>%
+  kable_styling(latex_options = c("striped", "scale_down")) %>%
+  column_spec(1, width = "3cm") %>%  
+  column_spec(2, width = "4cm") 
+```
+
+#### Receiver Operating Characteristic (ROC) curve. 
+
+Calculate True Positive Rate (TPR) and the False Positive Rate
+(FPR) for the DAG structures estimated by the OSEM and BDe
+methods, each employing following penalization parameters.
+
+-   For BDe 15 different equivalent sample sizes ($\chi$)
+    $\chi ∈ {0.000001, 0.00001,0.0001, 0.001, 0.01, 0.1, 1, 10, 20, 40, 60, 80, 100, 120,150}$
+    and
+-   For OSEM 15 different coefficient to be multiplied by the BIC
+    penalty ($\lambda$)
+    $\lambda \in {0.1,0.5,1, 1.5, 2, 2.5, 3, 4, 6, 10, 20, 30,40,50,60}$
+
+```{r OSEM-Comparison, echo=TRUE, message=FALSE, warning=FALSE, results='hide'}
+
+trueDAG = trueDAG
+data = ordinal_data
+# Define parameters
+lambda_values <- c(0.1,0.5,1, 1.5, 2, 2.5, 3, 4, 6, 10, 20, 30, 40, 50, 60)
+
+tprOSEM_values <- rep(NA, nrow = length(lambda_values))
+fdrpOSEM_values <- rep(NA, nrow = length(lambda_values))
+
+
+# Loop through lambda values for OSEM
+for (i in seq_along(lambda_values)) {
+  lambda <- lambda_values[i]
+  
+  # Fit the OSEM model
+  OSEMfit <- ordinalStructEM(n,data,
+                             usrpar = list(penType = "BIC",
+                                           L = 5,
+                                           lambda = lambda,
+                                           preLevels = NULL))
+  
+  # Calculate TPR and FPR
+  results_soft <- comparePatterns(as.matrix(OSEMfit$DAG), trueDAG, hardP2P = FALSE)
+  tprOSEM_values[i] <- results_soft[7] # TPR
+  fdrpOSEM_values[i] <- results_soft[9] # FDRp
+}
+
+
+```
+
+```{r BDE-Comparison, results='hide'}
+
+trueDAG = trueDAG_n20
+data = binary_data_n20
+# Define parameters
+
+chi_values <- c(0.00000001,0.0000001, 0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10, 20, 40, 60, 80, 100, 120, 150)
+
+tprBDe_values <- rep(NA, nrow = length(chi_values))
+fdrpBDe_values <- rep(NA, nrow = length(chi_values))
+
+# Loop through chi values for BDE
+for (i in seq_along(chi_values)) {
+  chi <- chi_values[i]
+  
+  # Fit the BDE model
+  BDEfit <- iterativeMCMC(scoreparameters("bdecat", data.frame(data), bdecatpar = list(chi = chi)))
+  
+  # Calculate TPR and FPR
+  results_soft <- comparePatterns(as.matrix(BDEfit$DAG), trueDAG,hardP2P = FALSE)
+  tprBDe_values[i] <- results_soft[7]
+  fdrpBDe_values[i] <- results_soft[9]
+}
+
+```
+
+```{r df_performace_matrices}
+
+
+# Combine both datasets
+roc_data <- rbind(data.frame(FPR = fdrpOSEM_values,
+                           TPR = tprOSEM_values,
+                           Method = "OSEM"), data.frame(FPR = fdrpBDe_values,
+                           TPR = tprBDe_values,
+                           Method = "BDe"))
+
+
+```
+
+```{r ROC, echo = FALSE}
+
+# Plot ROC curves for both methods
+ggplot(roc_data, aes(x = FPR, y = TPR, color = Method)) +
+  geom_line(size = 1) +
+  geom_point(size = 2) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray") +
+  labs(x = "False Positive Rate", y = "True Positive Rate", title = "ROC Curve Comparison") +
+  theme_minimal() + ylim(0.1,1)+xlim(0.1,1)+
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_color_manual(values = c("blue", "red"))
+
+```
+
