@@ -227,6 +227,8 @@ for exp_i in t:
     graph_list = mcmc_obj.get_mcmc_res_graphs( mcmc_res )
     score_list = mcmc_obj.get_mcmc_res_scores( mcmc_res )
 
+    with open(os.path.join(RESPATH, f'true_distribution_results_{exp_i}.pkl'), 'wb') as f:
+        pickle.dump(true_distr, f)
 
     with open(os.path.join(RESPATH, f'MCMC_results_{exp_i}.pkl'), 'wb') as f:
         pickle.dump(graph_list, f)
