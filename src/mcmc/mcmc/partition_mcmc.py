@@ -66,23 +66,28 @@ class PartitionMCMC(MCMC):
 
         self.parent_table = list_possible_parents(self._max_parents, self.node_labels, whitelist=whitelist, blacklist=blacklist, plus1=plus1, init_cpdag=cpdag)
         self.score_table = score_possible_parents(self.parent_table, self.node_labels, self.score_object)
-        self.mcmc_res = {}
+        self.mcmc_res = [None]*self.max_iter
 
-    def update_MCMC_res( self, iteration, graph, partition, party, permy, posy,  operation, isAccepted, score_P_curr, score_P_prop, acceptance_prob ):
-
+    def update_MCMC_res( self, iteration, graph, partition, party, permy, posy,  operation, isAccepted, score_P_curr,
+                         score_P_prop, acceptance_prob, P_prop, G_prop, G_score_curr, G_score_prop):
         self.mcmc_res[iteration] = {}
-        self.mcmc_res[iteration] =  {"graph": graph,
-                                    "partition": partition,
-                                    "party": party,
-                                    "permy": permy,
-                                    "posy": posy,
+        self.mcmc_res[iteration] = {"graph": graph,
+                                "partition": partition,
+                                "party": party,
+                                "permy": permy,
+                                "posy": posy,
 
-                                    "operation": operation,
-                                    "accepted" : isAccepted,
+                                "P_prop": P_prop,  # Proposed partition
+                                "G_prop": G_prop,  # Proposed graph (Sampled from the proposed parition - only relevnt for optimal mapping
+                                "G_score_curr": G_score_curr,  # Current graph score
+                                "G_score_prop": G_score_prop,  # Proposed graph score
 
-                                    "score_P_curr" : score_P_curr,
-                                    "score_P_prop" : score_P_prop,
-                                    "acceptance_prob" : acceptance_prob}
+                                "operation": operation,
+                                "accepted": isAccepted,
+
+                                "score_P_curr": score_P_curr,
+                                "score_P_prop": score_P_prop,
+                                "acceptance_prob": acceptance_prob}
 
     def run( self ):
         acceptance_prob = -1
@@ -106,7 +111,11 @@ class PartitionMCMC(MCMC):
 
         # Sample a DAG from the initial partition
         G = sample_score(self.num_nodes, self.node_labels, all_scores_curr , self.parent_table, self._node_label_to_idx)['incidence']
-        self.update_MCMC_res(0, G, P_curr, party_curr, permy_curr, posy_curr, "MCMC Start", -1, score_P_curr, -1, -1 ) # save the results
+        self.score_object.incidence = G
+        G_score_curr = self.score_object.compute()
+        self.update_MCMC_res(0, G, P_curr, party_curr, permy_curr, posy_curr, "MCMC Start", -1, score_P_curr, -1, -1,
+                             None, None, G_score_curr, None) # save the results
+
 
         t = time.time()
 
@@ -133,7 +142,9 @@ class PartitionMCMC(MCMC):
             nbh_create_prop = self.proposal_object.get_nbh_create_new()         # get the number of ways to create new partitions from the proposed partition
 
             if chosen_move == "stay_still":
-                self.update_MCMC_res(iter, G, P_curr, party_curr, permy_curr, posy_curr,  chosen_move, 0, score_P_curr, score_P_curr, acceptance_prob )
+                self.update_MCMC_res(iter, G, P_curr, party_curr, permy_curr, posy_curr,  chosen_move, 0,
+                                     score_P_curr, score_P_curr, acceptance_prob,
+                                     P_curr, G, G_score_curr, G_score_curr)
                 iter += 1
                 continue
 
@@ -146,6 +157,11 @@ class PartitionMCMC(MCMC):
                 all_scores_prop[key].update( rescored_scores_prop_dict[key])
 
             score_P_prop = sum(all_scores_prop['total_scores'].values())
+            G_prop = \
+            sample_score(self.num_nodes, self.node_labels, all_scores_prop, self.parent_table, self._node_label_to_idx)[
+                'incidence']
+            self.score_object.incidence = G_prop
+            G_score_prop = self.score_object.compute()
 
             # sample alpha uniformly from [0,1]
             alpha = np.log( np.random.uniform(0, 1) )
@@ -162,20 +178,24 @@ class PartitionMCMC(MCMC):
                 P_curr = P_prop  # accept the proposal
                 self.proposal_object.set_ordered_partition( P_prop )
 
+                G = G_prop
+                G_score_curr = G_score_prop
                 party_curr = party_prop
                 permy_curr = permy_prop
                 posy_curr = posy_prop
                 all_scores_curr = all_scores_prop
                 score_P_curr = score_P_prop
                 neigh_size_curr = neigh_size_prop
-                nbh_join_curr =  nbh_join_prop
+                nbh_join_curr = nbh_join_prop
                 nbh_create_curr = nbh_create_prop
                 is_accepted = 1
+
+            self.update_MCMC_res(iter, G, P_curr, party_curr, permy_curr, posy_curr,
+                                 chosen_move, is_accepted, score_P_curr, score_P_prop, acceptance_prob,
+                                 P_prop, G_prop, G_score_curr, G_score_prop)
             iter += 1
 
             t = time.time()
-            G = sample_score(self.num_nodes, self.node_labels, all_scores_curr , self.parent_table, self._node_label_to_idx)['incidence']
-            self.update_MCMC_res(iter, G, P_curr, party_curr, permy_curr, posy_curr,  chosen_move, is_accepted, score_P_curr, score_P_prop, acceptance_prob )
 
         return self.mcmc_res, np.round(ACCEPT / self.max_iter,4)
 
@@ -210,8 +230,8 @@ class PartitionMCMC(MCMC):
 
     def get_mcmc_res_graphs(self, results):
         mcmc_graph_lst = []
-        for i in results:
-            mcmc_graph_lst.append( results[i]['graph'] )
+        for r in results:
+            mcmc_graph_lst.append( r['graph'] )
         return mcmc_graph_lst
 
     def is_valid_partition(self, partition: OrderedPartition):

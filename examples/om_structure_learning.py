@@ -111,13 +111,13 @@ def KL_comparison_OM_MCMC(mcmc_results, ground_truth_distribution):
     return KL_MCMC_t, KL_OM_t, KL_OM_accepted_only_t
 
 
-n_exp = 10
-num_nodes = 6
+n_exp = 50
+num_nodes = 5
 node_labels = [f"X{i + 1}" for i in range(num_nodes)]
 noise_scale = 1.
 score_type = BGeScore
 mcmc_iter = 100000
-degree = 1  # erdos-renyi sparsity - equivalent to 0.75
+degree = 3  # erdos-renyi sparsity - equivalent to 0.75
 num_obsv = 200
 graph_type ="erdos-renyi"
 
