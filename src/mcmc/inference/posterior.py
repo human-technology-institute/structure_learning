@@ -62,7 +62,8 @@ def generate_all_dags_keys( num_nodes : int, get_adj_mat = False ):
 
 
 
-def generate_all_dags( data : pd.DataFrame, my_score : Score, isScoreLogSpace = True, gen_augmented_priors = True):
+def generate_all_dags( data : pd.DataFrame, my_score : Score, isScoreLogSpace = True, gen_augmented_priors = True,
+                       return_normalized=True):
 
     num_nodes = data.shape[1]
     node_labels = list(data.columns)
@@ -112,7 +113,10 @@ def generate_all_dags( data : pd.DataFrame, my_score : Score, isScoreLogSpace = 
 
     print(f"Total {num_nodes} node DAGs generated = {len(base_dag_dict.keys())}")
 
-    return base_dag_dict_norm
+    if return_normalized:
+        return base_dag_dict_norm
+    else:
+        return base_dag_dict
 
 
 def normalise_scores( base_dag_dict : dict, gen_augmented_priors = True ):
