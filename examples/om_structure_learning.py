@@ -1,4 +1,5 @@
 # Imports
+import argparse
 import os
 import datetime
 import numpy as np
@@ -18,29 +19,39 @@ from mcmc.inference.posterior import *
 import time
 import csv
 
+import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('TkAgg')
+
 from tqdm.notebook import trange
 
 
-def KL_MCMC(MCMC_dict, true_dist, n):
+def KL_MCMC(MCMC_dict, true_dist, n, logscore=False):
     """
     MCMC_dict: Dictionary with the visited graph and counts
     true_dist: the true distribution
     n: number of iterates
+    logscore: If true dist is log(P)
     """
 
     KL = 0
     for k, mcmc_count in MCMC_dict.items():
+        true_log_p = true_dist[k]
+        if not logscore:
+            # if true_dist is in log space
+            true_log_p = np.log(true_log_p)
         p_approx = mcmc_count / n
-        KL += p_approx * np.log(p_approx / true_dist[k])
+        KL += p_approx * (np.log(p_approx) - true_log_p)
     return KL
 
 
 # %%
-def KL_OM(unique_graphs, unique_scores, true_dist):
+def KL_OM(unique_graphs, unique_scores, true_dist, logscore=False):
     """
     unique_graphs: A list with the visited graph
     unique_scores: A list with scores of visited graph
     true_dist: the true distribution
+    logscore: T if true dist is given as log(p)
     """
 
     KL = 0
@@ -48,19 +59,27 @@ def KL_OM(unique_graphs, unique_scores, true_dist):
     # Prevents overflow during exponentiation by substracting
     max_score = max(unique_scores)
 
-    p_approx_vec = np.asarray(unique_scores) - max_score
-    p_approx_vec = np.exp(p_approx_vec)
-    p_approx_vec /= np.sum(p_approx_vec)
+    log_raw_p_approx_vec = np.asarray(unique_scores)
+    log_p_approx_vec = log_raw_p_approx_vec - max_score
+    p_approx_vec = np.exp(log_p_approx_vec)
+    norm_factor = np.sum(p_approx_vec)
+    log_p_approx_vec -= np.log(norm_factor)
 
-    for k, p_approx in zip(unique_graphs, p_approx_vec):
-        KL += p_approx * np.log(p_approx / true_dist[k])
+    for k, log_p_approx in zip(unique_graphs, log_p_approx_vec):
+        true_log_p = true_dist[k]
+        if not logscore:
+            # if true_dist is in log space
+            true_log_p = np.log(true_log_p)
+
+        KL += np.exp(log_p_approx) * (log_p_approx - true_log_p)
 
     return KL
 
 
 # %%
 
-def KL_comparison_OM_MCMC(mcmc_results, ground_truth_distribution):
+def KL_comparison_OM_MCMC(mcmc_results, ground_truth_distribution, logscore=False):
+    # log score if groundtruth is log(p)
     graph_mcmc_count = {}
     unique_graph_id = []  # needed to handle overflow/underflow in computing normalization factor
     unique_accepted_graph_id = []  # accepted only
@@ -102,13 +121,33 @@ def KL_comparison_OM_MCMC(mcmc_results, ground_truth_distribution):
             unique_accepted_graph_id.append(graph_id)
             unique_accepted_scores.append(score)
 
-        KL_OM_t.append(KL_OM(unique_graph_id, unique_scores, ground_truth_distribution))
-        KL_OM_accepted_only_t.append(KL_OM(unique_accepted_graph_id, unique_accepted_scores, ground_truth_distribution))
-        KL_MCMC_t.append(KL_MCMC(graph_mcmc_count, ground_truth_distribution, i + 1))
+        KL_OM_t.append(KL_OM(unique_graph_id, unique_scores, ground_truth_distribution, logscore=logscore))
+        KL_OM_accepted_only_t.append(
+            KL_OM(unique_accepted_graph_id, unique_accepted_scores, ground_truth_distribution, logscore=logscore))
+        KL_MCMC_t.append(KL_MCMC(graph_mcmc_count, ground_truth_distribution, i + 1, logscore=logscore))
 
         # print(f"{len(unique_accepted_graph_id)} - {len(unique_accepted_graph_id)}")
 
     return KL_MCMC_t, KL_OM_t, KL_OM_accepted_only_t
+
+parser = argparse.ArgumentParser(
+                    prog='om_structure_learning',
+                    description='Structure learing - AISTATs runner',
+                    epilog='blablbabla')
+
+parser.add_argument('--degree', dest='degree',
+                    type=int,
+                    default=2,
+                    help='degree')
+parser.add_argument('--graph_type', dest='graph_type',
+                    type=str,
+                    default="erdos-renyi",
+                    help='erdos-renyi or barabasi-albert')
+args = parser.parse_args()
+
+degree = args.degree  # erdos-renyi sparsity - equivalent to 0.75
+graph_type = args.graph_type
+assert graph_type in ("erdos-renyi", "barabasi-albert")
 
 
 n_exp = 50
@@ -116,10 +155,9 @@ num_nodes = 5
 node_labels = [f"X{i + 1}" for i in range(num_nodes)]
 noise_scale = 1.
 score_type = BGeScore
-mcmc_iter = 100000
-degree = 3  # erdos-renyi sparsity - equivalent to 0.75
+mcmc_iter = 1000
 num_obsv = 200
-graph_type ="erdos-renyi"
+
 
 DIRPATH = os.path.abspath("")
 MAINRESPATH = os.path.join(DIRPATH, 'om_results')
@@ -132,7 +170,7 @@ os.makedirs(RESPATH, exist_ok=True)
 metadata_dict = {"Num_experiments": n_exp,
                  "num_nodes": num_nodes,
                  "noise_scale": noise_scale,
-                 "score_type": type(score_type).__name__,
+                 "score_type": score_type.__name__,
                  "MCMC_start_point": 'random',
                  "mcmc_iter": mcmc_iter,
                  "graph_type": graph_type,
@@ -157,9 +195,9 @@ for exp_i in t:
     time.sleep(0.01)
     print(f"{exp_i}: Generate true DAG")
 
-    sdj = SyntheticDataset(num_nodes=num_nodes, num_obs=num_obsv, node_labels=node_labels, degree=degree, noise_scale=noise_scale, graph_type=graph_type)
-    metadata_dict["w_range"] =  sdj.w_range
-
+    sdj = SyntheticDataset(num_nodes=num_nodes, num_obs=num_obsv, node_labels=node_labels, degree=degree,
+                           noise_scale=noise_scale, graph_type=graph_type)
+    metadata_dict["w_range"] = sdj.w_range
 
     true_dag = sdj.adj_mat.values
     print(true_dag)
@@ -175,7 +213,6 @@ for exp_i in t:
     time.sleep(0.01)
     print(f"{exp_i}: Generate data")
 
-
     data = sdj.data
     # save data to file
     np.savetxt(os.path.join(RESPATH, f"data_{exp_i}.csv"), data, delimiter=',')
@@ -185,8 +222,16 @@ for exp_i in t:
     t.refresh()
     time.sleep(0.01)
     print(f"{exp_i}: Generate ground truth")
-    all_dags = generate_all_dags(data, score_type, gen_augmented_priors=False)
-    true_distr = compute_true_distribution(all_dags, with_aug_prior=False)
+    all_dags_dict = generate_all_dags(data, score_type, gen_augmented_priors=False, return_normalized=False)
+    # Getting raw score and normalizing here
+    max_log_score = max([all_dags_dict[key]["log_score"] for key in all_dags_dict.keys()])
+    total_score = 0.
+    for key in all_dags_dict.keys():
+        all_dags_dict[key]["log_score_scaled"] = all_dags_dict[key]["log_score"] - max_log_score
+        all_dags_dict[key]["score"] = np.exp(all_dags_dict[key]["log_score_scaled"])
+        total_score = total_score + all_dags_dict[key]["score"]
+    log_norm = np.log(total_score)
+    log_true_distr = {key:(all_dags_dict[key]["log_score_scaled"] - log_norm) for key in all_dags_dict.keys()}
 
     # MCMC
     t.set_description("%i: MCMC" % exp_i)
@@ -194,8 +239,9 @@ for exp_i in t:
     time.sleep(0.5)
     print(f"{exp_i}: MCMC")
     if metadata_dict['MCMC_start_point'] == 'random':
-        #static function does not change sdg
-        sdj_random_g = SyntheticDataset(num_nodes=num_nodes, num_obs=num_obsv, node_labels=node_labels, degree=degree, noise_scale=noise_scale, graph_type=graph_type)
+        # static function does not change sdg
+        sdj_random_g = SyntheticDataset(num_nodes=num_nodes, num_obs=num_obsv, node_labels=node_labels, degree=degree,
+                                        noise_scale=noise_scale, graph_type=graph_type)
         initial_graph = sdj_random_g.adj_mat.values
     else:
         raise ValueError
@@ -210,7 +256,7 @@ for exp_i in t:
     t.set_description("%i: KL comparison" % exp_i)
     t.refresh()
     time.sleep(0.01)
-    KL_MCMC_res, KL_OM_res, KL_OM_accepted_res = KL_comparison_OM_MCMC(mcmc_res, true_distr)
+    KL_MCMC_res, KL_OM_res, KL_OM_accepted_res = KL_comparison_OM_MCMC(mcmc_res, log_true_distr, logscore=True)
 
     MCMC_results_dict.update({f"KL_MCMC_{exp_i}": KL_MCMC_res})
     OM_results_dict.update({f"KL_OM_{exp_i}": KL_OM_res})
@@ -224,11 +270,11 @@ for exp_i in t:
     df.to_csv(os.path.join(RESPATH, 'OM_KL_accepted_only_results.csv'), index=True)
 
     # For debugging purposes
-    graph_list = mcmc_obj.get_mcmc_res_graphs( mcmc_res )
-    score_list = mcmc_obj.get_mcmc_res_scores( mcmc_res )
+    graph_list = mcmc_obj.get_mcmc_res_graphs(mcmc_res)
+    score_list = mcmc_obj.get_mcmc_res_scores(mcmc_res)
 
     with open(os.path.join(RESPATH, f'true_distribution_results_{exp_i}.pkl'), 'wb') as f:
-        pickle.dump(true_distr, f)
+        pickle.dump(log_true_distr, f)
 
     with open(os.path.join(RESPATH, f'MCMC_results_{exp_i}.pkl'), 'wb') as f:
         pickle.dump(graph_list, f)
@@ -236,8 +282,7 @@ for exp_i in t:
     with open(os.path.join(RESPATH, f'score_results_{exp_i}.pkl'), 'wb') as f:
         pickle.dump(score_list, f)
 
-
-#Plotting
+# Plotting
 df_MCMC = pd.read_csv(os.path.join(RESPATH, 'MCMC_KL_results.csv'), index_col=0)
 df_OM = pd.read_csv(os.path.join(RESPATH, 'OM_KL_results.csv'), index_col=0)
 quantiles = [0.05, 0.95]
@@ -250,8 +295,6 @@ MCMC_quantiles = df_MCMC.apply(lambda row: row.quantile(quantiles), axis=1)
 OM_mean = df_OM.mean(axis=1)
 OM_std = df_OM.std(axis=1)
 OM_quantiles = df_OM.apply(lambda row: row.quantile(quantiles), axis=1)
-
-OM_quantiles
 
 plt.plot(MCMC_mean)
 plt.plot(MCMC_mean, color='blue', label='MCMC')
