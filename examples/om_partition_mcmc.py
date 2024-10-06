@@ -176,7 +176,9 @@ metadata_dict = {"Num_experiments": n_exp,
                  "MCMC_start_point": 'random',
                  "mcmc_iter": mcmc_iter,
                  "graph_type": graph_type,
-                 "dag_sparse_degree": degree
+                 "dag_sparse_degree": degree,
+                 "MCMC_type": "partition"
+
                  }
 
 MCMC_results_dict = {}

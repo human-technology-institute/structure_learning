@@ -155,7 +155,7 @@ num_nodes = 5
 node_labels = [f"X{i + 1}" for i in range(num_nodes)]
 noise_scale = 1.
 score_type = BGeScore
-mcmc_iter = 1000
+mcmc_iter = 100000
 num_obsv = 200
 
 
@@ -174,7 +174,8 @@ metadata_dict = {"Num_experiments": n_exp,
                  "MCMC_start_point": 'random',
                  "mcmc_iter": mcmc_iter,
                  "graph_type": graph_type,
-                 "dag_sparse_degree": degree
+                 "dag_sparse_degree": degree,
+                 "MCMC_type": "Structure"
                  }
 
 MCMC_results_dict = {}
