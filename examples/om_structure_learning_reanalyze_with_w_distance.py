@@ -218,7 +218,7 @@ for folder in smcmc_folders:
     OM_JS_results_dict = {}
     OM_JS_accepted_results_dict = {}
 
-    for exp_i in range(2):
+    for exp_i in range(n_exp):
         print(f"Experiment: {exp_i}")
 
         # Load dag from Structure MCMC experiment
