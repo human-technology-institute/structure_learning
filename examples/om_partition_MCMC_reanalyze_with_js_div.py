@@ -5,10 +5,9 @@ import datetime
 import numpy as np
 
 from mcmc.scores.bge import BGeScore
-from mcmc.proposals.graph.graph_proposal import GraphProposal
 from mcmc.data.synthetic import SyntheticDataset
 
-from mcmc.mcmc.structure_mcmc import StructureMCMC
+from mcmc.mcmc.partition_mcmc import PartitionMCMC
 
 import pickle
 
@@ -183,7 +182,7 @@ metadata_dict = {"Num_experiments": n_exp,
                  "MCMC_type": "Structure"
                  }
 
-smcmc_Res_folder = r"C:\Users\161342\code\structure_learning\examples\om_results\structure_MCMC"
+smcmc_Res_folder = r"D:\Gilad\SUSAN - AISTATS 2025\structure_learning _results\UTS Laptop\KL\structure_MCMC"
 smcmc_folders = ["2024-09-24_00-10-31", "2024-09-24_23-51-35", "2024-09-25_23-34-13"]
 
 for folder in smcmc_folders:
@@ -237,23 +236,7 @@ for folder in smcmc_folders:
 
         # MCMC
         print(f"{exp_i}: MCMC")
-        if metadata_dict['MCMC_start_point'] == 'random':
-            # static function does not change sdg
-            sdj_random_g = SyntheticDataset(num_nodes=metadata_dict['num_nodes'], num_obs=len(data),
-                                            node_labels=node_labels,
-                                            degree=metadata_dict['dag_sparse_degree'],
-                                            noise_scale=metadata_dict['noise_scale'],
-                                            graph_type=metadata_dict['graph_type'])
-            initial_graph = sdj_random_g.adj_mat.values
-        else:
-            raise ValueError
-
-        np.savetxt(os.path.join(RESPATH, f"MCMC_initial_graph_{exp_i}.csv"), initial_graph, delimiter=',', fmt='%d')
-        proposal_object = GraphProposal(initial_graph, whitelist=None, blacklist=None)
-        score_object = score_type(data=data, incidence=initial_graph)
-
-        #
-        mcmc_obj = StructureMCMC(initial_graph, metadata_dict['mcmc_iter'], proposal_object, score_object)
+        mcmc_obj = PartitionMCMC(max_iter=mcmc_iter, data=data, score_object='bge')
         mcmc_res, accept_rate = mcmc_obj.run()
 
         sample_num, JS_MCMC_res, JS_OM_res, JS_OM_accepted_res = JS_comparison_OM_MCMC(mcmc_res, log_true_distr, logscore=True)
