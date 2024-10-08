@@ -21,24 +21,26 @@ import csv
 
 import matplotlib.pyplot as plt
 import matplotlib
+
 matplotlib.use('TkAgg')
 
 from tqdm.notebook import trange
 from scipy.stats import wasserstein_distance
 from scipy.spatial.distance import jensenshannon
 
-def JS_MCMC(MCMC_dict, true_dist, n, logscore=False):
+
+def JS_MCMC(MCMC_dict, true_dist_weights, n):
     """
     MCMC_dict: Dictionary with the visited graph and counts
-    true_dist: the true distribution
+    true_dist: the wights of the true distribution
     n: number of iterates
-    logscore: If true dist is log(P)
     """
 
-    true_dist_p = [np.exp(v) if logscore else v for v in true_dist.values()]
-    mcmc_dist_p = [v/n for v in MCMC_dict.values()]
+    mcmc_dist_p = [v / n for v in MCMC_dict.values()]
 
-    return jensenshannon(mcmc_dist_p, true_dist_p)
+    return jensenshannon(mcmc_dist_p, true_dist_weights)
+
+
 def W_MCMC(MCMC_dict, true_dist, n, logscore=False):
     """
     MCMC_dict: Dictionary with the visited graph and counts
@@ -50,11 +52,11 @@ def W_MCMC(MCMC_dict, true_dist, n, logscore=False):
     true_dist_support = [k for k in true_dist.keys()]
     mcmc_dist_support = [k for k in MCMC_dict.keys()]
     true_dist_weights = [np.exp(v) if logscore else v for v in true_dist.values()]
-    mcmc_dist_weights = [v/n for v in MCMC_dict.values()]
+    mcmc_dist_weights = [v / n for v in MCMC_dict.values()]
 
     W = float(wasserstein_distance(true_dist_support, mcmc_dist_support,
-                             u_weights=true_dist_weights,
-                             v_weights=mcmc_dist_weights))
+                                   u_weights=true_dist_weights,
+                                   v_weights=mcmc_dist_weights))
     return W
 
 
@@ -78,7 +80,6 @@ def W_OM(unique_graphs, unique_scores, true_dist, logscore=False):
     norm_factor = np.sum(p_approx_vec)
     log_p_approx_vec -= np.log(norm_factor)
 
-
     true_dist_support = [k for k in true_dist.keys()]
     true_dist_weights = [np.exp(v) if logscore else v for v in true_dist.values()]
 
@@ -88,44 +89,35 @@ def W_OM(unique_graphs, unique_scores, true_dist, logscore=False):
     return W
 
 
-
-def JS_OM(unique_graphs, unique_scores, true_dist, logscore=False):
+def JS_OM(om_dict, true_dist_weights):
     """
 
     """
 
     # Prevents overflow during exponentiation by substracting
-    max_score = max(unique_scores)
+    log_raw_p_approx_vec = np.asarray([float(v) for v in om_dict.values()])
+    max_score = np.max(log_raw_p_approx_vec)
 
-    log_raw_p_approx_vec = np.asarray(unique_scores)
     log_p_approx_vec = log_raw_p_approx_vec - max_score
     p_approx_vec = np.exp(log_p_approx_vec)
     norm_factor = np.sum(p_approx_vec)
-    log_p_approx_vec -= np.log(norm_factor)
+    p_approx_vec /= norm_factor
 
-    true_dist_weights = [np.exp(v) if logscore else v for v in true_dist.values()]
+    # true_dist_weights = [np.exp(v) if logscore else v for v in true_dist.values()]
+    return jensenshannon(p_approx_vec, true_dist_weights)
 
-    p_full_support = []
-    for k in true_dist.keys():
-        if k in unique_graphs:
-            idx = unique_graphs.index(k)
-            p_full_support.append(np.exp(log_p_approx_vec[idx]))
-        else:
-            p_full_support.append(0.) # making it explicit
-
-
-    return jensenshannon(p_full_support, true_dist_weights)
 
 # %%
 
-def JS_comparison_OM_MCMC(mcmc_results, ground_truth_distribution, logscore=False):
+def JS_comparison_OM_MCMC(mcmc_results, ground_truth_distribution, JS_step=50, logscore=False):
     # log score if groundtruth is log(p)
-    graph_mcmc_count = {k: 0 for k in ground_truth_distribution.keys()}
-    unique_graph_id = []  # needed to handle overflow/underflow in computing normalization factor
-    unique_accepted_graph_id = []  # accepted only
-    unique_scores = []  # needed to handle overflows
-    unique_accepted_scores = []  # needed to handle overflows
+    true_dist_weights = [np.exp(v) if logscore else v for v in ground_truth_distribution.values()]
 
+    graph_mcmc_count = {k: 0 for k in ground_truth_distribution.keys()}
+    graph_om_score = {k: -np.inf for k in ground_truth_distribution.keys()}
+    graph_om_accepted_score = {k: -np.inf for k in ground_truth_distribution.keys()}
+
+    sample_num = []
     JS_MCMC_t = []
     JS_OM_t = []
     JS_OM_accepted_only_t = []
@@ -145,45 +137,39 @@ def JS_comparison_OM_MCMC(mcmc_results, ground_truth_distribution, logscore=Fals
 
         graph_mcmc_count[graph_id] += 1
 
+        graph_om_score[graph_id] = score
         # OM update
-        if not (graph_id in unique_graph_id):
-            # When a proposal is accepted and was never added before
-            unique_graph_id.append(graph_id)
-            unique_scores.append(score)
-        elif graph_prop is not None and not (graph_prop in unique_graph_id):
+        if graph_prop is not None:
             # Looking at proposal
-            unique_graph_id.append(graph_prop)
-            unique_scores.append(score_prop)
+            graph_om_score[graph_prop] = score_prop
 
         # OM update - accepted graphs
-        if not (graph_id in unique_accepted_graph_id):
-            # When a proposal is accepted and was never added before
-            unique_accepted_graph_id.append(graph_id)
-            unique_accepted_scores.append(score)
+        graph_om_accepted_score[graph_id] = score
 
-        JS_OM_t.append(JS_OM(unique_graph_id, unique_scores, ground_truth_distribution, logscore=logscore))
-        JS_OM_accepted_only_t.append(
-            JS_OM(unique_accepted_graph_id, unique_accepted_scores, ground_truth_distribution, logscore=logscore))
-        JS_MCMC_t.append(JS_MCMC(graph_mcmc_count, ground_truth_distribution, i + 1, logscore=logscore))
+        if i % JS_step == 0 or i == max_mcmc_iter:
+            sample_num.append(i)
+            JS_OM_t.append(JS_OM(graph_om_score, true_dist_weights))
+            JS_OM_accepted_only_t.append(
+                JS_OM(graph_om_accepted_score, true_dist_weights))
+            JS_MCMC_t.append(JS_MCMC(graph_mcmc_count, true_dist_weights, i + 1))
 
         # print(f"{len(unique_accepted_graph_id)} - {len(unique_accepted_graph_id)}")
 
-    return JS_MCMC_t, JS_OM_t, JS_OM_accepted_only_t
+    return sample_num, JS_MCMC_t, JS_OM_t, JS_OM_accepted_only_t
+
 
 n_exp = 50
 num_nodes = 5
 node_labels = [f"X{i + 1}" for i in range(num_nodes)]
 noise_scale = 1.
 score_type = BGeScore
-mcmc_iter = 100000
+mcmc_iter = 1000
 num_obsv = 200
 graph_type = "Structure MCMC"
-
 
 DIRPATH = os.path.abspath("")
 MAINRESPATH = os.path.join(DIRPATH, 'om_results')
 os.makedirs(MAINRESPATH, exist_ok=True)
-
 
 # Save metadata
 metadata_dict = {"Num_experiments": n_exp,
@@ -252,9 +238,11 @@ for folder in smcmc_folders:
         print(f"{exp_i}: MCMC")
         if metadata_dict['MCMC_start_point'] == 'random':
             # static function does not change sdg
-            sdj_random_g = SyntheticDataset(num_nodes=metadata_dict['num_nodes'], num_obs=len(data), node_labels=node_labels,
+            sdj_random_g = SyntheticDataset(num_nodes=metadata_dict['num_nodes'], num_obs=len(data),
+                                            node_labels=node_labels,
                                             degree=metadata_dict['dag_sparse_degree'],
-                                            noise_scale=metadata_dict['noise_scale'], graph_type=metadata_dict['graph_type'])
+                                            noise_scale=metadata_dict['noise_scale'],
+                                            graph_type=metadata_dict['graph_type'])
             initial_graph = sdj_random_g.adj_mat.values
         else:
             raise ValueError
@@ -263,10 +251,15 @@ for folder in smcmc_folders:
         proposal_object = GraphProposal(initial_graph, whitelist=None, blacklist=None)
         score_object = score_type(data=data, incidence=initial_graph)
 
-        mcmc_obj = StructureMCMC(initial_graph, metadata_dict['mcmc_iter'], proposal_object, score_object)
+        #metadata_dict['mcmc_iter']
+        mcmc_obj = StructureMCMC(initial_graph, 1000, proposal_object, score_object)
         mcmc_res, accept_rate = mcmc_obj.run()
 
-        JS_MCMC_res, JS_OM_res, JS_OM_accepted_res = JS_comparison_OM_MCMC(mcmc_res, log_true_distr, logscore=True)
+        sample_num, JS_MCMC_res, JS_OM_res, JS_OM_accepted_res = JS_comparison_OM_MCMC(mcmc_res, log_true_distr, logscore=True)
+        if len(MCMC_JS_results_dict)==0:
+            MCMC_JS_results_dict.update({f"sample_num": sample_num})
+            OM_JS_results_dict.update({f"sample_num": sample_num})
+            OM_JS_accepted_results_dict.update({f"sample_num": sample_num})
 
         MCMC_JS_results_dict.update({f"W_MCMC_{exp_i}": JS_MCMC_res})
         OM_JS_results_dict.update({f"W_OM_{exp_i}": JS_OM_res})
@@ -308,7 +301,8 @@ for folder in smcmc_folders:
 
     plt.plot(MCMC_mean)
     plt.plot(MCMC_mean, color='blue', label='MCMC')
-    plt.fill_between(MCMC_mean.index, MCMC_quantiles[quantiles[0]], MCMC_quantiles[quantiles[1]], color='blue', alpha=0.2)
+    plt.fill_between(MCMC_mean.index, MCMC_quantiles[quantiles[0]], MCMC_quantiles[quantiles[1]], color='blue',
+                     alpha=0.2)
     plt.plot(OM_mean, color='red', label='OM')
     plt.fill_between(OM_mean.index, OM_quantiles[quantiles[0]], OM_quantiles[quantiles[1]], color='red', alpha=0.2)
 
