@@ -111,7 +111,9 @@ def JS_OM(om_dict, true_dist_weights):
 
 def JS_comparison_OM_MCMC(mcmc_results, ground_truth_distribution, JS_step=50, logscore=False):
     # log score if groundtruth is log(p)
-    true_dist_weights = [np.exp(v) if logscore else v for v in ground_truth_distribution.values()]
+    rounding = 1e-15
+    true_dist_weights = [np.exp(v) + rounding if logscore else v + rounding for v in ground_truth_distribution.values()]
+    assert ((np.sum(true_dist_weights) - 1) < 0.0001)
 
     graph_mcmc_count = {k: 0 for k in ground_truth_distribution.keys()}
     graph_om_score = {k: -np.inf for k in ground_truth_distribution.keys()}
@@ -183,8 +185,8 @@ metadata_dict = {"Num_experiments": n_exp,
                  "MCMC_type": "Structure"
                  }
 
-smcmc_Res_folder = r"C:\Users\161342\code\structure_learning\examples\om_results\structure_MCMC"
-smcmc_folders = ["2024-09-24_00-10-31", "2024-09-24_23-51-35", "2024-09-25_23-34-13"]
+smcmc_Res_folder = r"F:\Gilad\SUSAN - AISTATS 2025\structure_learning _results\UTS Laptop\JS\structure"
+smcmc_folders = ["2024-10-08_18-09-58_ER1", "2024-10-08_19-00-32_ER2", "2024-10-08_19-53-26_ER3"]
 
 for folder in smcmc_folders:
     directory = os.path.join(smcmc_Res_folder, folder)
@@ -196,6 +198,7 @@ for folder in smcmc_folders:
     for col in metadata_df.columns:
         metadata_dict[col] = metadata_df.loc[0, col]
 
+    metadata_dict['original_folder'] = folder
     with open(os.path.join(RESPATH, 'metadata.csv'), 'w', newline="") as csvfile:
         w = csv.DictWriter(csvfile, metadata_dict.keys())
         w.writeheader()
@@ -232,31 +235,55 @@ for folder in smcmc_folders:
         with open(os.path.join(directory, f'true_distribution_results_{exp_i}.pkl'), 'rb') as file:
             log_true_distr = pickle.load(file)
 
+        logscore = True
+        if np.abs(np.sum([v for v in log_true_distr.values()])-1) < 0.001:
+            logscore = False
+
+
         with open(os.path.join(RESPATH, f'true_distribution_results_{exp_i}.pkl'), 'wb') as f:
             pickle.dump(log_true_distr, f)
 
         # MCMC
         print(f"{exp_i}: MCMC")
-        if metadata_dict['MCMC_start_point'] == 'random':
-            # static function does not change sdg
-            sdj_random_g = SyntheticDataset(num_nodes=metadata_dict['num_nodes'], num_obs=len(data),
-                                            node_labels=node_labels,
-                                            degree=metadata_dict['dag_sparse_degree'],
-                                            noise_scale=metadata_dict['noise_scale'],
-                                            graph_type=metadata_dict['graph_type'])
-            initial_graph = sdj_random_g.adj_mat.values
-        else:
-            raise ValueError
-
-        np.savetxt(os.path.join(RESPATH, f"MCMC_initial_graph_{exp_i}.csv"), initial_graph, delimiter=',', fmt='%d')
-        proposal_object = GraphProposal(initial_graph, whitelist=None, blacklist=None)
-        score_object = score_type(data=data, incidence=initial_graph)
 
         #
-        mcmc_obj = StructureMCMC(initial_graph, metadata_dict['mcmc_iter'], proposal_object, score_object)
-        mcmc_res, accept_rate = mcmc_obj.run()
+        mcmc_res_path = os.path.join(directory, f'MCMC_results_{exp_i}.pkl')
 
-        sample_num, JS_MCMC_res, JS_OM_res, JS_OM_accepted_res = JS_comparison_OM_MCMC(mcmc_res, log_true_distr, logscore=True)
+        if os.path.exists(mcmc_res_path):
+            with open(os.path.join(directory, f'MCMC_results_{exp_i}.pkl'), 'rb') as file:
+                mcmc_res = pickle.load(file)
+
+
+        else:
+            if metadata_dict['MCMC_start_point'] == 'random':
+                # static function does not change sdg
+                sdj_random_g = SyntheticDataset(num_nodes=metadata_dict['num_nodes'], num_obs=len(data),
+                                                node_labels=node_labels,
+                                                degree=metadata_dict['dag_sparse_degree'],
+                                                noise_scale=metadata_dict['noise_scale'],
+                                                graph_type=metadata_dict['graph_type'])
+                initial_graph = sdj_random_g.adj_mat.values
+            else:
+                raise ValueError
+
+            np.savetxt(os.path.join(RESPATH, f"MCMC_initial_graph_{exp_i}.csv"), initial_graph, delimiter=',', fmt='%d')
+            proposal_object = GraphProposal(initial_graph, whitelist=None, blacklist=None)
+            score_object = score_type(data=data, incidence=initial_graph)
+
+            mcmc_obj = StructureMCMC(initial_graph, metadata_dict['mcmc_iter'], proposal_object, score_object)
+            mcmc_res, accept_rate = mcmc_obj.run()
+
+            # For debugging purposes
+            graph_list = mcmc_obj.get_mcmc_res_graphs(mcmc_res)
+            score_list = mcmc_obj.get_mcmc_res_scores(mcmc_res)
+
+            with open(os.path.join(RESPATH, f'MCMC_results_{exp_i}.pkl'), 'wb') as f:
+                pickle.dump(graph_list, f)
+
+            with open(os.path.join(RESPATH, f'score_results_{exp_i}.pkl'), 'wb') as f:
+                pickle.dump(score_list, f)
+
+        sample_num, JS_MCMC_res, JS_OM_res, JS_OM_accepted_res = JS_comparison_OM_MCMC(mcmc_res, log_true_distr, logscore=logscore)
         if len(MCMC_JS_results_dict)==0:
             MCMC_JS_results_dict.update({f"sample_num": sample_num})
             OM_JS_results_dict.update({f"sample_num": sample_num})
@@ -272,16 +299,6 @@ for folder in smcmc_folders:
         df.to_csv(os.path.join(RESPATH, 'OM_JS_results.csv'), index=True)
         df = pd.DataFrame(OM_JS_accepted_results_dict)
         df.to_csv(os.path.join(RESPATH, 'OM_JS_accepted_only_results.csv'), index=True)
-
-        # For debugging purposes
-        graph_list = mcmc_obj.get_mcmc_res_graphs(mcmc_res)
-        score_list = mcmc_obj.get_mcmc_res_scores(mcmc_res)
-
-        with open(os.path.join(RESPATH, f'MCMC_results_{exp_i}.pkl'), 'wb') as f:
-            pickle.dump(graph_list, f)
-
-        with open(os.path.join(RESPATH, f'score_results_{exp_i}.pkl'), 'wb') as f:
-            pickle.dump(score_list, f)
 
         with open(os.path.join(RESPATH, f'mcmc_results_{exp_i}.pkl'), 'wb') as f:
             pickle.dump(mcmc_res, f)

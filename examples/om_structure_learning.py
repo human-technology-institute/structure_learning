@@ -80,6 +80,10 @@ def KL_OM(unique_graphs, unique_scores, true_dist, logscore=False):
 
 def KL_comparison_OM_MCMC(mcmc_results, ground_truth_distribution, logscore=False):
     # log score if groundtruth is log(p)
+    rounding = 1e-15
+    true_dist_weights = [np.exp(v) + rounding if logscore else v + rounding for v in ground_truth_distribution.values()]
+    assert ((np.sum(true_dist_weights) - 1) < 0.0001)
+
     graph_mcmc_count = {}
     unique_graph_id = []  # needed to handle overflow/underflow in computing normalization factor
     unique_accepted_graph_id = []  # accepted only
