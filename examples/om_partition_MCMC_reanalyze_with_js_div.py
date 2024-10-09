@@ -124,15 +124,15 @@ def JS_comparison_OM_MCMC(mcmc_results, ground_truth_distribution, JS_step=50, l
     max_mcmc_iter = len(mcmc_results)
     for i in range(max_mcmc_iter):
         res = mcmc_results[i]
-        if "Gprop" in res.keys():
-            graph_prop = generate_key_from_adj_matrix(res['Gprop'])
-            score_prop = res['score_Gprop']
+        if "G_prop" in res.keys() and res['G_prop'] is not None:
+            graph_prop = generate_key_from_adj_matrix(res['G_prop'])
+            score_prop = res['G_score_prop']['score']
         else:
             graph_prop = None
 
         graph_id = generate_key_from_adj_matrix(res['graph'])  # Accepted graph/state
-        score = res['score']  # Accepted score
-        # Score is log of the true score
+        score = res['G_score_curr']['score']  # Accepted score
+
 
         graph_mcmc_count[graph_id] += 1
 
@@ -179,7 +179,7 @@ metadata_dict = {"Num_experiments": n_exp,
                  "MCMC_start_point": 'random',
                  "mcmc_iter": mcmc_iter,
                  "graph_type": graph_type,
-                 "MCMC_type": "Structure"
+                 "MCMC_type": "Partition"
                  }
 
 smcmc_Res_folder = r"D:\Gilad\SUSAN - AISTATS 2025\structure_learning _results\UTS Laptop\KL\structure_MCMC"
@@ -236,7 +236,7 @@ for folder in smcmc_folders:
 
         # MCMC
         print(f"{exp_i}: MCMC")
-        mcmc_obj = PartitionMCMC(max_iter=mcmc_iter, data=data, score_object='bge')
+        mcmc_obj = PartitionMCMC(max_iter=metadata_dict['mcmc_iter'], data=data, score_object='bge')
         mcmc_res, accept_rate = mcmc_obj.run()
 
         sample_num, JS_MCMC_res, JS_OM_res, JS_OM_accepted_res = JS_comparison_OM_MCMC(mcmc_res, log_true_distr, logscore=True)
@@ -258,13 +258,9 @@ for folder in smcmc_folders:
 
         # For debugging purposes
         graph_list = mcmc_obj.get_mcmc_res_graphs(mcmc_res)
-        score_list = mcmc_obj.get_mcmc_res_scores(mcmc_res)
 
         with open(os.path.join(RESPATH, f'MCMC_results_{exp_i}.pkl'), 'wb') as f:
             pickle.dump(graph_list, f)
-
-        with open(os.path.join(RESPATH, f'score_results_{exp_i}.pkl'), 'wb') as f:
-            pickle.dump(score_list, f)
 
         with open(os.path.join(RESPATH, f'mcmc_results_{exp_i}.pkl'), 'wb') as f:
             pickle.dump(mcmc_res, f)
