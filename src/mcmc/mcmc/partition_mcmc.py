@@ -20,29 +20,32 @@ class PartitionMCMC(MCMC):
     """
     Implementation of Partition MCMC.
     """
-    def __init__(self, data : pd.DataFrame = None, initial_partition : OrderedPartition = None, max_iter : int = 30000,
+    def __init__(self, data : pd.DataFrame = None, initial_state : Union[OrderedPartition, np.ndarray] = None, max_iter : int = 30000,
                  proposal_object : StructureLearningProposal = None, score_object : Union[str, Score] = None,
                  pc_init: bool = True, blacklist = None, whitelist = None, plus1: bool = False):
         """
         Initilialise Partition MCMC instance.
 
         Parameters:
-            data (pd.DataFrame):                            Dataset. Optional if score_object is given.
-            initial_graph (numpy.ndarray | None):           Initial graph for the MCMC simulation.
-                                                            If None, simulation starts with a random graph or a graph
-                                                            constructed from PC algorithm.
-            max_iter (int):                                 The number of MCMC iterations to run. Default: 30000.
-            score_object (Score):                           A score object implementing compute(). If None, BGeScore is used
-                                                            (data must be provided). Default: None.
-            proposal_object (StructureLearningProposal):    A proposal object. If None, a GraphProposal instance is used.
-                                                            Default: None.
-            pc_init (bool):                                 If True and initial_graph is not given, PC algorithm will be used
-                                                            to generate initial graph.
-            blacklist (numpy.ndarray):                      Mask for edges to ignore in the proposal
-            whitelist (numpy.ndarray):                      Mask for edges to include in the proposal
-            plus1 (bool):                                   Use plus1 neighborhood
+            data (pd.DataFrame):                                    Dataset. Optional if score_object is given.
+            initial_state (numpy.ndarray | OrderedPartition):       Initial graph/partition for the MCMC simulation.
+                                                                    If None, simulation starts with a random graph or a graph
+                                                                    constructed from PC algorithm.
+            max_iter (int):                                         The number of MCMC iterations to run. Default: 30000.
+            score_object (Score):                                   A score object implementing compute(). If None, BGeScore is used
+                                                                    (data must be provided). Default: None.
+            proposal_object (StructureLearningProposal):            A proposal object. If None, a GraphProposal instance is used.
+                                                                    Default: None.
+            pc_init (bool):                                         If True and initial_graph is not given, PC algorithm will be used
+                                                                    to generate initial graph.
+            blacklist (numpy.ndarray):                              Mask for edges to ignore in the proposal
+            whitelist (numpy.ndarray):                              Mask for edges to include in the proposal
+            plus1 (bool):                                           Use plus1 neighborhood
         """
-        super().__init__(data=data, initial_state=initial_partition, max_iter=max_iter, proposal_object=proposal_object,
+        if isinstance(initial_state, np.ndarray):
+            initial_state = build_partition(initial_state, list(score_object.data.columns if score_object else data.columns))
+
+        super().__init__(data=data, initial_state=initial_state, max_iter=max_iter, proposal_object=proposal_object,
                          score_object=score_object, pc_init=pc_init, blacklist=blacklist, whitelist=whitelist, plus1=plus1)
         self._to_string = f"Structure_MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
 
