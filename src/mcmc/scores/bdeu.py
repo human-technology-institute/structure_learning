@@ -1,4 +1,5 @@
 from typing import Union
+from functools import cache
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -23,6 +24,7 @@ class BDeuScore(Score):
         if incidence is not None and not isinstance(incidence, np.ndarray):
             self.incidence = nx.from_numpy_array(incidence, create_using=nx.DiGraph)
         self.alpha = 10.0
+        self.states = {node: self.data[node].unique() for node in list(self.data.columns)}
 
     # todo: for larger datasets, this function is very slow.
     def compute(self):
@@ -51,11 +53,11 @@ class BDeuScore(Score):
         Adapted from https://github.com/pgmpy/pgmpy/blob/dev/pgmpy/estimators/StructureScore.py
         """
 
-        var_states = self.data[node].nunique()
+        var_states = len(self.states[node])
         parents = list(parents)
-        state_counts = self.data.groupby([node] + parents).size().unstack(parents).fillna(0) if parents else self.data[node].value_counts().reindex(self.data[node].unique()).to_frame()
+        state_counts = self._state_counts(node, tuple(parents))
 
-        num_parents_states = np.prod([self.data[parent].nunique() for parent in parents])
+        num_parents_states = np.prod([len(self.states[parent]) for parent in parents])
 
         counts = np.asarray(state_counts)
         # counts size is different because reindex=False is dropping columns.
@@ -93,3 +95,8 @@ class BDeuScore(Score):
             'parameters': parameters
         }
         return score
+
+    @cache
+    def _state_counts(self, node: str, parents: tuple):
+        parents = list(parents)
+        return self.data.groupby([node] + parents).size().unstack(parents).fillna(0) if parents else self.data[node].value_counts().reindex(self.states[node]).to_frame()
