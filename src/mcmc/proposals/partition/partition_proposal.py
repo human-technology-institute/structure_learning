@@ -2,8 +2,9 @@ import numpy as np
 import math
 from mcmc.utils.partition_utils import *
 from mcmc.data_structures.partition import *
+from mcmc.proposals import StructureLearningProposal
 
-class PartitionProposal():
+class PartitionProposal(StructureLearningProposal):
 
     SWAP_ADJACENT = "swap_adjacent"
     SWAP_GLOBAL = "swap_global"
@@ -15,57 +16,89 @@ class PartitionProposal():
     MOVE_NODE_TO_NEW_PARTITION = "move_node_to_new_partition"
     STAY_STILL = "stay_still"
 
-    possible_moves = [SWAP_ADJACENT, SWAP_GLOBAL, SPLIT_OR_MERGE, MOVE_NODE_TO_NEW_OR_EXISTING, STAY_STILL]
+    operations = [SWAP_ADJACENT, SWAP_GLOBAL, SPLIT_OR_MERGE, MOVE_NODE_TO_NEW_OR_EXISTING, STAY_STILL]
 
-    def __init__(self, ordered_partition: OrderedPartition, whitelist: np.ndarray = None, blacklist: np.ndarray = None):
+    def __init__(self, initial_state: OrderedPartition, whitelist: np.ndarray = None, blacklist: np.ndarray = None):
 
-        self.update_partition(ordered_partition)
-        self.chosen_move = None
+        self.current_state = initial_state
+        self._update()
+        self.operation = None
         self.to_rescore = set()
-        self.num_moves = len(self.possible_moves)
+        self.num_moves = len(self.operations)
         self.nbh_join_existing = None
         self.nbh_create_new = None
-        self.move_probs = self.calculate_move_probs()
+        self.move_probs = self._calculate_move_probs()
         self.blacklist = blacklist
         self.whitelist = whitelist
 
-    def update_partition(self, new_partition):
-        self.ordered_partition = new_partition
-        self.num_part = len(self.ordered_partition.partitions)
-        self.nbh_size, self.nbh = self.compute_neighborhoods()
-        self.nodes = self.ordered_partition.get_all_nodes()
-        self.num_nodes = len(self.nodes)
+    def propose(self):
+        # reset the nodes to rescore
+        self.to_rescore = set()
+        while True:
+            operation = np.random.choice(self.operations, size=1, p=self.move_probs)[0]
+            if not("swap" in operation and self.current_state.size < 2):
+                break
 
-    def compute_neighborhoods( self ):
+        if operation == self.SWAP_ADJACENT:
+            self._swap_adjacent()
+        elif operation == self.SWAP_GLOBAL:
+            self._swap_global()
+        elif operation == self.SPLIT_OR_MERGE:
+            self._split_or_merge_move()
+        elif operation == self.MOVE_NODE_TO_NEW_OR_EXISTING:
+            self._move_node_to_existing_or_new_partition()
+        else:
+            self.operation = self.STAY_STILL
+            self.proposed_state = self.current_state.copy()
+        return self.proposed_state, self.operation
+
+    def compute_acceptance_ratio(self, current_state_score, proposed_state_score):
+        if self.SWAP_ADJACENT == self.operation or self.SWAP_GLOBAL == self.operation:
+            self._Q_current_proposed = 1
+            self._Q_proposed_current = 1
+        elif self.SPLIT_PARTITIONS == self.operation or self.MERGE_PARTITIONS == self.operation:
+            self._Q_current_proposed = self.compute_neighborhoods(self.current_state)[0]
+            self._Q_proposed_current = self.compute_neighborhoods(self.proposed_state)[0]
+        elif self.MOVE_NODE_TO_EXISTING_PARTITION == self.operation or self.MOVE_NODE_TO_NEW_PARTITION == self.operation:
+            self._Q_current_proposed = sum(self._compute_neighborhoods_new_existing_partition(self.current_state))
+            self._Q_proposed_current = sum(self._compute_neighborhoods_new_existing_partition(self.proposed_state))
+        else:
+            raise Exception("Invalid operation ", self.operation)
+
+        numerator = proposed_state_score + np.log(self._Q_current_proposed)
+        denominator = current_state_score + np.log(self._Q_proposed_current)
+
+        try:
+            acceptance_ratio = numerator - denominator
+        except Exception as e:
+            print(e)
+            acceptance_ratio = -np.inf
+
+        return min(0, acceptance_ratio)
+
+    def get_nodes_to_rescore(self):
+        return self.to_rescore
+
+    def accept(self):
+        self.current_state = self.proposed_state
+        self._update()
+
+    def _update(self):
+        self.num_part = len(self.current_state.partitions)
+        self.nbh_size, self.nbh = self.compute_neighborhoods(self.current_state)
+        self.nodes = self.current_state.get_all_nodes()
+        self.num_nodes = len(self.nodes)
+        self.nbh_join_existing, self.nbh_create_new = self._compute_neighborhoods_new_existing_partition(self.current_state)
+
+    def compute_neighborhoods(self, state):
         """
         Compute the number of neighborhoods of an ordered partiion by using the equation
         sum_{i=1}^{m} ( sum_{c=1}^{k_i-1} ( comb( k_i, c) ) ) + m - 1
         """
-        comb_lst = [sum(math.comb(part_i.size, c) for c in range(1, part_i.size)) for part_i in self.ordered_partition.partitions]
+        comb_lst = [sum(math.comb(part_i.size, c) for c in range(1, part_i.size)) for part_i in state.partitions]
         return np.sum(comb_lst) + self.num_part - 1, comb_lst
 
-    def propose_partition(self):
-
-        # reset the nodes to rescore
-        self.set_to_rescore( set() )
-        while True:
-            chosen_move = np.random.choice(self.possible_moves, size=1, p=self.move_probs)[0]
-            if not("swap" in chosen_move and self.ordered_partition.size < 2):
-                break
-
-        if chosen_move == self.SWAP_ADJACENT:
-            return self.swap_adjacent()
-        elif chosen_move == self.SWAP_GLOBAL:
-            return self.swap_global()
-        elif chosen_move == self.SPLIT_OR_MERGE:
-            return self.split_or_merge_move()
-        elif chosen_move == self.MOVE_NODE_TO_NEW_OR_EXISTING:
-            return self.move_node_to_existing_or_new_partition()
-        elif chosen_move == self.STAY_STILL:
-            self.chosen_move = self.STAY_STILL
-            return self.ordered_partition.copy()
-
-    def calculate_move_probs(self):
+    def _calculate_move_probs(self):
 
         # Choose the probability of the different moves
         prob1start = 40 / 100
@@ -86,287 +119,235 @@ class PartitionProposal():
 
         return move_probs
 
-    def swap_adjacent(self):
+    def _swap_adjacent(self):
 
-        assert self.ordered_partition.size >= 2
-        self.chosen_move = self.SWAP_ADJACENT
-        new_ordered_partition = self.ordered_partition.copy()
+        assert self.current_state.size >= 2
+        self.operation = self.SWAP_ADJACENT
+        self.proposed_state = self.current_state.copy()
 
         # choose random partition element
-        party, _, _ = convert_partition_to_party_permy_posy(new_ordered_partition)
+        party, _, _ = convert_partition_to_party_permy_posy(self.proposed_state)
         p = np.array(possible_permutations_neighbors(sum(party), party))
-        part_idx = np.random.choice(new_ordered_partition.size - 1, p=p/p.sum())
+        part_idx = np.random.choice(self.proposed_state.size - 1, p=p/p.sum())
         # choose a node from partition at part_idx
-        node_left = np.random.choice(list(new_ordered_partition.partitions[part_idx].nodes))
+        node_left = np.random.choice(list(self.proposed_state.partitions[part_idx].nodes))
         # choose a node from partition at part_idx+1
-        node_right = np.random.choice(list(new_ordered_partition.partitions[part_idx+1].nodes))
+        node_right = np.random.choice(list(self.proposed_state.partitions[part_idx+1].nodes))
 
         # swap
-        new_ordered_partition.partitions[part_idx].remove_single_node(node_left)
-        new_ordered_partition.partitions[part_idx].add_single_node(node_right)
+        self.proposed_state.partitions[part_idx].remove_single_node(node_left)
+        self.proposed_state.partitions[part_idx].add_single_node(node_right)
 
-        new_ordered_partition.partitions[part_idx+1].remove_single_node(node_right)
-        new_ordered_partition.partitions[part_idx+1].add_single_node(node_left)
+        self.proposed_state.partitions[part_idx+1].remove_single_node(node_right)
+        self.proposed_state.partitions[part_idx+1].add_single_node(node_left)
 
         # mark nodes to rescore
-        self.to_rescore = self.to_rescore.union(new_ordered_partition.get_all_nodes_from_right(part_idx+1))
+        self.to_rescore = self.to_rescore.union(self.proposed_state.get_all_nodes_from_right(part_idx+1))
         self.to_rescore = self.to_rescore.union({node_right})
 
-        new_ordered_partition.update_IDs()
+        self.proposed_state.update_IDs()
 
-        return new_ordered_partition
+        return self.proposed_state
 
-    def swap_global(self ):
+    def _swap_global(self ):
 
-        assert self.ordered_partition.size >= 2
-        self.chosen_move = self.SWAP_GLOBAL
-        new_ordered_partition = self.ordered_partition.copy()
+        assert self.current_state.size >= 2
+        self.operation = self.SWAP_GLOBAL
+        self.proposed_state = self.current_state.copy()
 
         # choose random partition elements
-        party, _, _ = convert_partition_to_party_permy_posy(new_ordered_partition)
+        party, _, _ = convert_partition_to_party_permy_posy(self.proposed_state)
         p = np.array(possible_permutations(sum(party), party))
-        part_idx_1 = np.random.choice(new_ordered_partition.size, p=p/p.sum())
-        part_idx_2 = np.random.choice(list(set(range(new_ordered_partition.size)).difference({part_idx_1})))
+        part_idx_1 = np.random.choice(self.proposed_state.size, p=p/p.sum())
+        part_idx_2 = np.random.choice(list(set(range(self.proposed_state.size)).difference({part_idx_1})))
 
         left_part_idx, right_part_idx = sorted([part_idx_1, part_idx_2])
 
         # choose a node from partition at left_part_idx
-        node_left = np.random.choice(list(new_ordered_partition.partitions[left_part_idx].nodes))
+        node_left = np.random.choice(list(self.proposed_state.partitions[left_part_idx].nodes))
         # choose a node from partition at right_part_idx
-        node_right = np.random.choice(list(new_ordered_partition.partitions[right_part_idx].nodes))
+        node_right = np.random.choice(list(self.proposed_state.partitions[right_part_idx].nodes))
 
         # swap
-        new_ordered_partition.partitions[left_part_idx].remove_single_node(node_left)
-        new_ordered_partition.partitions[left_part_idx].add_single_node(node_right)
+        self.proposed_state.partitions[left_part_idx].remove_single_node(node_left)
+        self.proposed_state.partitions[left_part_idx].add_single_node(node_right)
 
-        new_ordered_partition.partitions[right_part_idx].remove_single_node(node_right)
-        new_ordered_partition.partitions[right_part_idx].add_single_node(node_left)
+        self.proposed_state.partitions[right_part_idx].remove_single_node(node_right)
+        self.proposed_state.partitions[right_part_idx].add_single_node(node_left)
 
         # mark nodes to rescore
-        self.to_rescore = self.to_rescore.union(new_ordered_partition.get_all_nodes_from_right(left_part_idx))
+        self.to_rescore = self.to_rescore.union(self.proposed_state.get_all_nodes_from_right(left_part_idx))
 
-        new_ordered_partition.update_IDs()
+        self.proposed_state.update_IDs()
 
-        return new_ordered_partition
+        return self.proposed_state
 
-    def split_or_merge_move(self):
+    def _split_or_merge_move(self):
 
-        party, _, _ = convert_partition_to_party_permy_posy(self.ordered_partition)
+        party, _, _ = convert_partition_to_party_permy_posy(self.current_state)
         p = np.array(possible_splits_joins(sum(party), party))
         p = p if p.sum() else p+1
-        node = np.random.choice(list(self.ordered_partition.all_nodes), p=p/p.sum())
-        idx = self.ordered_partition.find_node(node)
+        node = np.random.choice(list(self.current_state.all_nodes), p=p/p.sum())
+        idx = self.current_state.find_node(node)
 
-        can_split = self.ordered_partition.partitions[idx].size >= 2
-        can_merge = self.ordered_partition.size > 1
+        can_split = self.current_state.partitions[idx].size >= 2
+        can_merge = self.current_state.size > 1
 
         choice = np.random.choice([0,1])
         if can_split and choice==0:
-            return self.split_move(idx)
+            return self._split_move(idx)
         elif can_merge and choice==1:
-            return self.join_move(idx)
+            return self._join_move(idx)
         else:
-            self.chosen_move = self.STAY_STILL
-            return self.ordered_partition.copy()
+            self.operation = self.STAY_STILL
+            return self.current_state.copy()
 
-    def split_move(self, idx : int):
+    def _split_move(self, idx : int):
 
-        self.chosen_move = self.SPLIT_PARTITIONS
-        new_ordered_partition = self.ordered_partition.copy()
-        assert new_ordered_partition.partitions[idx].size >= 2
+        self.operation = self.SPLIT_PARTITIONS
+        self.proposed_state = self.current_state.copy()
+        assert self.proposed_state.partitions[idx].size >= 2
 
         # randomly select which nodes at partition idx will be at the new left partition
-        n_nodes_left = np.random.randint(1, new_ordered_partition.partitions[idx].size)
-        nodes_involved = list(new_ordered_partition.partitions[idx].nodes)
+        n_nodes_left = np.random.randint(1, self.proposed_state.partitions[idx].size)
+        nodes_involved = list(self.proposed_state.partitions[idx].nodes)
         nodes_left = np.random.choice(nodes_involved, replace=False, size=n_nodes_left)
 
         # split
-        new_ordered_partition.partitions[idx].remove_nodes(nodes_left)
-        new_ordered_partition.insert_partition(idx, set(nodes_left))
+        self.proposed_state.partitions[idx].remove_nodes(nodes_left)
+        self.proposed_state.insert_partition(idx, set(nodes_left))
 
         # mark nodes to rescore
-        self.to_rescore = self.to_rescore.union(new_ordered_partition.get_all_nodes_from_right(idx))
+        self.to_rescore = self.to_rescore.union(self.proposed_state.get_all_nodes_from_right(idx))
 
         # remove empty partition if exists
-        new_ordered_partition.remove_empty_partitions()
+        self.proposed_state.remove_empty_partitions()
 
-        new_ordered_partition.update_IDs()
+        self.proposed_state.update_IDs()
 
-        return new_ordered_partition
+        return self.proposed_state
 
-    def join_move(self, idx : int):
+    def _join_move(self, idx : int):
 
-        assert self.ordered_partition.size >= 2
-        self.chosen_move = self.MERGE_PARTITIONS
-        new_ordered_partition = self.ordered_partition.copy()
+        assert self.current_state.size >= 2
+        self.operation = self.MERGE_PARTITIONS
+        self.proposed_state = self.current_state.copy()
 
         adj = np.random.choice([-1,1])
         if idx == 0:
             adj = 1
-        if idx == new_ordered_partition.size-1:
+        if idx == self.proposed_state.size-1:
             adj = -1
 
         left_part_idx, right_part_idx = sorted([idx, idx+adj])
 
         # join partitions at idx and idx+1
-        nodes_right = new_ordered_partition.partitions[right_part_idx].nodes
-        new_ordered_partition.partitions[right_part_idx].remove_nodes(nodes_right)
-        nodes_left = new_ordered_partition.partitions[left_part_idx].nodes
-        new_ordered_partition.partitions[left_part_idx].add_nodes(nodes_right)
+        nodes_right = self.proposed_state.partitions[right_part_idx].nodes
+        self.proposed_state.partitions[right_part_idx].remove_nodes(nodes_right)
+        nodes_left = self.proposed_state.partitions[left_part_idx].nodes
+        self.proposed_state.partitions[left_part_idx].add_nodes(nodes_right)
 
         # mark nodes to rescore
-        self.to_rescore = self.to_rescore.union(new_ordered_partition.get_all_nodes_from_right(left_part_idx))
+        self.to_rescore = self.to_rescore.union(self.proposed_state.get_all_nodes_from_right(left_part_idx))
 
         # remove empty partition if exists
-        new_ordered_partition.remove_empty_partitions()
+        self.proposed_state.remove_empty_partitions()
 
-        new_ordered_partition.update_IDs()
+        self.proposed_state.update_IDs()
 
-        return new_ordered_partition
+        return self.proposed_state
 
-    def node_to_existing_partition(self):
+    def _node_to_existing_partition(self):
 
-        assert self.ordered_partition.size >= 2
-        self.chosen_move = self.MOVE_NODE_TO_EXISTING_PARTITION
-        new_ordered_partition = self.ordered_partition.copy()
+        assert self.current_state.size >= 2
+        self.operation = self.MOVE_NODE_TO_EXISTING_PARTITION
+        self.proposed_state = self.current_state.copy()
 
         # sample a node
-        nodes = new_ordered_partition.get_all_nodes()
-        party, _, posy = convert_partition_to_party_permy_posy(new_ordered_partition)
+        nodes = self.proposed_state.get_all_nodes()
+        party, _, posy = convert_partition_to_party_permy_posy(self.proposed_state)
         p = np.array(calculate_join_possibilities(len(nodes), party, posy))
         node_to_move = np.random.choice(list(nodes), p=p/p.sum())
 
         # get partition where the node belongs to
-        current_partition_idx = new_ordered_partition.find_node(node_to_move)
+        current_partition_idx = self.proposed_state.find_node(node_to_move)
 
         # select a different partition to move to
-        target_partition_idx = np.random.choice(list(set(range(new_ordered_partition.size)).difference({current_partition_idx})))
+        target_partition_idx = np.random.choice(list(set(range(self.proposed_state.size)).difference({current_partition_idx})))
 
         # move
-        new_ordered_partition.partitions[current_partition_idx].remove_single_node(node_to_move)
-        new_ordered_partition.partitions[target_partition_idx].add_single_node(node_to_move)
+        self.proposed_state.partitions[current_partition_idx].remove_single_node(node_to_move)
+        self.proposed_state.partitions[target_partition_idx].add_single_node(node_to_move)
 
         # mark nodes to rescore
         min_idx, max_idx = sorted([current_partition_idx, target_partition_idx])
-        self.to_rescore = self.to_rescore.union(new_ordered_partition.get_all_nodes_from_right(min_idx))
+        self.to_rescore = self.to_rescore.union(self.proposed_state.get_all_nodes_from_right(min_idx))
         self.to_rescore = self.to_rescore.union({node_to_move})
 
         # remove empty partition if exists
-        new_ordered_partition.remove_empty_partitions()
+        self.proposed_state.remove_empty_partitions()
 
-        new_ordered_partition.update_IDs()
+        self.proposed_state.update_IDs()
 
-        return new_ordered_partition
+        return self.proposed_state
 
-    def node_to_new_partition(self):
+    def _node_to_new_partition(self):
 
-        self.chosen_move = self.MOVE_NODE_TO_NEW_PARTITION
-        new_ordered_partition = self.ordered_partition.copy()
+        self.operation = self.MOVE_NODE_TO_NEW_PARTITION
+        self.proposed_state = self.current_state.copy()
 
         # sample a node
-        nodes = new_ordered_partition.get_all_nodes()
-        party, _, posy = convert_partition_to_party_permy_posy(new_ordered_partition)
+        nodes = self.proposed_state.get_all_nodes()
+        party, _, posy = convert_partition_to_party_permy_posy(self.proposed_state)
         p = np.array(calculate_partition_transitions(len(nodes), party, posy))
         node_to_move = np.random.choice(list(nodes), p=p/p.sum())
 
         # get partition where the node belongs to
-        current_partition_idx = new_ordered_partition.find_node(node_to_move)
+        current_partition_idx = self.proposed_state.find_node(node_to_move)
 
         # sample where to go
         target_partition_idx = np.random.choice(p[list(nodes).index(node_to_move)])
-        if new_ordered_partition.partitions[current_partition_idx].size == 1:
+        if self.proposed_state.partitions[current_partition_idx].size == 1:
             if target_partition_idx >= current_partition_idx:
                 target_partition_idx += 1
-                if current_partition_idx < new_ordered_partition.size-1 and new_ordered_partition.partitions[current_partition_idx+1].size == 1:
+                if current_partition_idx < self.proposed_state.size-1 and self.proposed_state.partitions[current_partition_idx+1].size == 1:
                     target_partition_idx += 1
 
         # remove node from current partition
-        new_ordered_partition.partitions[current_partition_idx].remove_single_node(node_to_move)
+        self.proposed_state.partitions[current_partition_idx].remove_single_node(node_to_move)
 
         # insert new partition containing the node to target index
-        new_ordered_partition.insert_partition(target_partition_idx,  {node_to_move})
+        self.proposed_state.insert_partition(target_partition_idx,  {node_to_move})
 
         # mark nodes to rescore
         min_idx, max_idx = sorted([current_partition_idx, target_partition_idx])
-        self.to_rescore = self.to_rescore.union(new_ordered_partition.get_all_nodes_from_right(min_idx))
+        self.to_rescore = self.to_rescore.union(self.proposed_state.get_all_nodes_from_right(min_idx))
         self.to_rescore = self.to_rescore.union({node_to_move})
 
         # remove empty partition if exists
-        new_ordered_partition.remove_empty_partitions()
+        self.proposed_state.remove_empty_partitions()
 
-        new_ordered_partition.update_IDs()
+        self.proposed_state.update_IDs()
 
-        return new_ordered_partition
+        return self.proposed_state
 
-    def move_node_to_existing_or_new_partition(self):
+    def _move_node_to_existing_or_new_partition(self):
 
-        party, _, posy = convert_partition_to_party_permy_posy( self.ordered_partition )
-        num_nodes = sum(party)
-
-        self.nbh_join_existing = sum(calculate_join_possibilities(num_nodes, party, posy ))
-        self.nbh_create_new = sum(calculate_partition_transitions(num_nodes, party, posy ))
+        self.nbh_join_existing, self.nbh_create_new = self._compute_neighborhoods_new_existing_partition(self.current_state)
 
         prob_join_existing = self.nbh_join_existing / (self.nbh_join_existing + self.nbh_create_new)
         prob_create_new = self.nbh_create_new / (self.nbh_join_existing + self.nbh_create_new)
 
         if np.random.choice([0,1], size=1, p=[prob_join_existing, prob_create_new])[0] == 0:
-            return self.node_to_existing_partition()
+            return self._node_to_existing_partition()
         else:
-            return self.node_to_new_partition()
+            return self._node_to_new_partition()
 
-    def get_nbh_join_existing(self):
-        return self.nbh_join_existing
-
-    def set_nbh_join_existing(self, nbh_join_existing):
-        self.nbh_join_existing = nbh_join_existing
-
-    def get_nbh_create_new(self):
-        return self.nbh_create_new
-
-    def set_nbh_create_new(self, nbh_create_new):
-        self.nbh_create_new = nbh_create_new
-
-    def get_to_rescore(self):
-        # return self.ordered_partition.all_nodes
-        return self.to_rescore
-
-    def set_to_rescore(self, to_rescore):
-        self.to_rescore = to_rescore
-
-    def get_chosen_move(self):
-        return self.chosen_move
-
-    def set_chosen_move(self, move):
-        self.chosen_move = move
-
-    def get_ordered_partition(self):
-        return self.ordered_partition
-
-    def set_ordered_partition(self, new_partition):
-        self.ordered_partition = new_partition
-        self.num_part = len(self.ordered_partition.partitions)
-        self.nbh_size, self.nbh = self.compute_neighborhoods()
-
-        party, _, posy = convert_partition_to_party_permy_posy( self.ordered_partition )
+    def _compute_neighborhoods_new_existing_partition(self, state):
+        party, _, posy = convert_partition_to_party_permy_posy(state)
         num_nodes = sum(party)
 
-        self.nbh_join_existing = sum(calculate_join_possibilities(num_nodes, party, posy ))
-        self.nbh_create_new = sum(calculate_partition_transitions(num_nodes, party, posy ))
+        existing = sum(calculate_join_possibilities(num_nodes, party, posy ))
+        new = sum(calculate_partition_transitions(num_nodes, party, posy ))
 
-    def get_num_partitions(self):
-        return self.num_part
-
-    def set_num_partitions(self, num_part):
-        self.num_part = num_part
-
-    def get_nbh_size(self):
-        return self.nbh_size
-
-    def set_nbh_size(self, nbh_size):
-        self.nbh_size = nbh_size
-
-    def get_nbh(self):
-        return self.nbh
-
-    def set_nbh(self, nbh):
-        self.nbh = nbh
+        return existing, new

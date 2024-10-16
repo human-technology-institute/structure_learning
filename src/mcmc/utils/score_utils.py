@@ -88,7 +88,7 @@ def table_dag_score(parent_rows, node, score_object):
 
     for i in range(nrows):
         parent_nodes = filter_nans(parent_rows[i])
-        p_local[i] = score_object.compute_local(node,parent_nodes)['score']
+        p_local[i] = score_object.compute_node_with_edges(node,parent_nodes)['score']
 
     return p_local
 
