@@ -42,7 +42,7 @@ class Score(ABC):
 
     def compute_node(self, node : str):
         """
-        Implements a score function (e.g. BGe, Marginal Likelihood, etc) for a specific node and parents
+        Implements a score function (e.g. BGe, Marginal Likelihood, etc) for a specific node
         """
         node_indx = self.node_label_to_index[node]
         parentnodes = [self.node_labels[i] for i in find_parents(self.incidence, node_indx)]

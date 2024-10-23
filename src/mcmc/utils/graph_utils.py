@@ -367,7 +367,6 @@ def plot_graph(G : nx.DiGraph, title="Graph", figsize = (5,3), node_size=2000, n
     plt.gca().margins(0.20)
     plt.title(title)
     plt.axis("off")
-    plt.show()
 
 def plot_graph_from_adj_mat(adj_matrix : np.ndarray , node_labels : list, title="Graph",
                             figsize = (5,3), node_size=2000, node_color="skyblue", k=5):
