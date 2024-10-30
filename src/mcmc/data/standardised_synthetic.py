@@ -146,7 +146,7 @@ class Standardised_Synthetic_Data(object):
         data = np.zeros((num_obs, num_nodes))
         
         # Get topological order of nodes
-        top_order = self.topological_sort(adj_matrix)
+        top_order = Standardised_Synthetic_Data.topological_sort(adj_matrix)
         
         for node in top_order:
             parents = [i for i in range(num_nodes) if adj_matrix[i, node] != 0]
