@@ -7,6 +7,7 @@ import scipy.stats as stats
 import networkx as nx
 from scipy.stats import multivariate_normal
 from mcmc.utils.partition_utils import find_parent_nodes, remove_outgoing_edges
+from collections import deque
 
 class SyntheticDataset(object):
     """
@@ -14,13 +15,16 @@ class SyntheticDataset(object):
 
     """
     def __init__(
-        self,
+        self, 
         num_nodes: float,
         num_obs: float,
         node_labels: list,
         degree: float,
+        standardised: bool, 
         graph_type: str="erdos-renyi",
-        noise_scale: float=1.0, true_dag = None):
+        noise_scale: float=1.0,
+        true_dag = None,
+        seed: int = None):
 
         """
         Initialise SyntheticDataset instance
@@ -33,6 +37,10 @@ class SyntheticDataset(object):
         self.noise_scale = noise_scale
         self.w_range = (0.5, 2.5)
         self.true_dag = true_dag
+        self.standardised = standardised
+        self.seed = seed
+
+        print(f"Seed provided (type: {type(self.seed)}): {self.seed}")
 
         self._setup()
 
@@ -44,14 +52,17 @@ class SyntheticDataset(object):
             self.num_nodes,
             self.degree,
             self.graph_type,
-            self.w_range
+            self.w_range,
+            self.seed
         )
 
         if self.true_dag is None:
             self.data = pd.DataFrame(SyntheticDataset.simulate_data(
                 self.W,
                 self.num_obs,
+                self.standardised,
                 self.noise_scale
+                
             ), columns=self.node_labels)
         else:
             self.data, self.W = SyntheticDataset.simulate_data_from_dag(
@@ -127,7 +138,7 @@ class SyntheticDataset(object):
 
 
     @staticmethod
-    def simulate_random_dag(d, degree, graph_type, w_range):
+    def simulate_random_dag(d, degree, graph_type, w_range, seed):
         """Simulate random DAG with some expected degree.
 
         Parameters:
@@ -141,6 +152,8 @@ class SyntheticDataset(object):
             None
             (numpy.ndarray): permutation matrix
         """
+        
+        np.random.seed(seed)
         if graph_type == "erdos-renyi":
             prob = float(degree) / (d - 1)
             B = np.tril((np.random.rand(d, d) < prob).astype(float), k=-1)
@@ -225,13 +238,44 @@ class SyntheticDataset(object):
             X[:, j] = eta + np.random.normal(scale=sigmas[j], size=n)
 
         return X
+    
+    @staticmethod
+    def topological_sort(adj_matrix):
+        """
+        Sort the random dag that has been generated topologically. 
+        i.e. Source Nodes first and absorbing nodes last
+        """   
+        # Number of nodes in the DAG
+        num_nodes = adj_matrix.shape[0]
+
+        # Calculating number of edges point to a node
+        in_degree = np.zeros(num_nodes, dtype=int) # Init List
+        for i in range(num_nodes):
+            for j in range(num_nodes):
+                if adj_matrix[i, j] != 0: # Seeing if node i is a parent of node j
+                    in_degree[j] += 1 # If node i is indeed a parent, increase 'in-degree' of node j by 1
+        
+        queue = deque([i for i in range(num_nodes) if in_degree[i] == 0])
+        top_order = []
+        
+        while queue:
+            node = queue.popleft()
+            top_order.append(node)
+            for j in range(num_nodes):
+                if adj_matrix[node, j] != 0:
+                    in_degree[j] -= 1
+                    if in_degree[j] == 0:
+                        queue.append(j)
+    
+        return top_order
 
     @staticmethod
-    def simulate_data(W, n, noise_scale=1.0, sigmas=None):
-        """Simulate samples from SEM with specified type of noise.
+    def simulate_data(W, n, standardised, noise_scale=1.0, sigmas=None):
+        """
+        Simulate samples from SEM with specified type of noise.
 
         Parameters:
-            W (numpy.ndarray): weigthed DAG
+            W (numpy.ndarray): weighted DAG
             n (int): number of samples
             noise_scale (float): scale parameter of noise distribution in linear SEM
             sigmas (numpy.ndarray): noise vector
@@ -239,20 +283,57 @@ class SyntheticDataset(object):
         Returns:
             (numpy.ndarray) [n,d] sample matrix
         """
-        d = W.shape[0]
-        X = np.zeros([n, d], dtype=np.float64)
+        
+        if not standardised:
+            d = W.shape[0]
+            X = np.zeros([n, d], dtype=np.float64)
 
-        if sigmas is None:
-            sigmas = np.ones((d,)) * noise_scale # Assuming equal variances
+            if sigmas is None:
+                sigmas = np.ones((d,)) * noise_scale # Assuming equal variances
 
-        # Generate the diagonal conditional variance matrix, diagonal values indicate sigma^2_j
-        D_mat = np.eye(d) * sigmas
+            # Generate the diagonal conditional variance matrix, diagonal values indicate sigma^2_j
+            D_mat = np.eye(d) * sigmas
 
-        W_mat = W + np.eye(d)
+            W_mat = W + np.eye(d)
 
-        # Covariance matrix
-        sigma = np.linalg.pinv(W_mat.T) @ D_mat @ np.linalg.pinv(W_mat)
+            # Covariance matrix
+            sigma = np.linalg.pinv(W_mat.T) @ D_mat @ np.linalg.pinv(W_mat)
 
-        X = stats.multivariate_normal.rvs(cov=sigma, size=n)
+            X = stats.multivariate_normal.rvs(cov=sigma, size=n)
 
-        return X
+            return X
+        else:
+            # Generate Values for Intercept and Noise
+            noise = np.random.uniform(0, 10, size=n)
+            intercept = np.random.uniform(0, 10, size=n)
+
+            num_nodes = W.shape[0]  # Assuming W is the adjacency matrix
+            data = np.zeros((n, num_nodes))
+            
+            # Get topological order of nodes
+            top_order = SyntheticDataset.topological_sort(W)
+            
+            for node in top_order:
+                parents = [i for i in range(num_nodes) if W[i, node] != 0]
+                if not parents:
+                    # If no parents, generate data independently
+                    data[:, node] = np.random.randn(n) + intercept + noise
+                else:
+                    parent_values_list = []
+                    for parent in parents:
+                        # Extract Parent Values
+                        parent_values = data[:, parent].reshape(-1, 1)
+                        # Standardizing each parent node
+                        parent_values_std = (parent_values - np.mean(parent_values)) / np.std(parent_values)
+                        # Append to list
+                        parent_values_list.append(parent_values_std)
+                    
+                    # Combine all parent columns into a single array
+                    parent_values_combined = np.hstack(parent_values_list)
+
+                    
+                    # Generate data based on weighted sum of parent values + noise
+                    weights = W[parents, node]
+                    data[:, node] = intercept + np.dot(parent_values_combined, weights) + noise
+
+            return data
