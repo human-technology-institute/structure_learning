@@ -97,7 +97,6 @@ class PartitionMCMC(MCMC):
             result['accepted'] = False
             result['graph'] = G
         else:
-            proposed_state = proposed_state
             party_prop, permy_prop, posy_prop = convert_partition_to_party_permy_posy(proposed_state)
             scores_copy = deepcopy(self.scores)
             rescore = partition_score(list(nodes_to_rescore), self.node_labels, self.parent_table, self.score_table, permy_prop, party_prop, posy_prop)
