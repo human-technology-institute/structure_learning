@@ -30,6 +30,7 @@ class PartitionProposal(StructureLearningProposal):
         self.move_probs = self._calculate_move_probs()
         self.blacklist = blacklist
         self.whitelist = whitelist
+        self.proposed_state = self.current_state.copy()
 
     def propose(self):
         # reset the nodes to rescore
