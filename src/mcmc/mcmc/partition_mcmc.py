@@ -150,18 +150,18 @@ class PartitionMCMC(MCMC):
                     if part_idx >= part_idx_parent:
                         return False
 
-        if self.blacklist is not None: # check if partition adheres to node ordering based on banned edges
-            for node in self._node_label_to_idx:
-                idx = self._node_label_to_idx[node]
-                part_idx = partition.find_node(node)
+        # if self.blacklist is not None: # check if partition adheres to node ordering based on banned edges
+        #     for node in self._node_label_to_idx:
+        #         idx = self._node_label_to_idx[node]
+        #         part_idx = partition.find_node(node)
 
-                banned_parents = node_labels[self.blacklist[:,idx]==1]
+        #         banned_parents = node_labels[self.blacklist[:,idx]==1]
 
-                for parent in banned_parents:
-                    part_idx_parent = partition.find_node(parent)
+        #         for parent in banned_parents:
+        #             part_idx_parent = partition.find_node(parent)
 
-                    if part_idx == part_idx_parent+1: # parent node appears in partition immediately to the left
-                        if partition.partitions[part_idx_parent].size == 1:
-                            return False
+        #             if part_idx == part_idx_parent+1: # parent node appears in partition immediately to the left
+        #                 if partition.partitions[part_idx_parent].size == 1:
+        #                     return False
 
         return True
