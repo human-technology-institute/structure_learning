@@ -30,7 +30,7 @@ class PartitionProposal(StructureLearningProposal):
         self.move_probs = self._calculate_move_probs()
         self.blacklist = blacklist
         self.whitelist = whitelist
-        self.proposed_state = self.current_state.copy()
+        self.proposed_state = None
 
     def propose(self):
         # reset the nodes to rescore
@@ -40,6 +40,7 @@ class PartitionProposal(StructureLearningProposal):
             if not("swap" in operation and self.current_state.size < 2):
                 break
 
+        self.proposed_state = self.current_state.copy()
         if operation == self.SWAP_ADJACENT:
             self._swap_adjacent()
         elif operation == self.SWAP_GLOBAL:
@@ -50,7 +51,6 @@ class PartitionProposal(StructureLearningProposal):
             self._move_node_to_existing_or_new_partition()
         else:
             self.operation = self.STAY_STILL
-            self.proposed_state = self.current_state.copy()
         return self.proposed_state, self.operation
 
     def compute_acceptance_ratio(self, current_state_score, proposed_state_score):
@@ -124,7 +124,6 @@ class PartitionProposal(StructureLearningProposal):
 
         assert self.current_state.size >= 2
         self.operation = self.SWAP_ADJACENT
-        self.proposed_state = self.current_state.copy()
 
         # choose random partition element
         party, _, _ = convert_partition_to_party_permy_posy(self.proposed_state)
@@ -154,7 +153,6 @@ class PartitionProposal(StructureLearningProposal):
 
         assert self.current_state.size >= 2
         self.operation = self.SWAP_GLOBAL
-        self.proposed_state = self.current_state.copy()
 
         # choose random partition elements
         party, _, _ = convert_partition_to_party_permy_posy(self.proposed_state)
@@ -206,7 +204,6 @@ class PartitionProposal(StructureLearningProposal):
     def _split_move(self, idx : int):
 
         self.operation = self.SPLIT_PARTITIONS
-        self.proposed_state = self.current_state.copy()
         assert self.proposed_state.partitions[idx].size >= 2
 
         # randomly select which nodes at partition idx will be at the new left partition
@@ -232,7 +229,6 @@ class PartitionProposal(StructureLearningProposal):
 
         assert self.current_state.size >= 2
         self.operation = self.MERGE_PARTITIONS
-        self.proposed_state = self.current_state.copy()
 
         adj = np.random.choice([-1,1])
         if idx == 0:
@@ -262,7 +258,6 @@ class PartitionProposal(StructureLearningProposal):
 
         assert self.current_state.size >= 2
         self.operation = self.MOVE_NODE_TO_EXISTING_PARTITION
-        self.proposed_state = self.current_state.copy()
 
         # sample a node
         nodes = self.proposed_state.get_all_nodes()
@@ -295,7 +290,6 @@ class PartitionProposal(StructureLearningProposal):
     def _node_to_new_partition(self):
 
         self.operation = self.MOVE_NODE_TO_NEW_PARTITION
-        self.proposed_state = self.current_state.copy()
 
         # sample a node
         nodes = self.proposed_state.get_all_nodes()
