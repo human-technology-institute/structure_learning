@@ -18,7 +18,7 @@ class StructureLearningProposal(ABC):
 
     operations = [STAY_STILL]
 
-    def __init__(self, initial_state : State, blacklist = None, whitelist = None):
+    def __init__(self, initial_state : State, blacklist = None, whitelist = None, seed: int = 32):
         """
         Initialise StructureLearningProposal instance.
 
@@ -31,6 +31,7 @@ class StructureLearningProposal(ABC):
         self.current_state = initial_state
         self.proposed_state = None
         self.operation = None
+        self._rng = np.random.default_rng(seed=seed)
 
     @abstractmethod
     def propose(self) -> Tuple[State, str]:

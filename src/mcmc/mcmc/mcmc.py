@@ -18,11 +18,11 @@ class MCMC(ABC):
     """
     Base class for MCMC.
     Inheriting classes must implement the following methods:
-        run()
+        step()
     """
     def __init__(self, data: pd.DataFrame, initial_state: State, max_iter: int = 30000, score_object: Union[str, Score] = None,
                  proposal_object: Union[str, StructureLearningProposal] = None, pc_init: bool = True,
-                 blacklist: np.ndarray = None, whitelist: np.ndarray = None, plus1: bool = False):
+                 blacklist: np.ndarray = None, whitelist: np.ndarray = None, plus1: bool = False, seed: int = 32):
         """
         Initilialise MCMC instance.
 
@@ -48,7 +48,8 @@ class MCMC(ABC):
         self.data  = data
         self.node_labels = list(data.columns)
         self.num_nodes = len(self.node_labels)
-        self.cpdag = None
+        self.search_space = None
+        self._rng = np.random.default_rng(seed=seed)
 
         if score_object is None:
             print('Using default BGe score')
@@ -69,24 +70,24 @@ class MCMC(ABC):
                 raise Exception('Unsupported proposal', proposal_object)
             if initial_state is not None:
                 if isinstance(initial_state, np.ndarray):
-                    proposal_object = GraphProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist)
+                    proposal_object = GraphProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist, seed=seed)
                 elif isinstance(initial_state, OrderedPartition):
-                    proposal_object = PartitionProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist)
+                    proposal_object = PartitionProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist, seed=seed)
                 else:
                     print('Invalid initial state')
             else:
                 if pc_init:
                     print('Running PC algorithm')
-                    initial_state, cpdag = initial_graph_pc(score_object.data, True)
+                    initial_state, search_space = initial_graph_pc(score_object.data, True)
                 else: # start with random
-                    cpdag = None
-                    initial_state = generate_DAG(self.num_nodes, 0.5)
-                self.cpdag = cpdag
+                    search_space = None
+                    initial_state = generate_DAG(self.num_nodes, 0.5, seed)
+                self.search_space = search_space
                 if proposal_object is None or proposal_object == 'partition':
                     initial_state = build_partition(incidence=initial_state if not plus1 else np.zeros((self.num_nodes, self.num_nodes)), node_labels=self.node_labels)
-                    proposal_object = PartitionProposal(initial_state, whitelist=whitelist, blacklist=blacklist)
+                    proposal_object = PartitionProposal(initial_state, whitelist=whitelist, blacklist=blacklist, seed=seed)
                 else:
-                    proposal_object = GraphProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist)
+                    proposal_object = GraphProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist, seed=seed)
         elif not isinstance(proposal_object, StructureLearningProposal):
             raise Exception('Unsupported proposal', proposal_object)
         self.initial_state = initial_state

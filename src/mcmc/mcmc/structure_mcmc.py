@@ -16,7 +16,7 @@ class StructureMCMC(MCMC):
     """
     def __init__(self, data: pd.DataFrame = None, initial_graph : np.ndarray = None, max_iter : int = 30000,
                  score_object : Union[str, Score] = None, proposal_object : StructureLearningProposal = None, pc_init = True,
-                 blacklist: np.ndarray = None, whitelist: np.ndarray = None):
+                 blacklist: np.ndarray = None, whitelist: np.ndarray = None, seed: int = 32):
         """
         Initilialise Structure MCMC instance.
 
@@ -38,7 +38,7 @@ class StructureMCMC(MCMC):
 
         super().__init__(data=data, initial_state=initial_graph, max_iter=max_iter, score_object=score_object,
                          proposal_object='graph' if proposal_object is None else proposal_object, pc_init=pc_init,
-                         blacklist=blacklist, whitelist=whitelist)
+                         blacklist=blacklist, whitelist=whitelist, seed=seed)
 
         self._to_string = f"Structure_MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
 
@@ -48,6 +48,8 @@ class StructureMCMC(MCMC):
         result = {'current_state': self.proposal_object.current_state, 'proposed_state': None, 'score_current': state_score['score'],
                   'operation': 'initial', 'accepted': False, 'acceptance_prob': 0, 'score_proposed': state_score['score']}
         self.update_results(0, result)
+
+        self._rng = np.random.default_rng(seed=seed)
 
     def step(self):
         """
@@ -72,7 +74,7 @@ class StructureMCMC(MCMC):
             proposed_state_score = sum(list(scores_copy.values()))
 
             acceptance_prob = self.proposal_object.compute_acceptance_ratio(current_state_score, proposed_state_score)
-            u =  np.log(np.random.uniform(0,1))
+            u =  np.log(self._rng.uniform(0,1))
             is_accepted = u < acceptance_prob
             if is_accepted:
                 self.proposal_object.accept()

@@ -18,8 +18,9 @@ class PartitionProposal(StructureLearningProposal):
 
     operations = [SWAP_ADJACENT, SWAP_GLOBAL, SPLIT_OR_MERGE, MOVE_NODE_TO_NEW_OR_EXISTING, STAY_STILL]
 
-    def __init__(self, initial_state: OrderedPartition, whitelist: np.ndarray = None, blacklist: np.ndarray = None):
+    def __init__(self, initial_state: OrderedPartition, whitelist: np.ndarray = None, blacklist: np.ndarray = None, seed = 32):
 
+        super().__init__(initial_state, blacklist, whitelist, seed) # initialize the parent class
         self.current_state = initial_state
         self._update()
         self.operation = None
@@ -36,7 +37,7 @@ class PartitionProposal(StructureLearningProposal):
         # reset the nodes to rescore
         self.to_rescore = set()
         while True:
-            operation = np.random.choice(self.operations, size=1, p=self.move_probs)[0]
+            operation = self._rng.choice(self.operations, size=1, p=self.move_probs)[0]
             if not("swap" in operation and self.current_state.size < 2):
                 break
 
@@ -128,11 +129,11 @@ class PartitionProposal(StructureLearningProposal):
         # choose random partition element
         party, _, _ = convert_partition_to_party_permy_posy(self.proposed_state)
         p = np.array(possible_permutations_neighbors(sum(party), party))
-        part_idx = np.random.choice(self.proposed_state.size - 1, p=p/p.sum())
+        part_idx = self._rng.choice(self.proposed_state.size - 1, p=p/p.sum())
         # choose a node from partition at part_idx
-        node_left = np.random.choice(list(self.proposed_state.partitions[part_idx].nodes))
+        node_left = self._rng.choice(list(self.proposed_state.partitions[part_idx].nodes))
         # choose a node from partition at part_idx+1
-        node_right = np.random.choice(list(self.proposed_state.partitions[part_idx+1].nodes))
+        node_right = self._rng.choice(list(self.proposed_state.partitions[part_idx+1].nodes))
 
         # swap
         self.proposed_state.partitions[part_idx].remove_single_node(node_left)
@@ -157,15 +158,15 @@ class PartitionProposal(StructureLearningProposal):
         # choose random partition elements
         party, _, _ = convert_partition_to_party_permy_posy(self.proposed_state)
         p = np.array(possible_permutations(sum(party), party))
-        part_idx_1 = np.random.choice(self.proposed_state.size, p=p/p.sum())
-        part_idx_2 = np.random.choice(list(set(range(self.proposed_state.size)).difference({part_idx_1})))
+        part_idx_1 = self._rng.choice(self.proposed_state.size, p=p/p.sum())
+        part_idx_2 = self._rng.choice(list(set(range(self.proposed_state.size)).difference({part_idx_1})))
 
         left_part_idx, right_part_idx = sorted([part_idx_1, part_idx_2])
 
         # choose a node from partition at left_part_idx
-        node_left = np.random.choice(list(self.proposed_state.partitions[left_part_idx].nodes))
+        node_left = self._rng.choice(list(self.proposed_state.partitions[left_part_idx].nodes))
         # choose a node from partition at right_part_idx
-        node_right = np.random.choice(list(self.proposed_state.partitions[right_part_idx].nodes))
+        node_right = self._rng.choice(list(self.proposed_state.partitions[right_part_idx].nodes))
 
         # swap
         self.proposed_state.partitions[left_part_idx].remove_single_node(node_left)
@@ -186,13 +187,13 @@ class PartitionProposal(StructureLearningProposal):
         party, _, _ = convert_partition_to_party_permy_posy(self.current_state)
         p = np.array(possible_splits_joins(sum(party), party))
         p = p if p.sum() else p+1
-        node = np.random.choice(list(self.current_state.all_nodes), p=p/p.sum())
+        node = self._rng.choice(list(self.current_state.all_nodes), p=p/p.sum())
         idx = self.current_state.find_node(node)
 
         can_split = self.current_state.partitions[idx].size >= 2
         can_merge = self.current_state.size > 1
 
-        choice = np.random.choice([0,1])
+        choice = self._rng.choice([0,1])
         if can_split and choice==0:
             return self._split_move(idx)
         elif can_merge and choice==1:
@@ -207,9 +208,9 @@ class PartitionProposal(StructureLearningProposal):
         assert self.proposed_state.partitions[idx].size >= 2
 
         # randomly select which nodes at partition idx will be at the new left partition
-        n_nodes_left = np.random.randint(1, self.proposed_state.partitions[idx].size)
+        n_nodes_left = self._rng.integers(1, self.proposed_state.partitions[idx].size)
         nodes_involved = list(self.proposed_state.partitions[idx].nodes)
-        nodes_left = np.random.choice(nodes_involved, replace=False, size=n_nodes_left)
+        nodes_left = self._rng.choice(nodes_involved, replace=False, size=n_nodes_left)
 
         # split
         self.proposed_state.partitions[idx].remove_nodes(nodes_left)
@@ -230,7 +231,7 @@ class PartitionProposal(StructureLearningProposal):
         assert self.current_state.size >= 2
         self.operation = self.MERGE_PARTITIONS
 
-        adj = np.random.choice([-1,1])
+        adj = self._rng.choice([-1,1])
         if idx == 0:
             adj = 1
         if idx == self.proposed_state.size-1:
@@ -263,13 +264,13 @@ class PartitionProposal(StructureLearningProposal):
         nodes = self.proposed_state.get_all_nodes()
         party, _, posy = convert_partition_to_party_permy_posy(self.proposed_state)
         p = np.array(calculate_join_possibilities(len(nodes), party, posy))
-        node_to_move = np.random.choice(list(nodes), p=p/p.sum())
+        node_to_move = self._rng.choice(list(nodes), p=p/p.sum())
 
         # get partition where the node belongs to
         current_partition_idx = self.proposed_state.find_node(node_to_move)
 
         # select a different partition to move to
-        target_partition_idx = np.random.choice(list(set(range(self.proposed_state.size)).difference({current_partition_idx})))
+        target_partition_idx = self._rng.choice(list(set(range(self.proposed_state.size)).difference({current_partition_idx})))
 
         # move
         self.proposed_state.partitions[current_partition_idx].remove_single_node(node_to_move)
@@ -295,13 +296,13 @@ class PartitionProposal(StructureLearningProposal):
         nodes = self.proposed_state.get_all_nodes()
         party, _, posy = convert_partition_to_party_permy_posy(self.proposed_state)
         p = np.array(calculate_partition_transitions(len(nodes), party, posy))
-        node_to_move = np.random.choice(list(nodes), p=p/p.sum())
+        node_to_move = self._rng.choice(list(nodes), p=p/p.sum())
 
         # get partition where the node belongs to
         current_partition_idx = self.proposed_state.find_node(node_to_move)
 
         # sample where to go
-        target_partition_idx = np.random.choice(p[list(nodes).index(node_to_move)])
+        target_partition_idx = self._rng.choice(p[list(nodes).index(node_to_move)])
         if self.proposed_state.partitions[current_partition_idx].size == 1:
             if target_partition_idx >= current_partition_idx:
                 target_partition_idx += 1
@@ -333,7 +334,7 @@ class PartitionProposal(StructureLearningProposal):
         prob_join_existing = self.nbh_join_existing / (self.nbh_join_existing + self.nbh_create_new)
         prob_create_new = self.nbh_create_new / (self.nbh_join_existing + self.nbh_create_new)
 
-        if np.random.choice([0,1], size=1, p=[prob_join_existing, prob_create_new])[0] == 0:
+        if self._rng.choice([0,1], size=1, p=[prob_join_existing, prob_create_new])[0] == 0:
             return self._node_to_existing_partition()
         else:
             return self._node_to_new_partition()

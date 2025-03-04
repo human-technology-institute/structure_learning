@@ -22,7 +22,7 @@ class PartitionMCMC(MCMC):
     """
     def __init__(self, data : pd.DataFrame = None, initial_state : Union[OrderedPartition, np.ndarray] = None, max_iter : int = 30000,
                  proposal_object : StructureLearningProposal = None, score_object : Union[str, Score] = None,
-                 pc_init: bool = True, blacklist = None, whitelist = None, plus1: bool = False):
+                 pc_init: bool = True, blacklist = None, whitelist = None, plus1: bool = False, seed : int  = 32):
         """
         Initilialise Partition MCMC instance.
 
@@ -46,8 +46,8 @@ class PartitionMCMC(MCMC):
             initial_state = build_partition(initial_state, list(score_object.data.columns if score_object else data.columns))
 
         super().__init__(data=data, initial_state=initial_state, max_iter=max_iter, proposal_object=proposal_object,
-                         score_object=score_object, pc_init=pc_init, blacklist=blacklist, whitelist=whitelist, plus1=plus1)
-        self._to_string = f"Structure_MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
+                         score_object=score_object, pc_init=pc_init, blacklist=blacklist, whitelist=whitelist, plus1=plus1, seed=seed)
+        self._to_string = f"Partition_MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
 
         self._node_label_to_idx = node_label_to_index(self.node_labels)
 
@@ -56,6 +56,7 @@ class PartitionMCMC(MCMC):
         self.parent_table = list_possible_parents(self._max_parents, self.node_labels, whitelist=whitelist,
                                                   blacklist=blacklist, plus1=plus1, init_cpdag=self.cpdag)
         self.score_table = score_possible_parents(self.parent_table, self.node_labels, self.score_object)
+        self._rng = np.random.default_rng(seed=seed)
 
         # compute the scores of the current partition
         current_state = self.proposal_object.current_state
@@ -64,9 +65,10 @@ class PartitionMCMC(MCMC):
         current_state_score = sum(self.scores['total_scores'].values())
 
         # Sample a DAG from the initial partition
-        G = sample_score(self.num_nodes, self.node_labels, self.scores, self.parent_table, self._node_label_to_idx)['incidence']
+        sample = sample_score(self.num_nodes, self.node_labels, self.scores, self.parent_table, self._node_label_to_idx)
+        G, DAG_score = sample['incidence'], sample['logscore']
 
-        result = {'graph': G, 'partition': current_state, 'party': party_curr, 'permy': permy_curr, 'posy': posy_curr, 'operation': 'initial', 'accepted' : False,
+        result = {'graph': G, 'DAG_score': DAG_score, 'partition': current_state, 'party': party_curr, 'permy': permy_curr, 'posy': posy_curr, 'operation': 'initial', 'accepted' : False,
                   'score_current' : current_state_score, 'score_proposed' : -1, 'acceptance_prob' : -1, 'proposed_state': None}
         self.current_step = result
         self.update_results(0, result)
@@ -91,8 +93,10 @@ class PartitionMCMC(MCMC):
         nodes_to_rescore = self.proposal_object.get_nodes_to_rescore()
 
         if operation == StructureLearningProposal.STAY_STILL:
-            G = sample_score(self.num_nodes, self.node_labels, self.scores, self.parent_table, self._node_label_to_idx)['incidence']
+            sample = sample_score(self.num_nodes, self.node_labels, self.scores, self.parent_table, self._node_label_to_idx)
+            G, DAG_score = sample['incidence'], sample['logscore']
             result = self.current_step.copy()
+            result['DAG_score'] = DAG_score
             result['operation'] = operation
             result['accepted'] = False
             result['graph'] = G
@@ -104,7 +108,7 @@ class PartitionMCMC(MCMC):
                 scores_copy[key].update(rescore[key])
             proposed_state_score = sum(scores_copy['total_scores'].values())
 
-            u = np.log(np.random.uniform(0, 1))
+            u = np.log(self._rng.uniform(0, 1))
             acceptance_prob = self.proposal_object.compute_acceptance_ratio(current_state_score, proposed_state_score)
             is_accepted = u < acceptance_prob
 
@@ -115,9 +119,10 @@ class PartitionMCMC(MCMC):
                 current_state_score = proposed_state_score
                 party_curr, permy_curr, posy_curr = party_prop, permy_prop, posy_prop
 
-            G = sample_score(self.num_nodes, self.node_labels, self.scores, self.parent_table, self._node_label_to_idx)['incidence']
+            sample = sample_score(self.num_nodes, self.node_labels, self.scores, self.parent_table, self._node_label_to_idx)
+            G, DAG_score = sample['incidence'], sample['logscore']
 
-            result = {'graph': G, 'partition': self.proposal_object.current_state, 'party': party_curr, 'permy': permy_curr, 'posy': posy_curr,
+            result = {'graph': G, 'DAG_score': DAG_score, 'partition': self.proposal_object.current_state, 'party': party_curr, 'permy': permy_curr, 'posy': posy_curr,
                       'operation': operation, 'accepted' : is_accepted, 'score_current' : current_state_score, 'score_proposed' : proposed_state_score,
                       'acceptance_prob' : acceptance_prob, 'proposed_state': proposed_state}
         self.current_step = result

@@ -21,7 +21,7 @@ class GraphProposal(StructureLearningProposal):
     REVERSE_EDGE = 'reverse_edge'
     operations = [ADD_EDGE, DELETE_EDGE, REVERSE_EDGE, StructureLearningProposal.STAY_STILL]
 
-    def __init__(self, initial_state : Union[np.ndarray, nx.DiGraph], blacklist = None, whitelist = None):
+    def __init__(self, initial_state : Union[np.ndarray, nx.DiGraph], blacklist = None, whitelist = None, seed: int = 32):
         """
         Initialise GraphProposal instance.
 
@@ -30,7 +30,7 @@ class GraphProposal(StructureLearningProposal):
             blacklist (numpy.ndarray): mask for edges to ignore in the proposal
             whitelist (numpy.ndarray): mask for edges to include in the proposal
         """
-        super().__init__(initial_state, blacklist, whitelist) # initialize the parent class
+        super().__init__(initial_state, blacklist, whitelist, seed) # initialize the parent class
 
         self.initial_state = nx.adjacency_matrix(initial_state).toarray() if isinstance(initial_state, nx.DiGraph) else initial_state
         self.num_nodes = self.initial_state.shape[1]
@@ -66,7 +66,7 @@ class GraphProposal(StructureLearningProposal):
         # set the number of neighbours
         self._current_state_neighborhood = num_neighbours
         # Randomly sample an operation
-        operation = np.random.choice(self.operations, size=1, p=[num_addition/num_neighbours, num_deletion/num_neighbours, num_reversal/num_neighbours, 1/num_neighbours])
+        operation = self._rng.choice(self.operations, size=1, p=[num_addition/num_neighbours, num_deletion/num_neighbours, num_reversal/num_neighbours, 1/num_neighbours])
 
         # initialise new_incidence as zeros NxN
         self.proposed_state = np.zeros((self.num_nodes, self.num_nodes))

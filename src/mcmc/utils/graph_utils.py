@@ -861,10 +861,12 @@ def generate_DAG(N : int, prob : float , random_seed: int = None):
         (numpy.ndarray): adjacency matrix
 
     """
-    if random_seed is not None:
-        np.random.seed(random_seed)
+    rng = np.random.default_rng(seed=random_seed) if random_seed is not None else np.random
     adjmat = np.zeros((N, N))
-    adjmat[np.tril_indices_from(adjmat, k=-1)] = np.random.binomial(1, prob, size=int(N * (N - 1) / 2))
+    adjmat[np.tril_indices_from(adjmat, k=-1)] = rng.binomial(1, prob, size=int(N * (N - 1) / 2))
+    perm = rng.permutation(N)
+    adjmat[:, perm] = adjmat
+    adjmat[perm, :] = adjmat
     return adjmat
 
 def rDAG(n : int, p : float , labels : str, random_seed: int = 42):

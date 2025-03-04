@@ -14,10 +14,13 @@ from mcmc.utils.graph_utils import generate_DAG, plot_graph_from_adj_mat
 class MCMCExperiment:
 
     def __init__(self, mcmc: Union[MCMC, str], data: pd.DataFrame = None, score: str = 'bge', max_iter: int = 30000, n_chains: int = 1, logging: bool = True, seed: int = 32,
+                 blacklist = None, pc_init = True,
                  # if data is None, generate synthetic data from given graph
                  graph: Union[pd.DataFrame, np.ndarray] = None, n_samples: int = 100, n_variables: int = 5,
                  # experiment details
-                 experiment_name: str = None, parallel: bool = True, n_processes: int = 4, artifact_interval: int = 100
+                 experiment_name: str = None, parallel: bool = True, n_processes: int = 4, log_interval: int = 1, artifact_interval: int = 100,
+                 # values to log
+                 log_values = {'score': 'score_current', 'acceptance probability': 'acceptance_prob'}
                  ):
         # set seed
         self.seed = seed
@@ -30,6 +33,9 @@ class MCMCExperiment:
         self.n_processes = n_processes
         self.experiment_name = experiment_name
         self.artifact_interval = artifact_interval
+        self.log_interval = log_interval
+        self.log_values = {'score': 'score_current', 'acceptance probability': 'acceptance_prob'}
+        self.log_values.update(log_values)
 
         if data is None:
             # generate synthetic data
@@ -43,10 +49,11 @@ class MCMCExperiment:
         if isinstance(mcmc, MCMC):
             self.mcmc = [mcmc]
         elif isinstance(mcmc, str):
+            self.seeds = np.random.randint(10001, size=self.n_chains).tolist()
             if 'structure' in mcmc.lower():
-                self.mcmc = [StructureMCMC(data=data, score_object=score) for i in range(self.n_chains)]
+                self.mcmc = [StructureMCMC(data=data, score_object=score, blacklist=blacklist, pc_init=pc_init, seed=seed) for seed in self.seeds]
             elif 'partition' in mcmc.lower():
-                self.mcmc = [PartitionMCMC(data=data, score_object=score) for i in range(self.n_chains)]
+                self.mcmc = [PartitionMCMC(data=data, score_object=score, blacklist=blacklist, pc_init=pc_init, seed=seed) for seed in self.seeds]
             else:
                 raise NotImplementedError(mcmc)
         else:
@@ -65,7 +72,7 @@ class MCMCExperiment:
     def _run_one_chain(self, chain: int):
         with mlflow.start_run(nested=True):
             # log parameters and input
-            mlflow.log_param('seed', self.seed)
+            mlflow.log_param('seed', self.seeds[chain])
             mlflow.log_param('n_chains', self.n_chains)
             mlflow.log_param('parallel', self.parallel)
             mlflow.log_param('max_iter', self.max_iter)
@@ -80,24 +87,26 @@ class MCMCExperiment:
 
                 # log this step
                 if self.logging:
-                    mlflow.log_metric('score', result['score_current'], iter)
-                    mlflow.log_metric('acceptance probability', result['acceptance_prob'], iter)
+                    if iter % self.log_interval == 0:
+                        for k,v in self.log_values.items():
+                            mlflow.log_metric(k, result[v], iter)
 
                     # save graph as artifact
-                    if iter % self.artifact_interval == 0:
+                    if self.artifact_interval >= 1 and iter % self.artifact_interval == 0:
                         path = os.path.join(uri, f'{iter}.png')
                         g = result['graph']
                         plot_graph_from_adj_mat(g, list(self.data.columns))
                         plt.savefig(path)
                         mlflow.log_artifact(path)
+                        plt.close()
 
             # save chain results
             results = mcmc.results
             acceptance = mcmc.n_accepted/mcmc.max_iter
             path = os.path.join(uri, f'{chain}.npz')
             np.savez(path, results=results, acceptance=acceptance)
-            if self.logging:
-                mlflow.log_artifact(path)
+            mlflow.log_artifact(path)
+            print(f'Saved npz file to {path}')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='MCMCExperiment', description='Run MCMC experiment(s) on given dataset')

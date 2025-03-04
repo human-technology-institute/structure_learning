@@ -46,6 +46,7 @@ class TestBGe(unittest.TestCase):
                     score1 = bidag.DAGcorescore(i+1, np.array(parents_idx), n_vars, score)
 
                 # assertion
+                print(score1, score2)
                 self.assertAlmostEqual(score1, score2, delta=1e-5)
 
 if __name__ == '__main__':
