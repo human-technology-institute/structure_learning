@@ -48,7 +48,7 @@ class MCMC(ABC):
         self.data  = data
         self.node_labels = list(data.columns)
         self.num_nodes = len(self.node_labels)
-        self.search_space = None
+        self.pc_graph = None
         self._rng = np.random.default_rng(seed=seed)
 
         if score_object is None:
@@ -65,6 +65,10 @@ class MCMC(ABC):
             raise Exception(f"Unsupported score {score_object}")
         self.score_object = score_object
 
+        if pc_init:
+            print('Running PC algorithm')
+            self._pc_state, self.pc_graph = initial_graph_pc(score_object.data, True)
+
         if proposal_object is None or isinstance(proposal_object, str):
             if isinstance(proposal_object, str) and proposal_object not in ['graph', 'partition']:
                 raise Exception('Unsupported proposal', proposal_object)
@@ -76,15 +80,11 @@ class MCMC(ABC):
                 else:
                     print('Invalid initial state')
             else:
-                if pc_init:
-                    print('Running PC algorithm')
-                    initial_state, search_space = initial_graph_pc(score_object.data, True)
-                else: # start with random
-                    search_space = None
-                    initial_state = generate_DAG(self.num_nodes, 0.5, seed)
-                self.search_space = search_space
+                initial_state = self._pc_state if pc_init else generate_DAG(self.num_nodes, 0.5, seed)
                 if proposal_object is None or proposal_object == 'partition':
-                    initial_state = build_partition(incidence=initial_state if not plus1 else np.zeros((self.num_nodes, self.num_nodes)), node_labels=self.node_labels)
+                    initial_state[whitelist] = 1
+                    initial_state[blacklist] = 0
+                    initial_state = build_partition(incidence=initial_state, node_labels=self.node_labels)
                     proposal_object = PartitionProposal(initial_state, whitelist=whitelist, blacklist=blacklist, seed=seed)
                 else:
                     proposal_object = GraphProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist, seed=seed)

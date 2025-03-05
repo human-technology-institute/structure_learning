@@ -29,8 +29,6 @@ class PartitionProposal(StructureLearningProposal):
         self.nbh_join_existing = None
         self.nbh_create_new = None
         self.move_probs = self._calculate_move_probs()
-        self.blacklist = blacklist
-        self.whitelist = whitelist
         self.proposed_state = None
 
     def propose(self):

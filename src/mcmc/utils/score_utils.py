@@ -7,7 +7,7 @@ import torch
 from torch.distributions.categorical import Categorical
 
 # This function produces
-def list_possible_parents(max_parents, elements, whitelist=None, blacklist=None, plus1=False, init_cpdag=None):
+def list_possible_parents(max_parents, elements, whitelist=None, blacklist=None, plus1=False, searchspace=None):
     """
     Generate a matrix with all the possible parents of a given node
     up to the maximum number of parents.
@@ -27,9 +27,9 @@ def list_possible_parents(max_parents, elements, whitelist=None, blacklist=None,
     for i, element in enumerate(elements):
         remaining_elements = [e for e in elements if e != element] # all nodes except self
 
-        possible_parent_nodes = remaining_elements if init_cpdag is None or not plus1 else elements[init_cpdag[:,i]==1] # possible parents
+        possible_parent_nodes = remaining_elements if searchspace is None else elements[searchspace[:,i]==1] # possible parents
 
-        remaining_elements = set(remaining_elements) - set(possible_parent_nodes) # possible plus 1
+        remaining_elements = (set(remaining_elements) - set(possible_parent_nodes)) if plus1 else [] # possible plus 1
 
         # get required parent nodes
         required_parents = tuple(elements[whitelist[:, i]==1]) if whitelist is not None else []
