@@ -29,6 +29,8 @@ class StructureLearningProposal(ABC):
         """
         self.initial_state = initial_state
         self.current_state = initial_state
+        self.blacklist = blacklist
+        self.whitelist = whitelist
         self.proposed_state = None
         self.operation = None
         self._rng = np.random.default_rng(seed=seed)
