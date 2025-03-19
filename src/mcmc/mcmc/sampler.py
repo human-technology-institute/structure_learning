@@ -4,6 +4,7 @@ import numpy as np
 
 
 # TODO: logging
+# TODO: Convergence of sampler - e.g. R-hat
 class Sampler(ABC):
 
     def __init__(self, model, proposal, prior, **kwargs):
@@ -69,6 +70,10 @@ class Sampler(ABC):
         """
         pass
 
+
+#####################################################################################################################
+# Brute force
+#TODO
 
 ################################################################################################################
 class MCMCSampler(Sampler):
