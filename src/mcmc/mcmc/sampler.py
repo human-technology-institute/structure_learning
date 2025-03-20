@@ -2,12 +2,16 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
+from mcmc.proposals.proposal import StructureLearningProposal
+from mcmc.inference.prior import DiscretePrior
+
+from mcmc.utils.graph_utils import generate_key_from_adj_matrix, generate_adj_matrix_from_key
 
 # TODO: logging
 # TODO: Convergence of sampler - e.g. R-hat
 class Sampler(ABC):
 
-    def __init__(self, model, proposal, prior, **kwargs):
+    def __init__(self, model, proposal:StructureLearningProposal, prior:DiscretePrior, **kwargs):
         """
 
         Args:
@@ -24,6 +28,12 @@ class Sampler(ABC):
 
         self._chain_thetas = []
         self._chain_logpost = []
+
+        # Model containers - to prevent multiple calculation of the same model - relevant for discrete models only
+        # This assumes a UNIQUE score for a state (e.g., wouldn't work for graphs with missing data or latent nodes
+        self.state_dict = {}
+        self.counter_dict = {}
+
 
     @abstractmethod
     def step(self) -> dict:
@@ -51,6 +61,16 @@ class Sampler(ABC):
             res = self.step()
             self._chain_thetas.append(res['theta'])
             self._chain_logpost.append(res['log_posterior'])
+
+            # Update
+            state_key = generate_key_from_adj_matrix(res['theta'])
+            self.state_dict[state_key] = res['log_posterior']
+
+            if state_key in self.counter_dict.keys():
+                self.counter_dict[state_key] += 1
+            else:
+                self.counter_dict[state_key] = 1
+
             self.Nsamples += 1
 
         return self.postprocess()
@@ -73,7 +93,7 @@ class Sampler(ABC):
 
 #####################################################################################################################
 # Brute force
-#TODO
+# TODO
 
 ################################################################################################################
 class MCMCSampler(Sampler):
@@ -95,9 +115,12 @@ class MCMCSampler(Sampler):
         proposed_dict = self.proposal.propose(theta_c)
         logqratio = proposed_dict["logqratio"]  # the ratio between q(theta_c -> theta_p)/q(theta_p -> theta_c)
         theta_p = proposed_dict["theta_prop"]
-        logpost_p = self.log_posterior(theta_p)
+        if theta_p in self.state_dict.keys():  # To save compute time
+            logpost_p = self.state_dict[theta_p]
+        else:
+            logpost_p = self.log_posterior(theta_p)
 
-        mhratio = min(0, logpost_p - logpost_c - logqratio)
+        mhratio = min(0, logpost_p - logpost_c + logqratio)
         if np.log(np.random.uniform()) < mhratio:
             theta, logpost = theta_p, logpost_p
             self.Naccepts += 1
@@ -148,10 +171,6 @@ class OPADSampler(Sampler):
             raise ValueError("opad_plus: must be either None, list of tuples or a dictionary")
         # self.opad_plus_option - converted to a dict
 
-        # Model containers
-        self.state_dict = {}
-        self.counter_dict = {}
-
     def step(self):
         """
         """
@@ -159,21 +178,19 @@ class OPADSampler(Sampler):
         # Return sample from the internal sampler, e.g. MCMC
         res = self._sampler.step()
 
-        # Update OPAD dictionary of visited states and their scores
-        self.state_dict[res['theta']] = res['log_posterior']
-        if 'theta' in self.counter_dict.keys():
-            self.state_dict[res['theta']] += 1
-        else:
-            self.state_dict[res['theta']] = 1
+        # The main OPAD disctionary are handled by the super class which maintains State and counter of visited states
 
-        # OPAD+ options
+        # OPAD+ options - update states with additional samples states
         if self.opad_plus_option is not None:
             for key2state, key2value in self.opad_plus_option.items():
-                self.state_dict[res[key2state]] = res[key2value]
+
+                state_key = generate_key_from_adj_matrix(res[key2state])
+
+                self.state_dict[state_key] = res[key2value]
                 if key2state in self.counter_dict.keys():
-                    self.state_dict[res[key2state]] += 1
+                    self.counter_dict[state_key] += 1
                 else:
-                    self.state_dict[res[key2state]] = 1
+                    self.counter_dict[state_key] = 1
 
         return res
 
