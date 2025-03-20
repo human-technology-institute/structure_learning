@@ -36,14 +36,10 @@ class StructureLearningProposal(ABC):
         self._rng = np.random.default_rng(seed=seed)
 
     @abstractmethod
-    def propose(self) -> Tuple[State, str]:
+    def propose(self, current_state) -> dict:
         """
         Propose a DAG
         """
-        pass
-
-    @abstractmethod
-    def compute_acceptance_ratio(self) -> float:
         pass
 
     @abstractmethod
