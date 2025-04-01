@@ -162,7 +162,7 @@ true_dag_adj = np.array([
 
 # Simulate dataset
 np.random.seed(67)
-data_np = simulate_gaussian_dag(true_dag_adj, n_samples=800, noise_scale=4.5)
+data_np = simulate_gaussian_dag(true_dag_adj, n_samples=1300, noise_scale=7)
 
 data_df = pd.DataFrame(data_np, columns=['A', 'B', 'C'])
 
