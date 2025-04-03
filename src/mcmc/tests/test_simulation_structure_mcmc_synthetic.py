@@ -60,4 +60,4 @@ def simulate(n_restarts=1, n_nodes=3, node_degree=2, n_observations=200, n_itera
         yield mcmc_results, acceptance, synthetic_data, key in keys
 
 if __name__ == "__main__":
-    simulate()
+    simulate(save_results=True)
