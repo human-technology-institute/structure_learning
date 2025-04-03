@@ -80,11 +80,11 @@ class MCMC(ABC):
                 else:
                     print('Invalid initial state')
             else:
-                initial_state = self._pc_state if pc_init else generate_DAG(self.num_nodes, 0.5, seed)
+                initial_state = (self._pc_state if proposal_object == 'partition' else self.pc_graph) if pc_init else generate_DAG(self.num_nodes, 0.5, seed)
                 if whitelist is not None:
-                    initial_state[whitelist.astype(bool)] = 1
+                    initial_state[whitelist > 0] = 1
                 if blacklist is not None:
-                    initial_state[blacklist.astype(bool)] = 0
+                    initial_state[blacklist > 0] = 0
                 if proposal_object == 'partition':
                     initial_state = build_partition(incidence=initial_state, node_labels=self.node_labels)
                     proposal_object = PartitionProposal(initial_state, whitelist=whitelist, blacklist=blacklist, seed=seed)
