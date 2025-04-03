@@ -4,7 +4,7 @@
 from abc import ABC, abstractmethod
 import pandas as pd
 import numpy as np
-from mcmc.utils.graph_utils import node_label_to_index
+from mcmc.utils.graph_utils import node_label_to_index, find_parents
 
 class Score(ABC):
     """
@@ -40,10 +40,18 @@ class Score(ABC):
         """
         pass
 
-    @abstractmethod
-    def compute_local(self, node : str, parents: list):
+    def compute_node(self, node : str):
         """
         Implements a score function (e.g. BGe, Marginal Likelihood, etc) for a specific node
+        """
+        node_indx = self.node_label_to_index[node]
+        parentnodes = [self.node_labels[i] for i in find_parents(self.incidence, node_indx)]
+        return self.compute_node_with_edges(node, parentnodes)
+
+    @abstractmethod
+    def compute_node_with_edges(self, node : str, parents: list = None):
+        """
+        Implements a score function (e.g. BGe, Marginal Likelihood, etc) for a specific node and parents
         """
         pass
 

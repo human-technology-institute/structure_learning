@@ -1,4 +1,5 @@
 examples/nodes_*
+examples/mlruns/
 venv/
 __pycache__
 .DS_Store
@@ -8,4 +9,5 @@ dist/
 src/.DS_Store
 src/mcmc.egg-info/
 src/structure_mcmc.egg-info/
+src/structure_learning.egg-info/
 src/mcmc/.DS_Store

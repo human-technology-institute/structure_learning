@@ -25,17 +25,17 @@ python -m venv venv
 source venv/bin/activate
 ```
 
-2. **Navigate to the directory `structure_mcmc`. Execute the following commands:**
+2. **Navigate to the directory `structure_learning`. Execute the following commands:**
 ```sh
 pip install -q build
 python -m build
 ```
 
-If successful, you should have `mcmc-0.3.0-py3-none-any.whl` and `mcmc-0.3.0.tar.gz` inside `dist`.
+If successful, you should have `mcmc-0.4.0-py3-none-any.whl` and `mcmc-0.4.0.tar.gz` inside `dist`.
 Finally, run
 
 ```sh
-pip install dist/mcmc-0.3.0-py3-none-any.whl
+pip install dist/mcmc-0.4.0-py3-none-any.whl
 ```
 
 # Running Structure MCMC
@@ -43,19 +43,17 @@ pip install dist/mcmc-0.3.0-py3-none-any.whl
 ```
     import numpy as np
     from mcmc.mcmc import StructureMCMC
-    from mcmc.proposals import GraphProposal
-    from mcmc.scores import BGeScore
 
     ...
 
     # initialise structure MCMC
-    M = StructureMCMC(max_iter=n_iterations, data=data) # data is a pd Dataframe
+    M = StructureMCMC(max_iter=n_iterations, data=data, score_object='bge') # data is a pd Dataframe
 
     # run MCMC
     mcmc_results, acceptance = M.run()
 
     # get chain of graphs
-    graphs = M.get_mcmc_res_graphs(mcmc_results)
+    graphs = M.get_chain_info(mcmc_results)
 ```
 
 # Running Partition MCMC
@@ -63,20 +61,17 @@ pip install dist/mcmc-0.3.0-py3-none-any.whl
 ```
     import numpy as np
     from mcmc.mcmc import PartitionMCMC
-    from mcmc.proposals import PartitionProposal
-    from mcmc.scores import BGeScore
-    from mcmc.utils.partition_utils import build_partition
 
     ...
 
     # initialise partition MCMC
-    M = PartitionMCMC(data=data, max_iter=n_iterations) # data is a pd Dataframe
+    M = PartitionMCMC(data=data, max_iter=n_iterations, score_object='bge') # data is a pd Dataframe
 
     # run MCMC
     mcmc_results, acceptance = M.run()
 
     # get chain of graphs
-    graphs = M.get_mcmc_res_graphs(mcmc_results)
+    graphs = M.get_chain_info(mcmc_results)
 ```
 # Reference
 1. **Friedman, N., & Koller, D. (2003).** "Being Bayesian about network structure: A Bayesian approach to structure discovery in Bayesian networks." *Machine Learning*, 50(1), 95-125.

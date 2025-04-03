@@ -6,7 +6,7 @@ import numpy as np
 import scipy.stats as stats
 import networkx as nx
 from scipy.stats import multivariate_normal
-
+from mcmc.utils.partition_utils import find_parent_nodes, remove_outgoing_edges
 
 class SyntheticDataset(object):
     """
@@ -99,6 +99,32 @@ class SyntheticDataset(object):
         data = pd.DataFrame(multivariate_normal.rvs(cov=sigma, size=num_obs), columns=node_labels)
         # Generate data from MVN distribution
         return data, W
+
+    # def simulate_categorical_data_from_dag(DAG: np.ndarray, num_obs: int, node_labels: list, binary: bool = False, max_states = 5):
+
+    #     n_nodes = DAG.shape[1]
+    #     data = np.zeros((num_obs, n_nodes))
+
+    #     n_states = [2]*n_nodes
+    #     if not binary:
+    #         n_states = np.random.choice(list(range(2, max_states+1)), size=(n_nodes,))
+
+    #     incidence = DAG.copy()
+    #     ordering = []
+    #     for i in range(n_nodes):
+    #         parents = find_parent_nodes(incidence)
+    #         incidence = remove_outgoing_edges(incidence, parents)
+    #         ordering.extend(parents)
+
+    #     for node in ordering:
+    #         if not np.any(DAG[:,node]): # no parent
+    #             data[:, node] = np.random.choice(n_states[node], size=num_obs)
+    #         else:
+    #             states = np.arange(n_states[node])
+
+
+
+
 
     @staticmethod
     def simulate_random_dag(d, degree, graph_type, w_range):

@@ -43,11 +43,11 @@ def simulate(n_restarts=1, n_nodes=3, node_degree=2, n_observations=200, n_itera
                                           node_labels=node_labels, degree=node_degree)
         initial_graph = pd.DataFrame(np.random.choice([0,1], size=(n_nodes, n_nodes))*np.tri(n_nodes, n_nodes, -1))
         G = convert_adj_mat_to_graph(initial_graph)
-        score = BGeScore(synthetic_data.data, initial_graph.values)
+        score = BGeScore(data=synthetic_data, incidence=initial_graph.values)
         proposal = GraphProposal(G)
-        M = StructureMCMC(initial_graph.values, n_iterations, proposal, score)
+        M = StructureMCMC(data=synthetic_data, initial_graph=initial_graph.values, max_iter=n_iterations, proposal_object=proposal, score_object=score)
         mcmc_results, acceptance = M.run()
-        graphs = M.get_mcmc_res_graphs(mcmc_results)
+        graphs = M.get_graphs(mcmc_results)
 
         key = generate_key_from_adj_matrix(synthetic_data.adj_mat.values)
         keys = set([generate_key_from_adj_matrix(g) for g in graphs])
@@ -60,4 +60,4 @@ def simulate(n_restarts=1, n_nodes=3, node_degree=2, n_observations=200, n_itera
         yield mcmc_results, acceptance, synthetic_data, key in keys
 
 if __name__ == "__main__":
-    simulate()
+    simulate(save_results=True)
