@@ -17,7 +17,7 @@ dependencies = [
   "networkx",
   "igraph",
   "seaborn",
-  "pytorch",
+  "torch",
   "pcalg",
   "conditional_independence",
   "xlrd"
