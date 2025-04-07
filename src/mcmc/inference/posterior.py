@@ -92,7 +92,7 @@ def generate_all_dags( data : pd.DataFrame, my_score : Score, isScoreLogSpace = 
 
         # compute score of the data given the graph using any score object
         my_score_object = my_score(data=data, incidence=adj_matrix)
-        score_of_data_given_G = my_score_object.compute()
+        score_of_data_given_G = my_score_object.compute(adj_matrix)
 
         try:
             # Attempt to take the log of the score if the score function is not in log space.

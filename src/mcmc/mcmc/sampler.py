@@ -4,14 +4,14 @@ import numpy as np
 
 from mcmc.proposals.proposal import StructureLearningProposal
 from mcmc.inference.prior import DiscretePrior
-
+from mcmc.scores import Score
 from mcmc.utils.graph_utils import generate_key_from_adj_matrix, generate_adj_matrix_from_key
 
 # TODO: logging
 # TODO: Convergence of sampler - e.g. R-hat
 class Sampler(ABC):
 
-    def __init__(self, model, proposal:StructureLearningProposal, prior:DiscretePrior, **kwargs):
+    def __init__(self, model:Score, proposal:StructureLearningProposal, prior:DiscretePrior, **kwargs):
         """
 
         Args:
@@ -77,7 +77,7 @@ class Sampler(ABC):
 
     def log_posterior(self, theta):
         # The model maintains the data, therefore only a function of theta
-        return self.model.log_likelihood(theta) + self.prior.log_likelihood(theta)
+        return self.model.compute(theta)['score'] + self.prior.log_likelihood(theta)
 
     def current_state(self):
         return self._chain_thetas[-1], self._chain_logpost[-1]
@@ -93,8 +93,9 @@ class Sampler(ABC):
 
 #####################################################################################################################
 # Brute force
-# TODO
+# TODO - This is just OPAD with a specific proposal
 
+# MArching Band - also OPAD with spcific proposal
 ################################################################################################################
 class MCMCSampler(Sampler):
 
@@ -128,7 +129,7 @@ class MCMCSampler(Sampler):
         else:
             theta, logpost = theta_c, logpost_c
             self._chain_accept_reject.append(False)
-        self.proposal.adapt(theta)
+        #self.proposal.adapt(theta) # TODO: implem,ent and adapt method for the proposal
         return {'theta': theta,
                 'log_posterior': logpost,
                 'theta_prop': theta_p,

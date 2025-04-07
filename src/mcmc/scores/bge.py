@@ -7,6 +7,7 @@ from scipy.special import loggamma as lgamma
 from mcmc.scores import Score
 from mcmc.utils.graph_utils import find_parents
 
+
 class BGeScore(Score):
     """
     BGe (Bayesian Gaussian Equivalent) Score
@@ -25,19 +26,22 @@ class BGeScore(Score):
         self._num_obvs = data.shape[0] # number of observations
         self._mu0 = np.zeros(self._num_cols)
 
+        # summary statistics
+        mean_data = np.mean(data, axis=0)
+
         # Scoring parameters.
-        self._am = 1
-        self._aw = self._num_cols + self._am + 1
+        self._am = 1   # Kevin Murphy' (KM): kappa prior
+        self._aw = self._num_cols + self._am + 1 # Kevin Murphy' (KM): ni - degrees of freedom - prior
         T0scale = self._am * (self._aw - self._num_cols - 1) / (self._am + 1)
         self._T0 = T0scale * np.eye(self._num_cols)
         self._TN = (
             self._T0 + (self._num_obvs - 1) * np.cov(data.T) + ((self._am * self._num_obvs) / (self._am + self._num_obvs))
             * np.outer(
-                (self._mu0 - np.mean(data, axis=0)), (self._mu0 - np.mean(data, axis=0))
+                (self._mu0 - mean_data), (self._mu0 - mean_data)
             )
         )
 
-        self._awpN = self._aw + self._num_obvs
+        self._awpN = self._aw + self._num_obvs # ni_n
         self._constscorefact = - (self._num_obvs / 2) * np.log(np.pi) + 0.5 * np.log(self._am / (self._am + self._num_obvs))
         self._scoreconstvec = np.zeros(self._num_cols)
         for i in range(self._num_cols):
@@ -54,9 +58,11 @@ class BGeScore(Score):
         self._parameters = {}
         self._reg_coefficients = {}
 
-    def compute(self):
+    def compute(self, adj_mat):
         """
         Compute the BGE for the data
+        Parameters:
+            adj_mat: adjacency matrix to be evaluated
 
         Returns:
             (dict): score and parameters
@@ -64,6 +70,7 @@ class BGeScore(Score):
         total_log_ml = 0
         parameters = {}  # Dictionary to store the parameters for each node
 
+        self.incidence= adj_mat
         # Loop through each node in the graph
         for node in self.node_labels:
 

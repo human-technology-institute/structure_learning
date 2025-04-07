@@ -34,7 +34,7 @@ class Score(ABC):
 
     # abstract method to be implemented by subclasses
     @abstractmethod
-    def compute(self):
+    def compute(self, adj_mat):
         """
         Implements a score function (e.g. BGe, Marginal Likelihood, etc)
         """
