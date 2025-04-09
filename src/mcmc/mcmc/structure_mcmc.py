@@ -4,6 +4,7 @@
 from typing import Union
 import random
 import numpy as np
+import scipy
 import pandas as pd
 from mcmc.utils.graph_utils import collect_node_scores
 from mcmc.proposals import StructureLearningProposal, GraphProposal
@@ -16,7 +17,7 @@ class StructureMCMC(MCMC):
     """
     def __init__(self, data: pd.DataFrame = None, initial_graph : np.ndarray = None, max_iter : int = 30000,
                  score_object : Union[str, Score] = None, proposal_object : StructureLearningProposal = None, pc_init = True,
-                 blacklist: np.ndarray = None, whitelist: np.ndarray = None, seed: int = 32):
+                 blacklist: np.ndarray = None, whitelist: np.ndarray = None, seed: int = 32, sparse=True):
         """
         Initilialise Structure MCMC instance.
 
@@ -41,11 +42,11 @@ class StructureMCMC(MCMC):
                          blacklist=blacklist, whitelist=whitelist, seed=seed)
 
         self._to_string = f"Structure_MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
-
+        self.sparse = sparse
         self.score_object.incidence = self.proposal_object.current_state
         state_score = self.score_object.compute()
         self.scores = collect_node_scores(state_score)
-        result = {'current_state': self.proposal_object.current_state, 'proposed_state': None, 'score_current': state_score['score'],
+        result = {'current_state': self.proposal_object.current_state if not sparse else scipy.sparse.csr_matrix(self.proposal_object.current_state), 'proposed_state': None, 'score_current': state_score['score'],
                   'operation': 'initial', 'accepted': False, 'acceptance_prob': 0, 'score_proposed': state_score['score']}
         self.update_results(0, result)
 
@@ -84,5 +85,8 @@ class StructureMCMC(MCMC):
             is_accepted = False
             acceptance_prob = proposed_state_score = 0
 
+        if self.sparse:
+            current_state = scipy.sparse.csr_matrix(current_state)
+            proposed_state = scipy.sparse.csr_matrix(proposed_state)
         return {'graph': current_state, 'current_state': current_state, 'proposed_state': proposed_state, 'score_current': current_state_score,
                 'operation': operation, 'accepted': is_accepted, 'acceptance_prob': acceptance_prob, 'score_proposed': proposed_state_score}
