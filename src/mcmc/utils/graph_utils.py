@@ -1071,3 +1071,13 @@ def initial_graph_pc(data: pd.DataFrame, return_cpdag=False):
     cpdag = nx.to_numpy_array(g)
     dag = cpdag_to_dag(cpdag)
     return (dag, cpdag) if return_cpdag else dag
+
+def dag_to_cpdag(DAG, node_labels, blocklist=None):
+    import graphical_models
+
+    nodes = node_labels
+    arcs = v_structures | known_arcs
+    edges = edges - arcs
+    PDAG = graphical_models.PDAG(nodes=nodes, arcs=arcs, edges=edges)
+    PDAG.to_complete_pdag()
+    return PDAG.to_amat()
