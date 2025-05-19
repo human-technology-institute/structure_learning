@@ -1062,7 +1062,7 @@ def cpdag_to_dag(cpdag):
 
     return dag
 
-def initial_graph_pc(data: pd.DataFrame, return_cpdag=False):
+def initial_graph_pc_old(data: pd.DataFrame, return_cpdag=False):
     """
     Runs PC Algorithm and returns a DAG
     """
@@ -1072,12 +1072,29 @@ def initial_graph_pc(data: pd.DataFrame, return_cpdag=False):
     dag = cpdag_to_dag(cpdag)
     return (dag, cpdag) if return_cpdag else dag
 
-def dag_to_cpdag(DAG, node_labels, blocklist=None):
+def initial_graph_pc(data: pd.DataFrame, return_cpdag=False):
+    """
+    Runs PC Algorithm and returns a DAG
+    """
     import graphical_models
 
-    nodes = node_labels
-    arcs = v_structures | known_arcs
-    edges = edges - arcs
-    PDAG = graphical_models.PDAG(nodes=nodes, arcs=arcs, edges=edges)
-    PDAG.to_complete_pdag()
-    return PDAG.to_amat()
+    (g, sep_set) = pcalg.estimate_skeleton(indep_test_func=indep_test_func, data_matrix=data.values, alpha=0.01)
+    g = pcalg.estimate_cpdag(skel_graph=g, sep_set=sep_set)
+    cpdag = nx.to_numpy_array(g)
+    
+    pdag = graphical_models.PDAG.from_amat(cpdag)
+    dag = pdag.to_dag().to_amat()
+    return (dag, cpdag) if return_cpdag else dag
+
+# def dag_to_cpdag(DAG, node_labels, blocklist=None):
+#     import graphical_models
+
+#     nodes = node_labels
+#     dag = graphical_models.DAG.from_amat(DAG)
+#     v_structures = dag.vstructures()
+#     known_arcs = dag.arcs
+#     arcs = v_structures | known_arcs
+#     edges = edges - arcs
+#     PDAG = graphical_models.PDAG(nodes=nodes, arcs=arcs, edges=edges)
+#     PDAG.to_complete_pdag()
+#     return PDAG.to_amat()
