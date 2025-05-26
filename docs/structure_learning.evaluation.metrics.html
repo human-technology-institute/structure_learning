@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module structure_learning.evaluation.metrics</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.evaluation.html" class="white">evaluation</a>.metrics</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/Users/165421/Documents/code/structure_learning/src/structure_learning/evaluation/metrics.py">/Users/165421/Documents/code/structure_learning/src/structure_learning/evaluation/metrics.py</a></td></tr></table>
+    <p></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="sklearn.metrics.html">sklearn.metrics</a><br>
+</td><td class="multicolumn"><a href="numpy.html">numpy</a><br>
+</td><td class="multicolumn"><a href="pickle.html">pickle</a><br>
+</td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-compute_divergence"><strong>compute_divergence</strong></a>(self, interval=100, results_output_path=None)</dt></dl>
+ <dl><dt><a name="-expected_edges_DAGFlows"><strong>expected_edges_DAGFlows</strong></a>(mcmc_graph_list)</dt><dd><span class="code">Compute&nbsp;the&nbsp;expected&nbsp;number&nbsp;of&nbsp;edges.<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;computes&nbsp;the&nbsp;expected&nbsp;number&nbsp;of&nbsp;edges&nbsp;in&nbsp;graphs&nbsp;sampled&nbsp;from<br>
+the&nbsp;posterior&nbsp;approximation.<br>
+Code&nbsp;from:<br>
+<a href="https://github.com/tristandeleu/jax-dag-gflownet/blob/master/dag_gflownet/utils/metrics.py">https://github.com/tristandeleu/jax-dag-gflownet/blob/master/dag_gflownet/utils/metrics.py</a><br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mcmc_graph_list&nbsp;(list&nbsp;(numpy.ndarray)):&nbsp;&nbsp;Posterior&nbsp;approximation.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;must&nbsp;have&nbsp;size&nbsp;`(B,&nbsp;N,&nbsp;N)`,&nbsp;where&nbsp;`B`&nbsp;is&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;number&nbsp;of&nbsp;sample&nbsp;graphs&nbsp;from&nbsp;the&nbsp;posterior&nbsp;approximation,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;`N`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;variables&nbsp;in&nbsp;the&nbsp;graphs.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(float):&nbsp;The&nbsp;expected&nbsp;number&nbsp;of&nbsp;edges.</span></dd></dl>
+ <dl><dt><a name="-expected_shd_DAGFlows"><strong>expected_shd_DAGFlows</strong></a>(chain_list: list, true_DAG: numpy.ndarray)</dt><dd><span class="code">Compute&nbsp;the&nbsp;Expected&nbsp;Structural&nbsp;Hamming&nbsp;Distance.<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;computes&nbsp;the&nbsp;Expected&nbsp;SHD&nbsp;between&nbsp;a&nbsp;posterior&nbsp;approximation<br>
+given&nbsp;as&nbsp;a&nbsp;collection&nbsp;of&nbsp;samples&nbsp;from&nbsp;the&nbsp;posterior,&nbsp;and&nbsp;the&nbsp;ground-truth<br>
+graph&nbsp;used&nbsp;in&nbsp;the&nbsp;original&nbsp;data&nbsp;generation&nbsp;process.<br>
+Code&nbsp;from:<br>
+<a href="https://github.com/tristandeleu/jax-dag-gflownet/blob/master/dag_gflownet/utils/metrics.py">https://github.com/tristandeleu/jax-dag-gflownet/blob/master/dag_gflownet/utils/metrics.py</a><br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;chain_list&nbsp;(list&nbsp;(numpy.ndarray)):&nbsp;&nbsp;Posterior&nbsp;approximation.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;must&nbsp;have&nbsp;size&nbsp;`(B,&nbsp;N,&nbsp;N)`,&nbsp;where&nbsp;`B`&nbsp;is&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;number&nbsp;of&nbsp;sample&nbsp;graphs&nbsp;from&nbsp;the&nbsp;posterior&nbsp;approximation,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;`N`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;variables&nbsp;in&nbsp;the&nbsp;graphs.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;true_DAG&nbsp;(numpy.ndarray):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Adjacency&nbsp;matrix&nbsp;of&nbsp;the&nbsp;ground-truth&nbsp;graph.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;must&nbsp;have&nbsp;size&nbsp;`(N,&nbsp;N)`,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;`N`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;variables&nbsp;in&nbsp;the&nbsp;graph.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(float):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;Expected&nbsp;SHD.</span></dd></dl>
+ <dl><dt><a name="-jensen_shannon_divergence"><strong>jensen_shannon_divergence</strong></a>(P: dict, Q: dict, epsilon: float = 1e-15)</dt><dd><span class="code">Compute&nbsp;the&nbsp;jensen_shannon_divergence&nbsp;between&nbsp;two&nbsp;distributions.<br>
+Requires&nbsp;that&nbsp;the&nbsp;two&nbsp;distributions&nbsp;have&nbsp;the&nbsp;same&nbsp;length.</span></dd></dl>
+ <dl><dt><a name="-kl_divergence"><strong>kl_divergence</strong></a>(P: dict, Q: dict, epsilon: float = 1e-15)</dt><dd><span class="code">Computes&nbsp;the&nbsp;KL&nbsp;divergence&nbsp;between&nbsp;two&nbsp;distributions.<br>
+Requires&nbsp;that&nbsp;the&nbsp;two&nbsp;distributions&nbsp;have&nbsp;the&nbsp;same&nbsp;length.</span></dd></dl>
+ <dl><dt><a name="-mean_absolute_error"><strong>mean_absolute_error</strong></a>(P: dict, Q: dict)</dt><dd><span class="code">Compute&nbsp;mean&nbsp;absolute&nbsp;error.</span></dd></dl>
+ <dl><dt><a name="-mean_squared_error"><strong>mean_squared_error</strong></a>(P: dict, Q: dict)</dt><dd><span class="code">Compute&nbsp;mean&nbsp;squared&nbsp;error.</span></dd></dl>
+ <dl><dt><a name="-pairwise_structural_hamming_distance"><strong>pairwise_structural_hamming_distance</strong></a>(x, y)</dt><dd><span class="code">Computes&nbsp;pairwise&nbsp;Structural&nbsp;Hamming&nbsp;distance,&nbsp;i.e.<br>
+the&nbsp;number&nbsp;of&nbsp;edge&nbsp;insertions,&nbsp;deletions&nbsp;or&nbsp;flips&nbsp;in&nbsp;order&nbsp;to&nbsp;transform&nbsp;one&nbsp;graph&nbsp;to&nbsp;another<br>
+This&nbsp;means,&nbsp;edge&nbsp;reversals&nbsp;do&nbsp;not&nbsp;double&nbsp;count,&nbsp;and&nbsp;that&nbsp;getting&nbsp;an&nbsp;undirected&nbsp;edge&nbsp;wrong&nbsp;only&nbsp;counts&nbsp;1<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;(numpy.ndarray):&nbsp;batch&nbsp;of&nbsp;adjacency&nbsp;matrices&nbsp;&nbsp;[N,&nbsp;d,&nbsp;d]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y&nbsp;(numpy.ndarray):&nbsp;batch&nbsp;of&nbsp;adjacency&nbsp;matrices&nbsp;&nbsp;[M,&nbsp;d,&nbsp;d]<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;matrix&nbsp;of&nbsp;shape&nbsp;``[N,&nbsp;M]``&nbsp;&nbsp;where&nbsp;elt&nbsp;``i,j``&nbsp;is&nbsp;&nbsp;SHD(``x[i]``,&nbsp;``y[j]``)</span></dd></dl>
+ <dl><dt><a name="-save_results"><strong>save_results</strong></a>(self, results, filename)</dt><dd><span class="code">Pickle&nbsp;results</span></dd></dl>
+ <dl><dt><a name="-threshold_metrics_DAGFlows"><strong>threshold_metrics_DAGFlows</strong></a>(mcmc_graph_list, true_DAG)</dt><dd><span class="code">Compute&nbsp;threshold&nbsp;metrics&nbsp;(e.g.&nbsp;AUROC,&nbsp;Precision,&nbsp;Recall,&nbsp;etc...).<br>
+Code&nbsp;from:<br>
+<a href="https://github.com/tristandeleu/jax-dag-gflownet/blob/master/dag_gflownet/utils/metrics.py">https://github.com/tristandeleu/jax-dag-gflownet/blob/master/dag_gflownet/utils/metrics.py</a><br>
+&nbsp;<br>
+&nbsp;Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mcmc_graph_list&nbsp;(list&nbsp;(numpy.ndarray)):&nbsp;&nbsp;Posterior&nbsp;approximation.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;must&nbsp;have&nbsp;size&nbsp;`(B,&nbsp;N,&nbsp;N)`,&nbsp;where&nbsp;`B`&nbsp;is&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;number&nbsp;of&nbsp;sample&nbsp;graphs&nbsp;from&nbsp;the&nbsp;posterior&nbsp;approximation,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;`N`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;variables&nbsp;in&nbsp;the&nbsp;graphs.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;true_DAG&nbsp;(numpy.ndarray):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Adjacency&nbsp;matrix&nbsp;of&nbsp;the&nbsp;ground-truth&nbsp;graph.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;must&nbsp;have&nbsp;size&nbsp;`(N,&nbsp;N)`,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;`N`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;variables&nbsp;in&nbsp;the&nbsp;graph.<br>
+&nbsp;<br>
+Returns<br>
+-------<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(dict):&nbsp;threshold&nbsp;metrics.</span></dd></dl>
+</td></tr></table>
+</body></html>

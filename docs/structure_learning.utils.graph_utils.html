@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module structure_learning.utils.graph_utils</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.utils.html" class="white">utils</a>.graph_utils</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/Users/165421/Documents/code/structure_learning/src/structure_learning/utils/graph_utils.py">/Users/165421/Documents/code/structure_learning/src/structure_learning/utils/graph_utils.py</a></td></tr></table>
+    <p></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="igraph.html">igraph</a><br>
+<a href="itertools.html">itertools</a><br>
+<a href="numpy.html">numpy</a><br>
+</td><td class="multicolumn"><a href="networkx.html">networkx</a><br>
+<a href="pcalg.html">pcalg</a><br>
+<a href="pandas.html">pandas</a><br>
+</td><td class="multicolumn"><a href="pickle.html">pickle</a><br>
+<a href="matplotlib.pyplot.html">matplotlib.pyplot</a><br>
+<a href="re.html">re</a><br>
+</td><td class="multicolumn"><a href="zipfile.html">zipfile</a><br>
+</td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-add_edges_to_graph"><strong>add_edges_to_graph</strong></a>(edges, G_init)</dt><dd><span class="code">Add&nbsp;edges&nbsp;to&nbsp;existing&nbsp;networkx&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;edges&nbsp;(list&nbsp;(tuple)):&nbsp;list&nbsp;of&nbsp;edges&nbsp;to&nbsp;add<br>
+&nbsp;&nbsp;&nbsp;&nbsp;G_init&nbsp;(networkx.DiGraph):&nbsp;graph<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(networkx.DiGraph):&nbsp;new&nbsp;graph&nbsp;with&nbsp;added&nbsp;edges</span></dd></dl>
+ <dl><dt><a name="-all_valid_orderings"><strong>all_valid_orderings</strong></a>(adjMatrix, indx_to_node)</dt><dd><span class="code">Parameters:<br>
+&nbsp;<br>
+Returns:</span></dd></dl>
+ <dl><dt><a name="-calculate_in_degree"><strong>calculate_in_degree</strong></a>(adjMatrix)</dt><dd><span class="code">Compute&nbsp;in-degree&nbsp;for&nbsp;each&nbsp;node&nbsp;in&nbsp;a&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;adjMatrix&nbsp;(numpy.ndarray):&nbsp;graph&nbsp;adjacency&nbsp;matrix<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(list&nbsp;(int)):&nbsp;node&nbsp;in-degree</span></dd></dl>
+ <dl><dt><a name="-collect_node_scores"><strong>collect_node_scores</strong></a>(graph_score)</dt><dd><span class="code">Collect&nbsp;node&nbsp;scores&nbsp;as&nbsp;dictionary&nbsp;with&nbsp;nodes&nbsp;as&nbsp;keys.<br>
+&nbsp;<br>
+Parameter:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;graph_score&nbsp;(dict):&nbsp;dictionary&nbsp;of&nbsp;score&nbsp;information&nbsp;generated&nbsp;from&nbsp;Score&nbsp;objects<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(dict):&nbsp;dictionary&nbsp;with&nbsp;nodes&nbsp;as&nbsp;keys&nbsp;and&nbsp;scores&nbsp;as&nbsp;values</span></dd></dl>
+ <dl><dt><a name="-comb"><strong>comb</strong></a>(n, k, /)</dt><dd><span class="code">Number&nbsp;of&nbsp;ways&nbsp;to&nbsp;choose&nbsp;k&nbsp;items&nbsp;from&nbsp;n&nbsp;items&nbsp;without&nbsp;repetition&nbsp;and&nbsp;without&nbsp;order.<br>
+&nbsp;<br>
+Evaluates&nbsp;to&nbsp;n!&nbsp;/&nbsp;(k!&nbsp;*&nbsp;(n&nbsp;-&nbsp;k)!)&nbsp;when&nbsp;k&nbsp;&lt;=&nbsp;n&nbsp;and&nbsp;evaluates<br>
+to&nbsp;zero&nbsp;when&nbsp;k&nbsp;&gt;&nbsp;n.<br>
+&nbsp;<br>
+Also&nbsp;called&nbsp;the&nbsp;binomial&nbsp;coefficient&nbsp;because&nbsp;it&nbsp;is&nbsp;equivalent<br>
+to&nbsp;the&nbsp;coefficient&nbsp;of&nbsp;k-th&nbsp;term&nbsp;in&nbsp;polynomial&nbsp;expansion&nbsp;of&nbsp;the<br>
+expression&nbsp;(1&nbsp;+&nbsp;x)**n.<br>
+&nbsp;<br>
+Raises&nbsp;TypeError&nbsp;if&nbsp;either&nbsp;of&nbsp;the&nbsp;arguments&nbsp;are&nbsp;not&nbsp;integers.<br>
+Raises&nbsp;ValueError&nbsp;if&nbsp;either&nbsp;of&nbsp;the&nbsp;arguments&nbsp;are&nbsp;negative.</span></dd></dl>
+ <dl><dt><a name="-compare_graphs"><strong>compare_graphs</strong></a>(g1: numpy.ndarray, g2: numpy.ndarray, op, index_to_node_label)</dt><dd><span class="code">Checks&nbsp;edge&nbsp;operation&nbsp;on&nbsp;two&nbsp;adjacency&nbsp;matrices.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;g1&nbsp;(numpy.ndarray):&nbsp;adjacency&nbsp;matrix&nbsp;of&nbsp;first&nbsp;graph<br>
+&nbsp;&nbsp;&nbsp;&nbsp;g2&nbsp;(numpy.ndarray):&nbsp;adjacency&nbsp;matrix&nbsp;of&nbsp;second&nbsp;graph<br>
+&nbsp;&nbsp;&nbsp;&nbsp;op&nbsp;(str):&nbsp;edge&nbsp;operation&nbsp;[add_edge,&nbsp;delete_edge,&nbsp;reverse_edge]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;index_to_node_label&nbsp;(dict)<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(str)|(list&nbsp;(str)):&nbsp;label(s)&nbsp;of&nbsp;node(s)&nbsp;connected&nbsp;to&nbsp;relevant&nbsp;edge(s)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;under&nbsp;specified&nbsp;operation,&nbsp;or&nbsp;error&nbsp;message</span></dd></dl>
+ <dl><dt><a name="-compute_ancestor_matrix"><strong>compute_ancestor_matrix</strong></a>(adj_matrix: numpy.ndarray)</dt><dd><span class="code">Compute&nbsp;ancestor&nbsp;matrix&nbsp;from&nbsp;adjacency&nbsp;matrix.<br>
+&nbsp;<br>
+Parameter:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;adj_matrix&nbsp;(numpy.ndarray):&nbsp;graph&nbsp;adjancency&nbsp;matrix<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;ancestor&nbsp;matrix</span></dd></dl>
+ <dl><dt><a name="-convert_adj_mat_np_to_graph"><strong>convert_adj_mat_np_to_graph</strong></a>(incidence: numpy.ndarray, labels: list)</dt><dd><span class="code">Convert&nbsp;numpy&nbsp;adjacency&nbsp;matrix&nbsp;to&nbsp;networkx&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;incidence&nbsp;(numpy.ndarray):&nbsp;adjacency&nbsp;matrix<br>
+&nbsp;&nbsp;&nbsp;&nbsp;labels&nbsp;(list):&nbsp;node&nbsp;labels<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(networkx.DiGraph):&nbsp;networkx&nbsp;graph</span></dd></dl>
+ <dl><dt><a name="-convert_adj_mat_to_graph"><strong>convert_adj_mat_to_graph</strong></a>(incidence: pandas.core.frame.DataFrame)</dt><dd><span class="code">Convert&nbsp;pandas&nbsp;DataFrame&nbsp;adjacency&nbsp;matrix&nbsp;to&nbsp;networkx&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;incidence&nbsp;(pandas.DataFrame):&nbsp;adjacency&nbsp;matrix<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(networkx.DiGraph):&nbsp;networkx&nbsp;graph</span></dd></dl>
+ <dl><dt><a name="-convert_pkl_graph_to_csv"><strong>convert_pkl_graph_to_csv</strong></a>(pickle_path: str)</dt><dd><span class="code">Save&nbsp;pickled&nbsp;object&nbsp;to&nbsp;csv.<br>
+&nbsp;<br>
+Parameter:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pickle_path&nbsp;(str):&nbsp;Path&nbsp;to&nbsp;pickle&nbsp;file</span></dd></dl>
+ <dl><dt><a name="-count_all_valid_orderings"><strong>count_all_valid_orderings</strong></a>(graph: numpy.ndarray)</dt><dd><span class="code">Count&nbsp;all&nbsp;the&nbsp;valid&nbsp;node&nbsp;orderings&nbsp;given&nbsp;a&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;graph&nbsp;(numpy.ndarray):&nbsp;graph&nbsp;adjacency&nbsp;matrix<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(int):&nbsp;number&nbsp;of&nbsp;valid&nbsp;node&nbsp;orderings</span></dd></dl>
+ <dl><dt><a name="-count_dags"><strong>count_dags</strong></a>(n: int)</dt><dd><span class="code">Count&nbsp;all&nbsp;possible&nbsp;DAGs.&nbsp;Given&nbsp;$n$&nbsp;nodes,&nbsp;the&nbsp;possible&nbsp;number&nbsp;of&nbsp;DAGs<br>
+that&nbsp;can&nbsp;be&nbsp;built&nbsp;is&nbsp;given&nbsp;by<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a(n)&nbsp;=&nbsp;\sum_{k=1}^{n}&nbsp;(-1)^{(k+1)}&nbsp;inom{n}{k}&nbsp;2^{k(n-k)}&nbsp;a(n-k)<br>
+&nbsp;<br>
+Parameter:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;n&nbsp;(int):&nbsp;number&nbsp;of&nbsp;nodes<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(int):&nbsp;number&nbsp;of&nbsp;possible&nbsp;directed&nbsp;graphs</span></dd></dl>
+ <dl><dt><a name="-count_parents"><strong>count_parents</strong></a>(adj_matrix, node)</dt><dd><span class="code">Count&nbsp;the&nbsp;number&nbsp;of&nbsp;parents&nbsp;for&nbsp;a&nbsp;given&nbsp;node&nbsp;in&nbsp;a&nbsp;directed&nbsp;graph.<br>
+&nbsp;<br>
+Parameters<br>
+&nbsp;&nbsp;&nbsp;&nbsp;adj_matrix&nbsp;(numpy.ndarray):&nbsp;adjacency&nbsp;matrix&nbsp;of&nbsp;the&nbsp;graph<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node&nbsp;(int):&nbsp;index&nbsp;of&nbsp;the&nbsp;node&nbsp;to&nbsp;count&nbsp;parents&nbsp;for<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(int):&nbsp;number&nbsp;of&nbsp;parents&nbsp;(incoming&nbsp;edges)&nbsp;of&nbsp;the&nbsp;specified&nbsp;node</span></dd></dl>
+ <dl><dt><a name="-cpdag_to_dag"><strong>cpdag_to_dag</strong></a>(cpdag)</dt><dd><span class="code">Returns&nbsp;a&nbsp;DAG&nbsp;from&nbsp;a&nbsp;CPDAG</span></dd></dl>
+ <dl><dt><a name="-create_identity_matrix"><strong>create_identity_matrix</strong></a>(N)</dt><dd><span class="code">Create&nbsp;an&nbsp;NxN&nbsp;identity&nbsp;matrix.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;N&nbsp;(int):&nbsp;dimension&nbsp;of&nbsp;the&nbsp;matrix<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;identity&nbsp;matrix</span></dd></dl>
+ <dl><dt><a name="-create_ones_matrix"><strong>create_ones_matrix</strong></a>(N)</dt><dd><span class="code">Create&nbsp;an&nbsp;NxN&nbsp;ones&nbsp;matrix.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;N&nbsp;(int):&nbsp;dimension&nbsp;of&nbsp;the&nbsp;matrix<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;ones&nbsp;matrix</span></dd></dl>
+ <dl><dt><a name="-create_zeros_matrix"><strong>create_zeros_matrix</strong></a>(N)</dt><dd><span class="code">Create&nbsp;an&nbsp;NxN&nbsp;zero&nbsp;matrix.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;N&nbsp;(int):&nbsp;dimension&nbsp;of&nbsp;the&nbsp;matrix<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;zero&nbsp;matrix</span></dd></dl>
+ <dl><dt><a name="-edges_to_adj_np"><strong>edges_to_adj_np</strong></a>(edges, node_labels)</dt><dd><span class="code">Create&nbsp;adjacency&nbsp;matrix&nbsp;from&nbsp;a&nbsp;list&nbsp;of&nbsp;edges.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;edges&nbsp;(list&nbsp;(tuple)):&nbsp;list&nbsp;of&nbsp;graph&nbsp;edges<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_labels&nbsp;(list):&nbsp;&nbsp;node&nbsp;labels<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;adjacency&nbsp;matrix</span></dd></dl>
+ <dl><dt><a name="-edges_to_adjacency_matrix"><strong>edges_to_adjacency_matrix</strong></a>(edges, G)</dt><dd><span class="code">Convert&nbsp;edges&nbsp;to&nbsp;adjacency&nbsp;matrix.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;edges&nbsp;(list&nbsp;(tuple)):&nbsp;list&nbsp;of&nbsp;edges&nbsp;to&nbsp;add<br>
+&nbsp;&nbsp;&nbsp;&nbsp;G&nbsp;(networkx.DiGraph):&nbsp;graph<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;adjacency&nbsp;matrix</span></dd></dl>
+ <dl><dt><a name="-factorial"><strong>factorial</strong></a>(n, /)</dt><dd><span class="code">Find&nbsp;n!.<br>
+&nbsp;<br>
+Raise&nbsp;a&nbsp;ValueError&nbsp;if&nbsp;x&nbsp;is&nbsp;negative&nbsp;or&nbsp;non-integral.</span></dd></dl>
+ <dl><dt><a name="-findAllTopologicalOrders"><strong>findAllTopologicalOrders</strong></a>(adjMatrix, indegree, path, discovered, N, results, indx_to_node)</dt><dd><span class="code">Parameters:</span></dd></dl>
+ <dl><dt><a name="-find_all_paths_from_roots"><strong>find_all_paths_from_roots</strong></a>(graph)</dt><dd><span class="code">Find&nbsp;all&nbsp;paths&nbsp;in&nbsp;the&nbsp;given&nbsp;DAG&nbsp;starting&nbsp;from&nbsp;root&nbsp;nodes,&nbsp;represented&nbsp;by&nbsp;an&nbsp;adjacency&nbsp;matrix.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;graph:&nbsp;A&nbsp;2D&nbsp;list&nbsp;representing&nbsp;the&nbsp;adjacency&nbsp;matrix&nbsp;of&nbsp;the&nbsp;DAG.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(list&nbsp;(list))&nbsp;Each&nbsp;list&nbsp;represents&nbsp;a&nbsp;path&nbsp;starting&nbsp;from&nbsp;any&nbsp;root&nbsp;node.</span></dd></dl>
+ <dl><dt><a name="-find_parents"><strong>find_parents</strong></a>(adj_matrix, node)</dt><dd><span class="code">Find&nbsp;the&nbsp;indices&nbsp;of&nbsp;parent&nbsp;nodes&nbsp;for&nbsp;a&nbsp;given&nbsp;node&nbsp;in&nbsp;a&nbsp;directed&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;adj_matrix&nbsp;(numpy.ndarray):&nbsp;adjacency&nbsp;matrix&nbsp;of&nbsp;the&nbsp;graph<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node&nbsp;(int):&nbsp;index&nbsp;of&nbsp;the&nbsp;node&nbsp;to&nbsp;find&nbsp;parents&nbsp;for<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(list&nbsp;(int)):&nbsp;list&nbsp;of&nbsp;indices&nbsp;of&nbsp;parent&nbsp;nodes&nbsp;of&nbsp;the&nbsp;specified&nbsp;node</span></dd></dl>
+ <dl><dt><a name="-generate_DAG"><strong>generate_DAG</strong></a>(N: int, prob: float, random_seed: int = None)</dt><dd><span class="code">Generate&nbsp;a&nbsp;random&nbsp;DAG,&nbsp;represented&nbsp;by&nbsp;a&nbsp;lower&nbsp;triangular&nbsp;adjacency&nbsp;matrix.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;N&nbsp;(int):&nbsp;number&nbsp;of&nbsp;nodes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;prob&nbsp;(float):&nbsp;edge&nbsp;probability<br>
+&nbsp;&nbsp;&nbsp;&nbsp;random_seed&nbsp;(int):&nbsp;seed&nbsp;for&nbsp;numpy&nbsp;RNG<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;adjacency&nbsp;matrix</span></dd></dl>
+ <dl><dt><a name="-generate_adj_matrix_from_key"><strong>generate_adj_matrix_from_key</strong></a>(key, num_nodes)</dt><dd><span class="code">Create&nbsp;adjacency&nbsp;matrix&nbsp;from&nbsp;key.&nbsp;Inverse&nbsp;of&nbsp;generate_key_from_adj_matrix.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;key&nbsp;(str):&nbsp;string&nbsp;representation&nbsp;of&nbsp;the&nbsp;graph<br>
+&nbsp;&nbsp;&nbsp;&nbsp;num_nodes&nbsp;(int):&nbsp;number&nbsp;of&nbsp;nodes<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray)</span></dd></dl>
+ <dl><dt><a name="-generate_all_dags_from_ordering"><strong>generate_all_dags_from_ordering</strong></a>(nodes: list)</dt><dd><span class="code">Generate&nbsp;all&nbsp;DAGs&nbsp;from&nbsp;a&nbsp;topological&nbsp;ordering&nbsp;of&nbsp;nodes.<br>
+&nbsp;<br>
+Parameter:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nodes&nbsp;(list):&nbsp;nodes&nbsp;in&nbsp;topological&nbsp;order<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;generator&nbsp;of&nbsp;DAGs</span></dd></dl>
+ <dl><dt><a name="-generate_dag_from_ordering"><strong>generate_dag_from_ordering</strong></a>(ordering: list, node_label_to_index: dict, edge_prob: float = 0.5)</dt><dd><span class="code">Generate&nbsp;a&nbsp;random&nbsp;DAG&nbsp;from&nbsp;topological&nbsp;ordering.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ordering&nbsp;(list):&nbsp;node&nbsp;topological&nbsp;ordering<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_label_to_index&nbsp;(dict):&nbsp;node-index&nbsp;mapping<br>
+&nbsp;&nbsp;&nbsp;&nbsp;edge_prob&nbsp;(float):&nbsp;probability&nbsp;of&nbsp;an&nbsp;edge&nbsp;being&nbsp;present&nbsp;in&nbsp;the&nbsp;generated&nbsp;graph<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;adjacency_matrix</span></dd></dl>
+ <dl><dt><a name="-generate_edges_from_adj_matrix"><strong>generate_edges_from_adj_matrix</strong></a>(adj_matrix)</dt><dd><span class="code">Generate&nbsp;list&nbsp;of&nbsp;edges&nbsp;(as&nbsp;tuples)&nbsp;of&nbsp;the&nbsp;graph&nbsp;from&nbsp;adjacency&nbsp;matrix.<br>
+&nbsp;<br>
+Parameter:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;adj_matrix&nbsp;(numpy.ndarray):&nbsp;graph&nbsp;adjacency&nbsp;matrix<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(list&nbsp;(tuple&nbsp;(int))):&nbsp;list&nbsp;of&nbsp;edges</span></dd></dl>
+ <dl><dt><a name="-generate_graph_from_key"><strong>generate_graph_from_key</strong></a>(key, node_labels)</dt><dd><span class="code">Create&nbsp;networkx&nbsp;graph&nbsp;from&nbsp;key.&nbsp;Inverse&nbsp;of&nbsp;generate_key_from_graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;key&nbsp;(str):&nbsp;string&nbsp;representation&nbsp;of&nbsp;the&nbsp;graph<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_labels&nbsp;(list&nbsp;(str)):&nbsp;node&nbsp;labels<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(networkx.DiGraph)</span></dd></dl>
+ <dl><dt><a name="-generate_key_from_adj_matrix"><strong>generate_key_from_adj_matrix</strong></a>(adj_matrix)</dt><dd><span class="code">Generate&nbsp;a&nbsp;unique&nbsp;key&nbsp;from&nbsp;an&nbsp;adjacency&nbsp;matrix.<br>
+&nbsp;<br>
+Parameter:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;adj_matrix&nbsp;(np.ndarray):&nbsp;Adjacency&nbsp;matrix.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;Unique&nbsp;key&nbsp;for&nbsp;the&nbsp;adjacency&nbsp;matrix.</span></dd></dl>
+ <dl><dt><a name="-generate_key_from_graph"><strong>generate_key_from_graph</strong></a>(G: networkx.classes.digraph.DiGraph)</dt><dd><span class="code">Generate&nbsp;a&nbsp;unique&nbsp;key&nbsp;from&nbsp;a&nbsp;graph.<br>
+&nbsp;<br>
+Parameter:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;G&nbsp;(nx.DiGraph):&nbsp;Directed&nbsp;graph.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(str):&nbsp;Unique&nbsp;key&nbsp;for&nbsp;the&nbsp;graph.</span></dd></dl>
+ <dl><dt><a name="-get_adjacency_matrix"><strong>get_adjacency_matrix</strong></a>(G: networkx.classes.digraph.DiGraph)</dt><dd><span class="code">Get&nbsp;DataFrame&nbsp;adjacency&nbsp;from&nbsp;networkx&nbsp;graph.<br>
+&nbsp;<br>
+Parameter:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;G&nbsp;(networkx.DiGraph):&nbsp;graph<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(pandas.DataFrame):&nbsp;adjacency&nbsp;matrix</span></dd></dl>
+ <dl><dt><a name="-graph_to_adjmatrix"><strong>graph_to_adjmatrix</strong></a>(G)</dt><dd><span class="code">Convert&nbsp;a&nbsp;networkx&nbsp;graph&nbsp;to&nbsp;an&nbsp;adjacency&nbsp;matrix.<br>
+&nbsp;<br>
+Parameter:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;G&nbsp;(nx.DiGraph):&nbsp;a&nbsp;directed&nbsp;graph<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpyp.ndarray):&nbsp;adjacency&nbsp;matrix</span></dd></dl>
+ <dl><dt><a name="-has_cycle"><strong>has_cycle</strong></a>(adj_matrix)</dt><dd><span class="code">Check&nbsp;if&nbsp;the&nbsp;graph&nbsp;represented&nbsp;by&nbsp;the&nbsp;adjacency&nbsp;matrix&nbsp;has&nbsp;a&nbsp;cycle.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;adj_matrix&nbsp;(numpy.ndarray):&nbsp;adjacency&nbsp;matrix&nbsp;of&nbsp;the&nbsp;graph<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(bool):&nbsp;True&nbsp;if&nbsp;the&nbsp;graph&nbsp;has&nbsp;a&nbsp;cycle,&nbsp;False&nbsp;otherwise</span></dd></dl>
+ <dl><dt><a name="-indep_test_func"><strong>indep_test_func</strong></a>(data, i, j, k)</dt><dd><span class="code">Conditional&nbsp;independence&nbsp;test&nbsp;on&nbsp;data&nbsp;variables&nbsp;(columns)</span></dd></dl>
+ <dl><dt><a name="-index_to_node_label"><strong>index_to_node_label</strong></a>(node_labels)</dt><dd><span class="code">Map&nbsp;node&nbsp;index&nbsp;to&nbsp;label.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_labels&nbsp;(list&nbsp;(str)):&nbsp;node&nbsp;labels<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(dict):&nbsp;dictionary&nbsp;with&nbsp;index&nbsp;as&nbsp;keys&nbsp;and&nbsp;labels&nbsp;as&nbsp;values</span></dd></dl>
+ <dl><dt><a name="-initial_graph_pc"><strong>initial_graph_pc</strong></a>(data: pandas.core.frame.DataFrame, return_cpdag=False)</dt><dd><span class="code">Runs&nbsp;PC&nbsp;Algorithm&nbsp;and&nbsp;returns&nbsp;a&nbsp;DAG</span></dd></dl>
+ <dl><dt><a name="-initial_graph_pc_old"><strong>initial_graph_pc_old</strong></a>(data: pandas.core.frame.DataFrame, return_cpdag=False)</dt><dd><span class="code">Runs&nbsp;PC&nbsp;Algorithm&nbsp;and&nbsp;returns&nbsp;a&nbsp;DAG</span></dd></dl>
+ <dl><dt><a name="-initialize_adj_matrix"><strong>initialize_adj_matrix</strong></a>(edges, N)</dt><dd><span class="code">Initialise&nbsp;graph&nbsp;adjacency&nbsp;matrix&nbsp;from&nbsp;list&nbsp;of&nbsp;edges.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;edges&nbsp;(list&nbsp;(tuple&nbsp;(int))):&nbsp;list&nbsp;of&nbsp;graph&nbsp;edges<br>
+&nbsp;&nbsp;&nbsp;&nbsp;N&nbsp;(int):&nbsp;number&nbsp;of&nbsp;nodes<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;adjacency&nbsp;matrix<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(list&nbsp;(int)):&nbsp;in-degree&nbsp;of&nbsp;each&nbsp;node</span></dd></dl>
+ <dl><dt><a name="-inspect_graph_from_index"><strong>inspect_graph_from_index</strong></a>(distr: dict, indx: int, node_labels: list = None)</dt><dd><span class="code">Plot&nbsp;graph&nbsp;from&nbsp;graph&nbsp;distribution.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;distr&nbsp;(dict):&nbsp;graph&nbsp;distribution<br>
+&nbsp;&nbsp;&nbsp;&nbsp;indx&nbsp;(int):&nbsp;index&nbsp;of&nbsp;graph&nbsp;to&nbsp;plot<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_labels&nbsp;(list):&nbsp;node&nbsp;labels</span></dd></dl>
+ <dl><dt><a name="-inspect_graph_from_key"><strong>inspect_graph_from_key</strong></a>(key: str, node_labels: list = None)</dt><dd><span class="code">Plot&nbsp;graph&nbsp;from&nbsp;string&nbsp;representation.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;key&nbsp;(str):&nbsp;string&nbsp;representation&nbsp;of&nbsp;graph<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_labels&nbsp;(list):&nbsp;node&nbsp;labels</span></dd></dl>
+ <dl><dt><a name="-intersection"><strong>intersection</strong></a>(d1, d2)</dt><dd><span class="code">Intersection&nbsp;of&nbsp;two&nbsp;dictionaries.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;d1&nbsp;(dict):&nbsp;first&nbsp;dictionary<br>
+&nbsp;&nbsp;&nbsp;&nbsp;d2&nbsp;(dict):&nbsp;second&nbsp;dictionary<br>
+&nbsp;<br>
+Returns:</span></dd></dl>
+ <dl><dt><a name="-is_valid_ordering"><strong>is_valid_ordering</strong></a>(adjacency_matrix: numpy.ndarray, ordering: str, node_label_to_indx: dict)</dt><dd><span class="code">Checks&nbsp;valid&nbsp;node&nbsp;ordering.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;adjacency_matrix&nbsp;(numpy.ndarray):&nbsp;graph&nbsp;adjacency&nbsp;matrix<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ordering&nbsp;(str):&nbsp;node&nbsp;ordering<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_label_to_indx:&nbsp;mapping&nbsp;of&nbsp;node&nbsp;labels&nbsp;to&nbsp;indices<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(bool)&nbsp;True&nbsp;if&nbsp;valid&nbsp;ordering,&nbsp;False&nbsp;otherwise</span></dd></dl>
+ <dl><dt><a name="-load_pickle_file"><strong>load_pickle_file</strong></a>(filename: str)</dt><dd><span class="code">Load&nbsp;pickled&nbsp;object.<br>
+&nbsp;<br>
+Parameter:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(str):&nbsp;name&nbsp;of&nbsp;pickle&nbsp;file</span></dd></dl>
+ <dl><dt><a name="-node_label_to_index"><strong>node_label_to_index</strong></a>(node_labels)</dt><dd><span class="code">Map&nbsp;node&nbsp;label&nbsp;to&nbsp;index.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_labels&nbsp;(list&nbsp;(str)):&nbsp;node&nbsp;labels<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(dict):&nbsp;dictionary&nbsp;with&nbsp;labels&nbsp;as&nbsp;keys&nbsp;and&nbsp;index&nbsp;as&nbsp;values</span></dd></dl>
+ <dl><dt><a name="-plot_graph"><strong>plot_graph</strong></a>(G: networkx.classes.digraph.DiGraph, title='Graph', figsize=(5, 3), node_size=2000, node_color='skyblue', k=5)</dt><dd><span class="code">Plot&nbsp;a&nbsp;networkx&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;G&nbsp;(networkx.DiGraph):&nbsp;graph<br>
+&nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;(str):&nbsp;figure&nbsp;title<br>
+&nbsp;&nbsp;&nbsp;&nbsp;figsize&nbsp;(tuple&nbsp;(int)):&nbsp;figure&nbsp;size<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_size&nbsp;(int):&nbsp;node&nbsp;size<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_color&nbsp;(matplotlib.colors):&nbsp;node&nbsp;color<br>
+&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(int):&nbsp;distance&nbsp;between&nbsp;nodes</span></dd></dl>
+ <dl><dt><a name="-plot_graph_from_adj_mat"><strong>plot_graph_from_adj_mat</strong></a>(adj_matrix: numpy.ndarray, node_labels: list, title='Graph', figsize=(5, 3), node_size=2000, node_color='skyblue', k=5)</dt><dd><span class="code">Plot&nbsp;graph&nbsp;from&nbsp;adjacency&nbsp;matrix.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;adj_matrix&nbsp;(numpy.ndarray):&nbsp;graph&nbsp;adjacency&nbsp;matrix<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_labels&nbsp;(list&nbsp;(str)):&nbsp;node&nbsp;labels<br>
+&nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;(str):&nbsp;figure&nbsp;title<br>
+&nbsp;&nbsp;&nbsp;&nbsp;figsize&nbsp;(tuple&nbsp;(int)):&nbsp;figure&nbsp;size<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_size&nbsp;(int):&nbsp;node&nbsp;size<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_color&nbsp;(matplotlib.colors):&nbsp;node&nbsp;color<br>
+&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(int):&nbsp;distance&nbsp;between&nbsp;nodes</span></dd></dl>
+ <dl><dt><a name="-plot_igraph"><strong>plot_igraph</strong></a>(g: &lt;module 'igraph' from '/Users/165421/miniforge3/envs/dev/lib/python3.12/site-packages/igraph/__init__.py'&gt;, title='Graph', figsize=(5, 3), node_size=2000, node_color='skyblue', k=5)</dt><dd><span class="code">Plot&nbsp;igraph&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;g&nbsp;(igraph):&nbsp;graph<br>
+&nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;(str):&nbsp;figure&nbsp;title<br>
+&nbsp;&nbsp;&nbsp;&nbsp;figsize&nbsp;(tuple&nbsp;(int)):&nbsp;figure&nbsp;size<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_size&nbsp;(int):&nbsp;node&nbsp;size<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_color&nbsp;(str):&nbsp;node&nbsp;color<br>
+&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(int):&nbsp;distance&nbsp;between&nbsp;nodes</span></dd></dl>
+ <dl><dt><a name="-rDAG"><strong>rDAG</strong></a>(n: int, p: float, labels: str, random_seed: int = 42)</dt><dd><span class="code">Generate&nbsp;a&nbsp;random&nbsp;DAG,&nbsp;represented&nbsp;by&nbsp;a&nbsp;lower&nbsp;triangular&nbsp;adjacency&nbsp;matrix&nbsp;(DataFrame).<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;N&nbsp;(int):&nbsp;number&nbsp;of&nbsp;nodes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;prob&nbsp;(float):&nbsp;edge&nbsp;probability<br>
+&nbsp;&nbsp;&nbsp;&nbsp;labels&nbsp;(list):&nbsp;node&nbsp;labels<br>
+&nbsp;&nbsp;&nbsp;&nbsp;random_seed&nbsp;(int):&nbsp;seed&nbsp;for&nbsp;numpy&nbsp;RNG<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(pandas.DataFrame):&nbsp;adjacency&nbsp;matrix</span></dd></dl>
+ <dl><dt><a name="-random_index_from_ones"><strong>random_index_from_ones</strong></a>(matrix: numpy.ndarray)</dt><dd><span class="code">Return&nbsp;a&nbsp;random&nbsp;index&nbsp;where&nbsp;the&nbsp;matrix&nbsp;element&nbsp;is&nbsp;1&nbsp;(edge).<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;matrix&nbsp;(numpy.ndarray):&nbsp;matrix<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;index</span></dd></dl>
+ <dl><dt><a name="-remove_edges_from_graph"><strong>remove_edges_from_graph</strong></a>(edges, G_init)</dt><dd><span class="code">Remove&nbsp;edges&nbsp;from&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;edges&nbsp;(list&nbsp;(tuple)):&nbsp;list&nbsp;of&nbsp;edges&nbsp;to&nbsp;remove<br>
+&nbsp;&nbsp;&nbsp;&nbsp;G_init&nbsp;(networkx.DiGraph):&nbsp;graph<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(networkx.DiGraph):&nbsp;new&nbsp;graph</span></dd></dl>
+ <dl><dt><a name="-save_graphs"><strong>save_graphs</strong></a>(graphs: list, directory: str, filename: str, num_nodes: int)</dt><dd><span class="code">Save&nbsp;graphs&nbsp;as&nbsp;zipped&nbsp;GraphML&nbsp;files<br>
+&nbsp;<br>
+Parameter:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;graphs&nbsp;(list):&nbsp;a&nbsp;list&nbsp;of&nbsp;graphs&nbsp;nx.DiGraph<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(str):&nbsp;a&nbsp;string&nbsp;representing&nbsp;the&nbsp;filename&nbsp;to&nbsp;be&nbsp;saved<br>
+&nbsp;&nbsp;&nbsp;&nbsp;num_nodes&nbsp;(int):&nbsp;number&nbsp;of&nbsp;nodes&nbsp;in&nbsp;graphs</span></dd></dl>
+ <dl><dt><a name="-update_graph_frequencies"><strong>update_graph_frequencies</strong></a>(graph_list: list, result_index: dict)</dt><dd><span class="code">Given&nbsp;a&nbsp;list&nbsp;of&nbsp;graphs,&nbsp;returns&nbsp;a&nbsp;dictionary&nbsp;with&nbsp;the&nbsp;number&nbsp;of&nbsp;times&nbsp;a&nbsp;graph&nbsp;occurs<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;graph_list&nbsp;(list):&nbsp;List&nbsp;of&nbsp;graphs.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dag_dict&nbsp;(dict):&nbsp;Dictionary&nbsp;to&nbsp;be&nbsp;updated&nbsp;with&nbsp;graph&nbsp;frequencies.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(dict):&nbsp;Updated&nbsp;dictionary&nbsp;with&nbsp;normalized&nbsp;frequencies.</span></dd></dl>
+ <dl><dt><a name="-update_matrix"><strong>update_matrix</strong></a>(matrix1, matrix2)</dt><dd><span class="code">Update&nbsp;matrix1&nbsp;with&nbsp;the&nbsp;values&nbsp;from&nbsp;matrix2&nbsp;only&nbsp;where&nbsp;matrix1&nbsp;is&nbsp;zero.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;matrix1&nbsp;(numpy.ndarray):&nbsp;First&nbsp;matrix&nbsp;to&nbsp;update.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;matrix2&nbsp;(numpy.ndarray):&nbsp;Second&nbsp;matrix&nbsp;with&nbsp;values&nbsp;to&nbsp;use&nbsp;for&nbsp;updating.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;Updated&nbsp;matrix</span></dd></dl>
+</td></tr></table>
+</body></html>

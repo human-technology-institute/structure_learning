@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Python: module structure_learning.proposals.proposal</title>
+</head><body>
+
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.proposals.html" class="white">proposals</a>.proposal</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/Users/165421/Documents/code/structure_learning/src/structure_learning/proposals/proposal.py">/Users/165421/Documents/code/structure_learning/src/structure_learning/proposals/proposal.py</a></td></tr></table>
+    <p></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="numpy.html">numpy</a><br>
+</td><td class="multicolumn"><a href="networkx.html">networkx</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
+    
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="abc.html#ABC">abc.ABC</a>(<a href="builtins.html#object">builtins.object</a>)
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="structure_learning.proposals.proposal.html#StructureLearningProposal">StructureLearningProposal</a>
+</dt></dl>
+</dd>
+</dl>
+ <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="StructureLearningProposal">class <strong>StructureLearningProposal</strong></a>(<a href="abc.html#ABC">abc.ABC</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#StructureLearningProposal">StructureLearningProposal</a>(initial_state:&nbsp;~State,&nbsp;blacklist=None,&nbsp;whitelist=None,&nbsp;seed:&nbsp;int&nbsp;=&nbsp;32)<br>
+&nbsp;<br>
+Base&nbsp;class&nbsp;for&nbsp;proposal&nbsp;classes&nbsp;for&nbsp;structure&nbsp;learning&nbsp;using&nbsp;MCMC.<br>
+All&nbsp;inheriting&nbsp;classes&nbsp;must&nbsp;implement&nbsp;the&nbsp;following&nbsp;methods:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#StructureLearningProposal-propose">propose</a>()&nbsp;-&gt;&nbsp;graph&nbsp;:&nbsp;numpy.ndarray,&nbsp;operation&nbsp;:&nbsp;str<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#StructureLearningProposal-compute_acceptance_ratio">compute_acceptance_ratio</a>()&nbsp;-&gt;&nbsp;float<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.proposals.proposal.html#StructureLearningProposal">StructureLearningProposal</a></dd>
+<dd><a href="abc.html#ABC">abc.ABC</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="StructureLearningProposal-__init__"><strong>__init__</strong></a>(self, initial_state: ~State, blacklist=None, whitelist=None, seed: int = 32)</dt><dd><span class="code">Initialise&nbsp;<a href="#StructureLearningProposal">StructureLearningProposal</a>&nbsp;instance.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;graph&nbsp;(networkx.DiGraph):&nbsp;graph<br>
+&nbsp;&nbsp;&nbsp;&nbsp;blacklist&nbsp;(numpy.ndarray):&nbsp;mask&nbsp;for&nbsp;edges&nbsp;to&nbsp;ignore&nbsp;in&nbsp;the&nbsp;proposal<br>
+&nbsp;&nbsp;&nbsp;&nbsp;whitelist&nbsp;(numpy.ndarray):&nbsp;mask&nbsp;for&nbsp;edges&nbsp;to&nbsp;include&nbsp;in&nbsp;the&nbsp;proposal</span></dd></dl>
+
+<dl><dt><a name="StructureLearningProposal-accept"><strong>accept</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="StructureLearningProposal-compute_acceptance_ratio"><strong>compute_acceptance_ratio</strong></a>(self) -&gt; float</dt></dl>
+
+<dl><dt><a name="StructureLearningProposal-get_nodes_to_rescore"><strong>get_nodes_to_rescore</strong></a>(self) -&gt; List[str]</dt></dl>
+
+<dl><dt><a name="StructureLearningProposal-propose"><strong>propose</strong></a>(self) -&gt; Tuple[~State, str]</dt><dd><span class="code">Propose&nbsp;a&nbsp;DAG</span></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>STAY_STILL</strong> = 'stay_still'</dl>
+
+<dl><dt><strong>__abstractmethods__</strong> = frozenset({'compute_acceptance_ratio', 'get_nodes_to_rescore', 'propose'})</dl>
+
+<dl><dt><strong>operations</strong> = ['stay_still']</dl>
+
+</td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>List</strong> = typing.List<br>
+<strong>State</strong> = ~State<br>
+<strong>Tuple</strong> = typing.Tuple</td></tr></table>
+</body></html>
