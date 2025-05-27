@@ -50,6 +50,14 @@ class Graph:
         idx = [self._node_to_index_dict.get(node) for node in nodes]
         return idx if len(idx) > 1 or not unwrap else idx[0]
     
+    def find_parents(self, node, return_index=False):
+        node_idx = self._node_to_index.get(node)
+        if node_idx is None:
+            return None
+        parent_indices = np.nonzero(self.incidence[:, node_idx])[0].tolist()
+        parents = np.array(self.nodes)[parent_indices]
+        return (parents, parent_indices) if return_index else parents
+    
     # modifiers
     def add_node(self, node: str):
         """

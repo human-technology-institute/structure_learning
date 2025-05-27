@@ -2,8 +2,10 @@
 
 """
 from abc import ABC, abstractmethod
+from typing import Union
 import pandas as pd
 import numpy as np
+from structure_learning.data_structures import Graph
 from structure_learning.utils.graph_utils import node_label_to_index, find_parents
 
 class Score(ABC):
@@ -13,7 +15,7 @@ class Score(ABC):
         compute() -> dict
         compute_node() -> dict
     """
-    def __init__(self, data : pd.DataFrame, incidence : np.array,\
+    def __init__(self, data : pd.DataFrame, graph : Union[np.array, Graph],\
                  to_string : str, is_log_space = True):
         """
         Initialises the Score abstract class.
@@ -26,10 +28,9 @@ class Score(ABC):
         """
         self._data = data
         self._node_labels = list(data.columns)
-        self._adj_matrix = incidence
-        self._node_label_to_index = node_label_to_index(self._node_labels)
+        self.graph = graph if isinstance(graph, Graph) else Graph(incidence=graph, nodes=self._node_labels)
+        self._node_label_to_index = self.graph._node_to_index_dict()
         self._is_log_space = is_log_space
-
         self._to_string = to_string
 
     # abstract method to be implemented by subclasses
@@ -44,8 +45,7 @@ class Score(ABC):
         """
         Implements a score function (e.g. BGe, Marginal Likelihood, etc) for a specific node
         """
-        node_indx = self.node_label_to_index[node]
-        parentnodes = [self.node_labels[i] for i in find_parents(self.incidence, node_indx)]
+        parentnodes = [i for i in self.graph.find_parents(node)]
         return self.compute_node_with_edges(node, parentnodes)
 
     @abstractmethod
@@ -76,48 +76,6 @@ class Score(ABC):
     @data.setter
     def data(self, d):
         self._data = d
-
-    @property
-    def adj_matrix(self):
-        """
-        Adjacency matrix. adj_matrix, incidence and graph all refer to the same numpy.ndarray.
-        """
-        return self._adj_matrix
-
-    @adj_matrix.setter
-    def adj_matrix(self, mat):
-        """
-        Set adjacency matrix for scoring.
-        """
-        self._adj_matrix = mat
-
-    @property
-    def incidence(self):
-        """
-        Adjacency matrix. adj_matrix, incidence and graph all refer to the same numpy.ndarray.
-        """
-        return self._adj_matrix
-
-    @incidence.setter
-    def incidence(self, mat):
-        """
-        Set adjacency matrix for scoring.
-        """
-        self._adj_matrix = mat
-
-    @property
-    def graph(self):
-        """
-        Adjacency matrix. adj_matrix, incidence and graph all refer to the same numpy.ndarray.
-        """
-        return self._adj_matrix
-
-    @graph.setter
-    def graph(self, mat):
-        """
-        Set adjacency matrix for scoring.
-        """
-        self._adj_matrix = mat
 
     @property
     def is_log_space(self):

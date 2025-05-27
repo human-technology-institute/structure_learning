@@ -1,45 +1,16 @@
 import itertools
-from typing import Union, List, Tuple
+from typing import Union, List, Tuple, Type, TypeVar
 import networkx as nx
 import numpy as np
 from .graph import Graph
 
+D = TypeVar['DAG']
 class DAG(Graph):
     
     def __init__(self, incidence = None, nodes = None):
         super().__init__(incidence, nodes)
         if self.has_cycle(self.incidence):
             raise Exception('Cycle found in adjacency matrix')
-        
-    @classmethod
-    def generate_all_dags_from_ordering(nodes : list):
-        """
-        Generate all DAGs from a topological ordering of nodes.
-
-        Parameter:
-            nodes (list): nodes in topological order
-
-        Returns:
-            A generator of DAGs
-        """
-        # Generate all permutations of edges based on the given topological order
-        all_edges = [(nodes[i], nodes[j]) for i in range(len(nodes)) for j in range(i+1, len(nodes))]
-        unique_graphs = set()
-
-        for edges in itertools.chain.from_iterable(itertools.combinations(all_edges, r) for r in range(len(all_edges)+1)):
-            G = nx.DiGraph()
-            G.add_nodes_from(nodes)
-            G.add_edges_from(edges)
-            # Check for cycles, since we only want DAGs
-            if not nx.is_directed_acyclic_graph(G):
-                continue
-
-            # Generate a sorted adjacency matrix as a tuple and check if it's already in our set
-            adj_matrix = nx.to_numpy_array(G, nodelist=sorted(G.nodes()))
-            matrix_tuple = tuple(map(tuple, adj_matrix))
-            if matrix_tuple not in unique_graphs:
-                unique_graphs.add(matrix_tuple)
-                yield G
 
     def compute_ancestor_matrix(self):
         """
@@ -113,3 +84,45 @@ class DAG(Graph):
         for k in range(1, n + 1):
             total += (-1)**(k+1) * comb(n, k) * (2**(k*(n-k))) * cls.count_dags(n-k)
         return total
+    
+    @classmethod
+    def generate_all_dags(cls, n_nodes: int, node_labels: List[str] = None) -> List[Type[D]]:
+        """
+        Generate a dictionary of all unique DAGs with N nodes.
+
+        Args:
+            n_nodes (int): number of nodes in the graph
+            node_labels (list): list of node labels. Each label is a string.
+
+        Returns:
+            dict: dictionary of all unique DAGs with N nodes.
+        """
+
+        # generate node labels for N nodes
+        if node_labels is None:
+            node_labels = [f"X{i}" for i in range(n_nodes)]
+
+        # Dictionary to store all unique DAGs
+        base_dag_lst = []
+
+        # Generate all possible directed edges among the nodes
+        all_possible_edges = list(itertools.permutations(node_labels, 2))
+
+        # Iterate over all possible adjacency matrices
+        # Iterate over the subsets of all possible edges to form directed graphs
+        for r in range(len(all_possible_edges)+1):
+            for subset in itertools.combinations(all_possible_edges, r):
+
+                # Initialize an NxN matrix filled with zeros
+                adj_matrix = np.zeros((n_nodes, n_nodes))
+
+                # Set entries corresponding to the edges in the current subset to 1
+                for edge in subset:
+                    source, target = edge
+                    adj_matrix[node_labels.index(source)][node_labels.index(target)] = 1
+
+                if not cls.has_cycle(adj_matrix):
+
+                    base_dag_lst.append(Graph(incidence=adj_matrix, nodes=node_labels))
+
+        return base_dag_lst
