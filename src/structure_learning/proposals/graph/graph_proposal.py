@@ -7,6 +7,7 @@ import numpy as np
 from structure_learning.utils.graph_utils import create_identity_matrix, create_ones_matrix, \
                                     random_index_from_ones, compute_ancestor_matrix, update_matrix
 from structure_learning.proposals import StructureLearningProposal
+from structure_learning.data_structures import Graph
 
 class GraphProposal(StructureLearningProposal):
     """
@@ -21,7 +22,7 @@ class GraphProposal(StructureLearningProposal):
     REVERSE_EDGE = 'reverse_edge'
     operations = [ADD_EDGE, DELETE_EDGE, REVERSE_EDGE, StructureLearningProposal.STAY_STILL]
 
-    def __init__(self, initial_state : Union[np.ndarray, nx.DiGraph], blacklist = None, whitelist = None, seed: int = 32):
+    def __init__(self, initial_state : Union[np.ndarray, nx.DiGraph, Graph], blacklist = None, whitelist = None, seed: int = 32):
         """
         Initialise GraphProposal instance.
 
@@ -32,7 +33,11 @@ class GraphProposal(StructureLearningProposal):
         """
         super().__init__(initial_state, blacklist, whitelist, seed) # initialize the parent class
 
-        self.initial_state = nx.adjacency_matrix(initial_state).toarray() if isinstance(initial_state, nx.DiGraph) else initial_state
+        if not isinstance(initial_state, Graph):
+            initial_state = nx.adjacency_matrix(initial_state).toarray() if isinstance(initial_state, nx.DiGraph) else initial_state
+            self.initial_state = Graph(incidence=initial_state)
+        else:
+            self.initial_state = initial_state
         self.num_nodes = self.initial_state.shape[1]
         self._max_parents = self.num_nodes - 1
 
@@ -58,10 +63,10 @@ class GraphProposal(StructureLearningProposal):
             (str): operation that generated the proposed graph
         """
         # add the whitelist to the current incidence matrix
-        self.current_state = update_matrix(self.current_state, self.current_state + self.whitelist)
+        current_state = update_matrix(self.current_state.incidence, self.current_state.incidence + self.whitelist)
 
         # compute all possible neighbours
-        num_neighbours, del_indx_mat, add_indx_mat, rev_indx_mat, num_deletion, num_addition, num_reversal = self._compute_nbhood(self.current_state)
+        num_neighbours, del_indx_mat, add_indx_mat, rev_indx_mat, num_deletion, num_addition, num_reversal = self._compute_nbhood(current_state)
 
         # set the number of neighbours
         self._current_state_neighborhood = num_neighbours
@@ -72,15 +77,17 @@ class GraphProposal(StructureLearningProposal):
         self.proposed_state = np.zeros((self.num_nodes, self.num_nodes))
 
         if operation == self.ADD_EDGE:
-            self.proposed_state = self._propose_neighbor_by_addition(add_indx_mat, self.current_state)
+            self.proposed_state = self._propose_neighbor_by_addition(add_indx_mat, current_state)
         elif operation == self.DELETE_EDGE:
-            self.proposed_state = self._propose_neighbor_by_deletion(del_indx_mat, self.current_state)
+            self.proposed_state = self._propose_neighbor_by_deletion(del_indx_mat, current_state)
         elif operation == self.REVERSE_EDGE:
-            self.proposed_state = self._propose_neighbor_by_reverse(rev_indx_mat, self.current_state)
+            self.proposed_state = self._propose_neighbor_by_reverse(rev_indx_mat, current_state)
         elif operation == self.STAY_STILL:
-            self.proposed_state = self.current_state
+            self.proposed_state = self.current_state.incidence
         else:
             raise Exception(f"The operation '{operation}' is not valid!")
+        
+        self.proposed_state = Graph(incidence=self.proposed_state, nodes=self.current_state.nodes)
 
         self.operation = operation
 
@@ -256,7 +263,7 @@ class GraphProposal(StructureLearningProposal):
         Returns:
             (float): transition probability Q(G_curr|G_prop)
         """
-        num_neigh, _, _, _ , _, _, _ = self._compute_nbhood(self.proposed_state)
+        num_neigh, _, _, _ , _, _, _ = self._compute_nbhood(self.proposed_state.incidence)
         self._proposed_state_neighborhood = num_neigh
 
         # Q(G_curr -> G_prop) = 1 / (number of neighbors of G_prop)

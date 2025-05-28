@@ -29,7 +29,9 @@ class Score(ABC):
         self._data = data
         self._node_labels = list(data.columns)
         self.graph = graph if isinstance(graph, Graph) else Graph(incidence=graph, nodes=self._node_labels)
-        self._node_label_to_index = self.graph._node_to_index_dict()
+        self._node_label_to_index = {} 
+        if self.graph.incidence is not None:
+            self._node_label_to_index = self.graph._node_to_index_dict()
         self._is_log_space = is_log_space
         self._to_string = to_string
 
@@ -94,4 +96,7 @@ class Score(ABC):
         """
         Return mapping of node labels to indices
         """
+        if self._node_label_to_index is None or len(self._node_label_to_index)==0:
+            self.graph._update_node_index()
+            self._node_label_to_index = self.graph._node_to_index_dict
         return self._node_label_to_index

@@ -72,7 +72,7 @@ class BGeScore(Score):
             # Save the parameters for the node
             parameters[node] = {
                 'score' : log_ml_node,
-                'parents': find_parents(self.incidence, self.node_label_to_index[node])
+                'parents': self.graph.find_parents(self.node_label_to_index[node])
             }
 
             total_log_ml += log_ml_node
@@ -99,7 +99,6 @@ class BGeScore(Score):
             (dict): score and parameters
         """
         parameters = {}  # Dictionary to store the parameters for each node
-
         node_indx = self.node_label_to_index[node]
         parentnodes = [self.node_label_to_index[i]  for i in parents] # get index of parents labels
         num_parents = len(parentnodes) # number of parents

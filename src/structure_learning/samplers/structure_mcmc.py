@@ -10,7 +10,7 @@ import pandas as pd
 from structure_learning.utils.graph_utils import collect_node_scores, generate_key_from_adj_matrix
 from structure_learning.proposals import StructureLearningProposal, GraphProposal
 from structure_learning.scores import Score, BGeScore, BDeuScore
-from structure_learning.mcmc import MCMC
+from structure_learning.samplers import MCMC
 
 class StructureMCMC(MCMC):
     """
@@ -44,11 +44,11 @@ class StructureMCMC(MCMC):
 
         self._to_string = f"Structure_MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
         self.sparse = sparse
-        self.score_object.incidence = self.proposal_object.current_state
+        self.score_object.graph = self.proposal_object.current_state
         state_score = self.score_object.compute()
         self.scores = collect_node_scores(state_score)
-        result = {'current_state': self.proposal_object.current_state if not sparse else scipy.sparse.csr_matrix(self.proposal_object.current_state), 'proposed_state': None, 'score_current': state_score['score'],
-                  'operation': 'initial', 'accepted': False, 'acceptance_prob': 0, 'score_proposed': state_score['score']}
+        result = {'graph': self.proposal_object.current_state, 'current_state': self.proposal_object.current_state, 'proposed_state': None, 'score_current': state_score['score'],
+                  'operation': 'initial', 'accepted': False, 'acceptance_prob': 0, 'score_proposed': state_score['score'], 'timestamp': 0}
         self.update_results(0, result)
 
         self._rng = np.random.default_rng(seed=seed)
@@ -68,7 +68,7 @@ class StructureMCMC(MCMC):
 
         if operation != StructureLearningProposal.STAY_STILL:
 
-            self.score_object.incidence = proposed_state
+            self.score_object.graph = proposed_state
             scores_copy = self.scores.copy()
 
             for node in nodes_to_rescore:
@@ -86,8 +86,5 @@ class StructureMCMC(MCMC):
             is_accepted = False
             acceptance_prob = proposed_state_score = 0
 
-        if self.sparse:
-            current_state = scipy.sparse.csr_matrix(current_state)
-            proposed_state = scipy.sparse.csr_matrix(proposed_state)
-        return {'graph': generate_key_from_adj_matrix(current_state), 'current_state': current_state, 'proposed_state': generate_key_from_adj_matrix(proposed_state), 'score_current': current_state_score,
+        return {'graph': current_state, 'current_state': current_state, 'proposed_state': proposed_state, 'score_current': current_state_score,
                 'operation': operation, 'accepted': is_accepted, 'acceptance_prob': acceptance_prob, 'score_proposed': proposed_state_score, 'timestamp': time.time() - self._start_time}

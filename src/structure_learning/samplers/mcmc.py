@@ -9,7 +9,7 @@ import networkx as nx
 import numpy as np
 from structure_learning.scores import Score, BGeScore, BDeuScore
 from structure_learning.proposals import StructureLearningProposal, GraphProposal, PartitionProposal
-from structure_learning.data_structures import OrderedPartition, DAG
+from structure_learning.data_structures import OrderedPartition, DAG, MCMCDistribution, Graph
 from structure_learning.utils.graph_utils import initial_graph_pc, generate_DAG
 from structure_learning.utils.partition_utils import build_partition
 
@@ -23,7 +23,8 @@ class MCMC(ABC):
     """
     def __init__(self, data: pd.DataFrame, initial_state: State, max_iter: int = 30000, score_object: Union[str, Score] = None,
                  proposal_object: Union[str, StructureLearningProposal] = None, pc_init: bool = True,
-                 blacklist: np.ndarray = None, whitelist: np.ndarray = None, plus1: bool = False, seed: int = 32):
+                 blacklist: np.ndarray = None, whitelist: np.ndarray = None, plus1: bool = False, seed: int = 32, 
+                 result_type: str = 'distribution'):
         """
         Initilialise MCMC instance.
 
@@ -42,6 +43,7 @@ class MCMC(ABC):
             blacklist (numpy.ndarray):                      Mask for edges to ignore in the proposal
             whitelist (numpy.ndarray):                      Mask for edges to include
             plus1 (bool):                                   Use plus1 neighborhood
+            result_type (str):                              Save results as either dictionary or distribution object.
         """
 
         if data is None or not isinstance(data, pd.DataFrame):
@@ -100,7 +102,8 @@ class MCMC(ABC):
         self.max_iter = max_iter
         self.n_accepted = 0
         self.scores = None
-        self.results = {}
+        self.result_type = result_type
+        self.results = MCMCDistribution() if result_type == 'distribution' else {}
         self._start_time = time.time()
         self._to_string = f"MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
 
@@ -124,9 +127,12 @@ class MCMC(ABC):
         pass
 
     def update_results(self, iteration, info):
-        self.results[iteration] = info
+        if self.result_type == 'distribution':
+            self.results.update(info['graph'].to_key(), iteration, info)
+        else:
+            self.results[iteration] = info
 
-    def get_graphs(self, results, filter_accepted=False):
+    def get_graphs(self, results):
         """
         Returns list of sampled graphs from MCMC simulation results.
 
@@ -138,8 +144,11 @@ class MCMC(ABC):
         """
         return self.get_chain_info(results)
 
-    def get_chain_info(self, results, key='graph', filter_accepted=False):
-        return [result[key] for _,(i,result) in enumerate(results.items()) if (not filter_accepted or result['accepted'])]
+    def get_chain_info(self, results, key='graph'):
+        if self.result_type == 'distribution':
+            return results.prop('key')
+        else:
+            return [result[key] for _,(i,result) in enumerate(results.items())]
 
     def __str__(self):
         return self._to_string

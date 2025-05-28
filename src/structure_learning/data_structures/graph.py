@@ -8,9 +8,20 @@ import pandas as pd
 
 G = TypeVar('Graph')
 class Graph:
-
+    """
+    Class wrapper for graphs.
+    """
     def __init__(self, incidence: Union[np.ndarray, pd.DataFrame] = None, nodes: Union[List, Tuple] = None):
-        self.incidence, self.nodes = (incidence.astype(bool), list(nodes)) if isinstance(incidence, np.ndarray) else (incidence.values.astype(bool), list(incidence.columns))
+        """
+        Initialise a graph instance.
+
+        Parameters:
+            incidence (np.ndarray | pd.DataFrame):      adjacency matrix
+            nodes (list | tuple):                       node labels. If incidence is a dataframe, this parameter is ignored.
+        """
+        self.incidence, self.nodes = None, None
+        if incidence is not None:
+            self.incidence, self.nodes = (incidence.astype(bool), list(nodes)) if isinstance(incidence, np.ndarray) else (incidence.values.astype(bool), list(incidence.columns))
         self._edges = None
         self._node_to_index_dict = None
 
@@ -20,6 +31,10 @@ class Graph:
         Returns the number of nodes in the Graph object
         """
         return len(self.nodes)
+    
+    @property
+    def shape(self):
+        return (len(self.nodes),len(self.nodes))
 
     @property
     def edges(self):
@@ -36,7 +51,8 @@ class Graph:
         """
         Update node-index dictionary
         """
-        self._node_to_index_dict = {node:idx for idx,node in enumerate(self.nodes)}
+
+        self._node_to_index_dict = {} if self.nodes is None else {node:idx for idx,node in enumerate(self.nodes)}
 
     def _node_to_index(self, nodes):
         """
@@ -51,9 +67,9 @@ class Graph:
         return idx if len(idx) > 1 or not unwrap else idx[0]
     
     def find_parents(self, node, return_index=False):
-        node_idx = self._node_to_index.get(node)
+        node_idx = self._node_to_index(node)
         if node_idx is None:
-            return None
+            return []
         parent_indices = np.nonzero(self.incidence[:, node_idx])[0].tolist()
         parents = np.array(self.nodes)[parent_indices]
         return (parents, parent_indices) if return_index else parents
@@ -173,11 +189,7 @@ class Graph:
         Convert Graph object to networkx DiGraph.
         """
         G =  nx.from_numpy_array(self.incidence, create_using=nx.DiGraph)
-
-        # Create a mapping from old labels to new labels
         mapping = {old_label: new_label for old_label, new_label in zip(G.nodes(), self.nodes)}
-
-        # Relabel the nodes
         G = nx.relabel_nodes(G, mapping)
 
         return G
@@ -196,17 +208,14 @@ class Graph:
             type (str): type of key to use
         """
         key = ''
-        if type == 'default':
-            num_nodes = str(self.incidence.shape[0])
-
-            # Convert the graph to a string
-            s = "".join(map(str, self.incidence.flatten().astype(int)))
-
-            # Insert a space every three characters
-            key = re.sub("(.{" + num_nodes + "})", "\\1 ", s)
-            key = key if key[-1] != " " else key[:-1]
-        else:
-            raise Exception("Unsupported key type")
+        if self.incidence is not None:
+            if type == 'default':
+                num_nodes = str(self.incidence.shape[0])
+                s = "".join(map(str, self.incidence.flatten().astype(int)))
+                key = re.sub("(.{" + num_nodes + "})", "\\1 ", s)
+                key = key if key[-1] != " " else key[:-1]
+            else:
+                raise Exception("Unsupported key type")
         return key
 
     def from_key(key: str, type:str = 'default', nodes: Union[List, Tuple, np.ndarray] = None) -> Type[G]:
@@ -234,6 +243,24 @@ class Graph:
         else:
             raise Exception("Unsupported key type")
         return None
+
+    # arithmetic
+    def __mul__(self, g: Type['G']):
+        if self.nodes != g.nodes:
+            raise Exception("Graph do not have matching nodes")
+        product = self.incidence * g.incidence
+        return Graph(product, self.nodes)
+
+    def __rmul__(self, g: Type['G']):
+        if self.nodes != g.nodes:
+            raise Exception("Graph do not have matching nodes")
+        product = g.incidence * self.incidence
+        return Graph(product, self.nodes)
+    
+    def __eq__(self, g: Type['G']):
+        if self.nodes != g.nodes:
+            raise Exception("Graph do not have matching nodes")
+        return (self.incidence == g.incidence).all()
 
     # I/O
     def to_csv(self, filename):
@@ -266,7 +293,6 @@ class Graph:
         plt.axis("off")
 
     # utils
-    
     def compare(self, other: Type[G], operation: str):
         """
         Checks edge operation on two adjacency matrices.

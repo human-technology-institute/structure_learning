@@ -14,7 +14,7 @@ from structure_learning.proposals import StructureLearningProposal
 from structure_learning.proposals import PartitionProposal
 from structure_learning.data_structures import OrderedPartition
 from structure_learning.scores import Score, BGeScore, BDeuScore
-from structure_learning.mcmc import MCMC
+from structure_learning.samplers import MCMC
 
 class PartitionMCMC(MCMC):
     """

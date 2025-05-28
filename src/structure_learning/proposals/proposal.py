@@ -14,6 +14,7 @@ class StructureLearningProposal(ABC):
         propose() -> graph : numpy.ndarray, operation : str
         compute_acceptance_ratio() -> float
     """
+    INITIAL = 'initial'
     STAY_STILL = 'stay_still'
 
     operations = [STAY_STILL]

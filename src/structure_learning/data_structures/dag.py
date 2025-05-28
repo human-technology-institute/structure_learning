@@ -1,10 +1,12 @@
 import itertools
+from math import comb
 from typing import Union, List, Tuple, Type, TypeVar
+import pandas as pd
 import networkx as nx
 import numpy as np
-from .graph import Graph
+from structure_learning.data_structures import Graph
 
-D = TypeVar['DAG']
+D = TypeVar('DAG')
 class DAG(Graph):
     
     def __init__(self, incidence = None, nodes = None):
@@ -126,3 +128,4 @@ class DAG(Graph):
                     base_dag_lst.append(Graph(incidence=adj_matrix, nodes=node_labels))
 
         return base_dag_lst
+    
