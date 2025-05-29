@@ -1,6 +1,5 @@
 import numpy as np
 import math
-from structure_learning.utils.partition_utils import *
 from structure_learning.data_structures.partition import *
 from structure_learning.proposals import StructureLearningProposal
 
@@ -125,8 +124,8 @@ class PartitionProposal(StructureLearningProposal):
         self.operation = self.SWAP_ADJACENT
 
         # choose random partition element
-        party, _, _ = convert_partition_to_party_permy_posy(self.proposed_state)
-        p = np.array(possible_permutations_neighbors(sum(party), party))
+        party, _, _ = self.proposed_state.to_party_permy_posy()
+        p = np.array(self._possible_permutations_neighbors(sum(party), party))
         part_idx = self._rng.choice(self.proposed_state.size - 1, p=p/p.sum())
         # choose a node from partition at part_idx
         node_left = self._rng.choice(list(self.proposed_state.partitions[part_idx].nodes))
@@ -154,8 +153,8 @@ class PartitionProposal(StructureLearningProposal):
         self.operation = self.SWAP_GLOBAL
 
         # choose random partition elements
-        party, _, _ = convert_partition_to_party_permy_posy(self.proposed_state)
-        p = np.array(possible_permutations(sum(party), party))
+        party, _, _ = self.proposed_state.to_party_permy_posy()
+        p = np.array(self._possible_permutations(sum(party), party))
         part_idx_1 = self._rng.choice(self.proposed_state.size, p=p/p.sum())
         part_idx_2 = self._rng.choice(list(set(range(self.proposed_state.size)).difference({part_idx_1})))
 
@@ -182,8 +181,8 @@ class PartitionProposal(StructureLearningProposal):
 
     def _split_or_merge_move(self):
 
-        party, _, _ = convert_partition_to_party_permy_posy(self.current_state)
-        p = np.array(possible_splits_joins(sum(party), party))
+        party, _, _ = self.proposed_state.to_party_permy_posy()
+        p = np.array(self._possible_splits_joins(sum(party), party))
         p = p if p.sum() else p+1
         node = self._rng.choice(list(self.current_state.all_nodes), p=p/p.sum())
         idx = self.current_state.find_node(node)
@@ -260,8 +259,8 @@ class PartitionProposal(StructureLearningProposal):
 
         # sample a node
         nodes = self.proposed_state.get_all_nodes()
-        party, _, posy = convert_partition_to_party_permy_posy(self.proposed_state)
-        p = np.array(calculate_join_possibilities(len(nodes), party, posy))
+        party, _, posy = self.proposed_state.to_party_permy_posy()
+        p = np.array(self._calculate_join_possibilities(len(nodes), party, posy))
         node_to_move = self._rng.choice(list(nodes), p=p/p.sum())
 
         # get partition where the node belongs to
@@ -292,8 +291,8 @@ class PartitionProposal(StructureLearningProposal):
 
         # sample a node
         nodes = self.proposed_state.get_all_nodes()
-        party, _, posy = convert_partition_to_party_permy_posy(self.proposed_state)
-        p = np.array(calculate_partition_transitions(len(nodes), party, posy))
+        party, _, posy = self.proposed_state.to_party_permy_posy()
+        p = np.array(self._calculate_partition_transitions(len(nodes), party, posy))
         node_to_move = self._rng.choice(list(nodes), p=p/p.sum())
 
         # get partition where the node belongs to
@@ -338,10 +337,68 @@ class PartitionProposal(StructureLearningProposal):
             return self._node_to_new_partition()
 
     def _compute_neighborhoods_new_existing_partition(self, state):
-        party, _, posy = convert_partition_to_party_permy_posy(state)
+        party, _, posy = state.to_party_permy_posy()
         num_nodes = sum(party)
 
-        existing = sum(calculate_join_possibilities(num_nodes, party, posy ))
-        new = sum(calculate_partition_transitions(num_nodes, party, posy ))
+        existing = sum(self._calculate_join_possibilities(num_nodes, party, posy ))
+        new = sum(self._calculate_partition_transitions(num_nodes, party, posy ))
 
         return existing, new
+
+    def _calculate_join_possibilities(self, n, party, posy):
+        m = len(party)
+        join_possibs = [0] * n
+        for k in range(n):
+            join_possibs[k] = m - 1
+            node_element = posy[k]
+            if party[node_element] == 1:  # Nodes in a partition element of size 1
+                if node_element < m - 1:
+                    if party[node_element + 1] == 1:  # And if the next partition element is also size 1
+                        join_possibs[k] = m - 2  # We only allow them to jump to the left to count the swap only once
+        return join_possibs
+    
+    def _calculate_partition_transitions(self, n, party, posy):
+        m = len(party)
+        hole_possibs = [0] * n
+        for k in range(n):
+            node_element = posy[k]
+            if party[node_element] == 1:  # Nodes in a partition element of size 1 cannot move to the neighbouring holes
+                hole_possibs[k] = m - 1
+                if node_element < m - 1:
+                    if party[node_element + 1] == 1:  # And if the next partition element is also size 1
+                        hole_possibs[k] = m - 2  # We only allow them to jump to the left to count the swap only once
+            elif party[node_element] == 2:  # Nodes in a partition element of size 2 cannot move to the hole on the left
+                hole_possibs[k] = m  # Since this would count the same splitting twice
+            else:
+                hole_possibs[k] = m + 1
+        return hole_possibs
+    
+    def _possible_splits_joins(self, n, party):
+        partypossibs = [0] * n
+        kbot = 0
+        m = len(party)
+        for j in range(m):
+            elemsize = party[j]
+            ktop = kbot + elemsize - 1
+            for k in range(kbot, ktop):
+                partypossibs[k] = math.comb(elemsize, k-kbot+1)
+            kbot = ktop + 1
+        return partypossibs
+
+    def _possible_permutations_neighbors(self, n, party):
+        m = len(party)
+        possibs = [0] * (m-1)
+        if m > 1:
+            for i in range(m-1):
+                possibs[i] = party[i]*party[i+1]
+        return possibs
+    
+    def _possible_permutations(self, n, party):
+        m = len(party)
+        possibs = [0] * (m)
+        if m > 1:
+            remainder = n
+            for i in range(m):
+                remainder = remainder - party[i]
+                possibs[i] = party[i]*remainder
+        return possibs

@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 import mlflow
-from structure_learning.mcmc import MCMC, StructureMCMC, PartitionMCMC
+from structure_learning.samplers import MCMC, StructureMCMC, PartitionMCMC
 from structure_learning.data import SyntheticDataset
 from structure_learning.utils.graph_utils import generate_DAG, plot_graph_from_adj_mat
 

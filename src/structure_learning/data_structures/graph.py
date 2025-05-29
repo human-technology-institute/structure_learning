@@ -81,6 +81,18 @@ class Graph:
         parents = np.array(self.nodes)[parent_indices]
         return (parents, parent_indices) if return_index else parents
     
+    @classmethod
+    def find_parent_nodes(self, incidence):
+        """Find parent nodes (nodes with no incoming edges)."""
+        n = len(incidence)
+        parent_nodes = set(range(n))
+        exist_edge = set([True, 1, 1.0])
+        for i in range(n):
+            for j in range(n):
+                if incidence[j][i] in exist_edge:
+                    parent_nodes.discard(i)
+        return parent_nodes
+    
     # modifiers
     def add_node(self, node: str):
         """
@@ -386,3 +398,4 @@ class Graph:
                     return True
 
         return False
+

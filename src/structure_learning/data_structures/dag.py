@@ -14,7 +14,8 @@ class DAG(Graph):
         if self.has_cycle(self.incidence):
             raise Exception('Cycle found in adjacency matrix')
 
-    def compute_ancestor_matrix(self):
+    @classmethod
+    def compute_ancestor_matrix(cls, adj_matrix = None):
         """
         Compute ancestor matrix from adjacency matrix.
 
@@ -24,7 +25,7 @@ class DAG(Graph):
         Returns:
             (numpy.ndarray): ancestor matrix
         """
-        adj_matrix = self.incidence
+        adj_matrix = cls.incidence if adj_matrix is None else adj_matrix
         num_nodes = adj_matrix.shape[0]
 
         # Initialize the ancestor matrix as the adjacency matrix

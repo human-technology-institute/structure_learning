@@ -42,10 +42,10 @@ class Score(ABC):
         Implements a score function (e.g. BGe, Marginal Likelihood, etc) for a specific node
         """
         parentnodes = [i for i in graph.find_parents(node)]
-        return self.compute_node_with_edges(graph, node, parentnodes)
+        return self.compute_node_with_edges(node, parentnodes, graph._node_to_index_dict)
 
     @abstractmethod
-    def compute_node_with_edges(self, graph: Graph, node : str, parents: list = None):
+    def compute_node_with_edges(self, node : str, parents: list = None, node_index_map: dict = None):
         """
         Implements a score function (e.g. BGe, Marginal Likelihood, etc) for a specific node and parents
         """

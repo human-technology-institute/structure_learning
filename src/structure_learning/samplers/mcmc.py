@@ -53,6 +53,7 @@ class MCMC(ABC):
             raise Exception("Data (as pandas dataframe or Data) must be provided")
         self.data  = data
         self.node_labels = list(data.columns)
+        self._node_label_to_idx = {node:idx for idx,node in enumerate(self.node_labels)}
         self.num_nodes = len(self.node_labels)
         self.pc_graph = None
         self._rng = np.random.default_rng(seed=seed)
@@ -75,30 +76,7 @@ class MCMC(ABC):
             print('Running PC algorithm')
             # pc = PC(data=score_object.data)
             self._pc_state, self.pc_graph = initial_graph_pc(score_object.data, True)
-
-        if proposal_object is None or isinstance(proposal_object, str):
-            if isinstance(proposal_object, str) and proposal_object not in ['graph', 'partition']:
-                raise Exception('Unsupported proposal', proposal_object)
-            if initial_state is not None:
-                if isinstance(initial_state, np.ndarray):
-                    proposal_object = GraphProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist, seed=seed)
-                elif isinstance(initial_state, OrderedPartition):
-                    proposal_object = PartitionProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist, seed=seed)
-                else:
-                    print('Invalid initial state')
-            else:
-                initial_state = (self._pc_state if proposal_object == 'partition' else self.pc_graph) if pc_init else DAG.generate_random(self.node_labels, 0.5, seed)
-                if whitelist is not None:
-                    initial_state[whitelist > 0] = 1
-                if blacklist is not None:
-                    initial_state[blacklist > 0] = 0
-                if proposal_object == 'partition':
-                    initial_state = build_partition(incidence=initial_state, node_labels=self.node_labels)
-                    proposal_object = PartitionProposal(initial_state, whitelist=whitelist, blacklist=blacklist, seed=seed)
-                else:
-                    proposal_object = GraphProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist, seed=seed)
-        elif not isinstance(proposal_object, StructureLearningProposal):
-            raise Exception('Unsupported proposal', proposal_object)
+        
         self.initial_state = initial_state
         self.proposal_object = proposal_object
         self.blacklist = blacklist
@@ -134,8 +112,10 @@ class MCMC(ABC):
     def update_results(self, iteration, info):
         if self.result_type == 'distribution':
             self.results.update(info['graph'].to_key(), iteration, info)
-        else:
+        elif self.result_type == 'iterations':
             self.results[iteration] = info
+        else:
+            raise Exception("Unsupported result type")
 
     def get_graphs(self, results):
         """

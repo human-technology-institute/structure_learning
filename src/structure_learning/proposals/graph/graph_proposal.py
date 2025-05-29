@@ -4,10 +4,8 @@
 from typing import List, Union
 import networkx as nx
 import numpy as np
-from structure_learning.utils.graph_utils import create_identity_matrix, create_ones_matrix, \
-                                    random_index_from_ones, compute_ancestor_matrix, update_matrix
 from structure_learning.proposals import StructureLearningProposal
-from structure_learning.data_structures import Graph
+from structure_learning.data_structures import Graph, DAG
 
 class GraphProposal(StructureLearningProposal):
     """
@@ -45,8 +43,8 @@ class GraphProposal(StructureLearningProposal):
         self._proposed_state_neighborhood = -1
 
         # Matrices used in further computations
-        self._fullmatrix = create_ones_matrix(self.num_nodes)
-        self._Ematrix = create_identity_matrix(self.num_nodes)
+        self._fullmatrix = np.ones((self.num_nodes,self.num_nodes)).astype(int)
+        self._Ematrix = np.identity(self.num_nodes).astype(int)
 
         if blacklist is None:
             self.blacklist = np.zeros((self.num_nodes, self.num_nodes))
@@ -134,7 +132,7 @@ class GraphProposal(StructureLearningProposal):
             (numpy.ndarray): adjacency matrix of new graph
         """
         try:
-            r, c = random_index_from_ones(index_mat)
+            r, c = self.__random_index_from_ones(index_mat)
         except Exception as e:
             print("Incidence matrix")
             print(incidence)
@@ -162,7 +160,7 @@ class GraphProposal(StructureLearningProposal):
             (numpy.ndarray): adjacency matrix of new graph
         """
         try:
-            r, c = random_index_from_ones(index_mat)
+            r, c = self.__random_index_from_ones(index_mat)
         except Exception as e:
             print("Incidence matrix")
             print(incidence)
@@ -191,7 +189,7 @@ class GraphProposal(StructureLearningProposal):
             (numpy.ndarray): adjacency matrix of new graph
         """
         try:
-            r, c = random_index_from_ones(index_mat)
+            r, c = self.__random_index_from_ones(index_mat)
         except Exception as e:
             print("Incidence matrix")
             print(incidence)
@@ -223,7 +221,7 @@ class GraphProposal(StructureLearningProposal):
             (int): number of neighboring graphs obtainable by edge addition
             (int): number of neighboring graphs obtainable by edge reversal
         """
-        ancestor = compute_ancestor_matrix(incidence)
+        ancestor = DAG.compute_ancestor_matrix(incidence)
 
         # 1.) Number of neighbour graphs obtained by edge deletions
         deletion = incidence.copy() - self.whitelist
@@ -282,3 +280,19 @@ class GraphProposal(StructureLearningProposal):
         self._prob_Gprop_Gcurr = 1 / self._current_state_neighborhood
 
         return self._prob_Gprop_Gcurr
+
+    def __random_index_from_ones(self, matrix : np.ndarray):
+        """
+        Return a random index where the matrix element is 1 (edge).
+
+        Parameters:
+            matrix (numpy.ndarray): matrix
+
+        Returns:
+            (numpy.ndarray): index
+        """
+        ones_indices = np.argwhere(matrix == 1)
+        if len(ones_indices) == 0:
+            return None  # Return None if there are no 1s in the matrix.
+        random_choice = self._rng.choice(len(ones_indices))
+        return ones_indices[random_choice]

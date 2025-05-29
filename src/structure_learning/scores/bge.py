@@ -90,7 +90,7 @@ class BGeScore(Score):
         }
         return score
 
-    def compute_node_with_edges(self, graph: Graph, node : str, parents: list):
+    def compute_node_with_edges(self, node : str, parents: list, node_index_map: dict):
         """
         Compute the BGE for edge(s)
 
@@ -102,8 +102,8 @@ class BGeScore(Score):
             (dict): score and parameters
         """
         parameters = {}  # Dictionary to store the parameters for each node
-        node_indx = graph._node_to_index(node)
-        parentnodes = graph._node_to_index(parents) # get index of parents labels
+        node_indx = node_index_map[node]
+        parentnodes = [node_index_map[p] for p in parents] # get index of parents labels
         num_parents = len(parentnodes) # number of parents
 
         awpNd2 = (self._awpN - self._num_cols + num_parents + 1) / 2

@@ -6,7 +6,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 from structure_learning.data import SyntheticDataset
-from structure_learning.mcmc import StructureMCMC
+from structure_learning.samplers import StructureMCMC
 from structure_learning.utils.graph_utils import convert_adj_mat_to_graph, generate_key_from_adj_matrix
 from structure_learning.proposals import GraphProposal
 from structure_learning.scores import BGeScore

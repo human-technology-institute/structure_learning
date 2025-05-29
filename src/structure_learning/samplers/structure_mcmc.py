@@ -5,7 +5,8 @@ from typing import Union
 import time
 import numpy as np
 import pandas as pd
-from structure_learning.proposals import StructureLearningProposal
+from structure_learning.proposals import StructureLearningProposal, GraphProposal
+from structure_learning.data_structures import DAG
 from structure_learning.scores import Score
 from structure_learning.samplers import MCMC
 
@@ -42,6 +43,19 @@ class StructureMCMC(MCMC):
 
         self._to_string = f"Structure_MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
         self.sparse = sparse
+
+        if proposal_object is None:
+            if self.initial_state is None:
+                self.initial_state = self.pc_graph if pc_init else DAG.generate_random(self.node_labels, 0.5, seed)
+                if whitelist is not None:
+                    self.initial_state[whitelist > 0] = 1
+                if blacklist is not None:
+                    self.initial_state[blacklist > 0] = 0
+            proposal_object = GraphProposal(initial_state=self.initial_state, blacklist=blacklist, whitelist=whitelist, seed=seed)
+        elif not isinstance(proposal_object, StructureLearningProposal):
+            raise Exception('Unsupported proposal', proposal_object)
+        
+        self.proposal_object = proposal_object
         state_score = self.score_object.compute(self.proposal_object.current_state)
         self.scores = {node: info['score'] for node, info in state_score['parameters'].items()}
         result = {'graph': self.proposal_object.current_state, 'current_state': self.proposal_object.current_state, 'proposed_state': None, 'score_current': state_score['score'],

@@ -1,6 +1,8 @@
 import seaborn as sns
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+from .graph import Graph
 
 class Partition:
 
@@ -215,6 +217,72 @@ class OrderedPartition:
         for i in range(len(self.get_partitions())):
             print(f"Partition ID {self.get_partitions()[i].get_ID()}: {self.get_partitions()[i].nodes} | Size: {self.get_partitions()[i].size} | Partition Indx : {i}" )
 
+    @classmethod
+    def from_graph(cls, g: Graph):
+       return cls.from_numpy(g.incidence, g.nodes)
+
+    @classmethod
+    def from_numpy(cls, incidence: np.ndarray , node_labels : list):
+        """Partition the graph based on the connectivity."""
+         
+        partitions = []
+
+        graph_matrix = incidence.copy()
+        remaining_nodes = set(range(len(graph_matrix)))
+        partition_id = 1
+
+        while remaining_nodes:
+            parent_nodes = Graph.find_parent_nodes(graph_matrix)
+            print(parent_nodes)
+            if not parent_nodes:
+                break
+
+            partition_labels = [node_labels[node] for node in parent_nodes if node in remaining_nodes]
+            partition_labels = set(partition_labels)
+
+            new_partition = Partition(partition_id, partition_labels)
+            partitions.append(new_partition)
+
+            """Remove outgoing edges from a set of nodes."""
+            for node in parent_nodes:
+                for i in range(len(graph_matrix)):
+                    graph_matrix[node][i] = 0
+                    
+            remaining_nodes -= parent_nodes
+            partition_id += 1
+
+        return OrderedPartition(partitions)
+    
+    @classmethod
+    def from_string(cls, string:str):
+        tokens = string.split("} {")
+        tokens = [ token.replace("{", "").replace("}", "") for token in tokens ]
+        id = 0
+        partitions = []
+        for token in tokens:
+            partitions.append( Partition(id, set(token.split(","))))
+            id = id + 1
+        return OrderedPartition(partitions)
+    
+    def to_party_permy_posy(self):
+
+        num_partitions =  len(self.get_partitions())
+
+        party = []
+        permy = []
+        posy = []
+
+        for i in range(num_partitions):
+            num_nodes = self.partitions[i].size
+            party.append( num_nodes )
+            posy.append( [i]*num_nodes )
+            permy.append(list(self.partitions[i].nodes))
+
+        flatten = lambda l: [item for sublist in l for item in sublist]
+        posy = flatten(posy)
+        permy = flatten(permy)
+        return party, permy, posy
+    
     def visualize_partitions(self, fig_size=(2.7, 6), title = "Ordered Partition"):
         """
         Visualizes a set of partition objects side by side with an optimized layout.
