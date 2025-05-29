@@ -123,16 +123,17 @@ class Distribution:
             v = np.array(v)/sum(v)
         return k, v
 
-    def plot(self, prop='freq', sort=True, normalise=False, limit=-1):
+    def plot(self, prop='freq', sort=True, normalise=False, limit=-1, ax=None):
         particles, count = self.hist(prop=prop, normalise=normalise)
         if sort:
             sort_idx = np.argsort(count)
             particles, count = np.array(particles)[sort_idx], np.array(count)[sort_idx]
         limit = limit if limit > 0 else len(particles)
-        fig = plt.figure()
-        ax = fig.subplots(1,1)
-        ax.grid(alpha=0.5)
-        ax.set_axisbelow(True)
+        if ax is None:
+            fig = plt.figure()
+            ax = fig.subplots(1,1)
+            ax.grid(alpha=0.5)
+            ax.set_axisbelow(True)
         bars = ax.bar(particles[-limit:], count[-limit:])
         ax.set_xlabel('Particles')
         ax.set_ylabel('Proportion')

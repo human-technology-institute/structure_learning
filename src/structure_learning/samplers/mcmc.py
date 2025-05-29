@@ -153,11 +153,12 @@ class MCMC(ABC):
     def trace(self):
         return self._trace
     
-    def traceplot(self):
-        fig = plt.figure()
-        ax = fig.subplots(1,1)
-        ax.grid(alpha=0.5)
-        ax.set_axisbelow(True)
+    def traceplot(self, ax=None):
+        if ax is None:
+            fig = plt.figure()
+            ax = fig.subplots(1,1)
+            ax.grid(alpha=0.5)
+            ax.set_axisbelow(True)
         plot = ax.plot(self.trace)
         ax.set_xlabel('Iterations')
         ax.set_ylabel('Log score')
