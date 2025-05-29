@@ -211,6 +211,14 @@ class MCMCDistribution(Distribution):
         opad.rejected = self.rejected
         opad.normalise()
         return opad
+    
+    @classmethod
+    def from_iterates(cls, iterates: dict):
+        dist = MCMCDistribution()
+        for iteration, data in iterates.items():
+            particle = data['graph'].to_key()
+            dist.update(particle=particle, iteration=iteration, data=data)
+        return dist
 
 class OPAD(MCMCDistribution):
     """
@@ -238,7 +246,7 @@ class OPAD(MCMCDistribution):
             self.normalise()
 
     @classmethod
-    def from_mcmc(self, dist: Distribution, plus=False):
+    def from_mcmc(cls, dist: Distribution, plus=False):
         return dist.to_opad(plus=plus)
     
     def plot(self, prop='p', sort=True, normalise=False, limit=-1):

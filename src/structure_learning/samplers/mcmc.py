@@ -12,7 +12,7 @@ from structure_learning.scores import Score, BGeScore, BDeuScore
 from structure_learning.proposals import StructureLearningProposal, GraphProposal, PartitionProposal
 from structure_learning.data_structures import OrderedPartition, DAG
 from structure_learning.data import Data
-from structure_learning.distributions import MCMCDistribution
+from structure_learning.distributions import MCMCDistribution, OPAD
 from .pc import PC
 from structure_learning.utils.graph_utils import initial_graph_pc
 from structure_learning.utils.partition_utils import build_partition
@@ -25,10 +25,14 @@ class MCMC(ABC):
     Inheriting classes must implement the following methods:
         step()
     """
+
+    RESULT_TYPE_DIST = 'distribution'
+    RESULT_TYPE_OPAD = 'opad'
+    RESULT_TYPE_ITER = 'iterates'
     def __init__(self, data: pd.DataFrame, initial_state: State, max_iter: int = 30000, score_object: Union[str, Score] = None,
                  proposal_object: Union[str, StructureLearningProposal] = None, pc_init: bool = True,
                  blacklist: np.ndarray = None, whitelist: np.ndarray = None, plus1: bool = False, seed: int = 32, 
-                 result_type: str = 'distribution'):
+                 result_type: str = RESULT_TYPE_DIST):
         """
         Initilialise MCMC instance.
 
@@ -47,7 +51,7 @@ class MCMC(ABC):
             blacklist (numpy.ndarray):                      Mask for edges to ignore in the proposal
             whitelist (numpy.ndarray):                      Mask for edges to include
             plus1 (bool):                                   Use plus1 neighborhood
-            result_type (str):                              Save results as either dictionary or distribution object.
+            result_type (str):                              Options: iterates | distribution (default) | opad
         """
 
         if data is None or not isinstance(data, (Data, pd.DataFrame)):
@@ -87,7 +91,11 @@ class MCMC(ABC):
         self.n_accepted = 0
         self.scores = None
         self.result_type = result_type
-        self.results = MCMCDistribution() if result_type == 'distribution' else {}
+        self.results = {}
+        if result_type == MCMC.RESULT_TYPE_DIST:
+            self.results = MCMCDistribution()
+        elif result_type == MCMC.RESULT_TYPE_OPAD:
+            self.results = OPAD()
         self._start_time = time.time()
         self._to_string = f"MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
 
@@ -112,9 +120,9 @@ class MCMC(ABC):
         pass
 
     def update_results(self, iteration, info):
-        if self.result_type == 'distribution':
+        if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD):
             self.results.update(info['graph'].to_key(), iteration, info)
-        elif self.result_type == 'iterations':
+        elif self.result_type == 'iterates':
             self.results[iteration] = info
         else:
             raise Exception("Unsupported result type")
@@ -154,3 +162,14 @@ class MCMC(ABC):
         ax.set_xlabel('Iterations')
         ax.set_ylabel('Log score')
         return plot
+    
+    def to_distribution(self):
+        return MCMCDistribution.from_iterates(self.results) if self.result_type == self.RESULT_TYPE_ITER else self.results
+    
+    def to_opad(self):
+        if self.result_type == self.RESULT_TYPE_ITER:
+            return MCMCDistribution.from_iterates(self.results).to_opad()
+        elif self.result_type == self.RESULT_TYPE_DIST:
+            return self.results.to_opad()
+        else:
+            return self.results
