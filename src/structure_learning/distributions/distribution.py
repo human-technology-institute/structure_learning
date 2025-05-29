@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List, Iterable, Dict, Union, TypeVar, Type
+from typing import List, Tuple, Iterable, Dict, Union, TypeVar, Type
 from copy import deepcopy
 import pandas as pd
 import numpy as np
@@ -34,6 +34,9 @@ class Distribution:
     def logp(self):
         return self.prop('logp')
     
+    def clear(self):
+        self.particles = {}
+    
     @classmethod
     def compute_normalisation(cls, logp: Union[List, np.ndarray], return_constants=True):
         """
@@ -59,9 +62,11 @@ class Distribution:
         """
         Normalise the current set of particles in the distribution.
         """
+        if len(self.particles) == 0:
+            return
         self.p, self.logZ, self.max_log_p = self.compute_normalisation(self.logp)
         for particle, _p in zip(self.particles.keys(), self.p):
-            self.particles[particle]['p'] = _p
+            self.particles[particle]['p'] = _p.item()
     
     def prop(self, name):
         """
@@ -83,6 +88,9 @@ class Distribution:
         """
         return particle in self.particles
     
+    def __len__(self):
+        return len(self.particles)
+    
     def update(self, particle, data):
         """
         Adds particle to distribution. If particle already exists, update its data.
@@ -92,7 +100,9 @@ class Distribution:
             data (dict):            Particle data
         """
         if particle in self:
-            for k,v in data.items():
+            for k,v in data.items():    
+                if 'logp' == k:
+                    continue
                 self.particles[particle][k].append(v)
             self.particles[particle]['freq'] += 1
         else:
@@ -187,11 +197,49 @@ class MCMCDistribution(Distribution):
             iteration (int):        Iteration number at which the particle was generated.
             data (dict):            Particle data
         """
-        data.update({'iteration': iteration})
+        data.update({'iteration': iteration, 'logp': data['score_current']})
         super().update(particle, data)
             
         if self.rejected is not None and (not data['accepted'] and data['operation'] != 'initial'):
             particle = data['proposed_state'].to_key()
-            self.rejected.update(particle, {'logp': data['score_proposed'], 'iterations': [iteration], 'operation': data['operation'],
-                                        'timestamp': data['timestamp']})
+            self.rejected.update(particle, {'logp': data['score_proposed'], 'iteration': iteration, 
+                                            'operation': data['operation'], 'timestamp': data['timestamp']})
+            
+    def to_opad(self, plus=False):
+        opad = OPAD(plus=plus)
+        opad.particles = self.particles
+        opad.rejected = self.rejected
+        opad.normalise()
+        return opad
 
+class OPAD(MCMCDistribution):
+    """
+    This class implements the OPAD re-weighing mechanism described in 
+    """
+    def __init__(self, particles: Iterable = [], logp: Iterable = [], theta: Dict = [], plus = False):
+        super().__init__(particles, logp, theta)
+        self.plus = plus
+        self.normalise()
+
+    def normalise(self):
+        if self.plus: # add rejected to particles
+            if len(self.rejected) > 0:
+                for particle, data in self.rejected.particles.items():
+                    self.update(particle, data['iteration'], data, normalise=False)
+                self.rejected.clear()
+        return super().normalise()
+
+    def update(self, particle, iteration, data, normalise=True):
+        """
+        Add new particles to the distribution and renormalise.
+        """
+        super().update(particle, iteration, data)
+        if normalise:
+            self.normalise()
+
+    @classmethod
+    def from_mcmc(self, dist: Distribution, plus=False):
+        return dist.to_opad(plus=plus)
+    
+    def plot(self, prop='p', sort=True, normalise=False, limit=-1):
+        return super().plot(prop=prop, sort=sort, normalise=normalise, limit=limit)
