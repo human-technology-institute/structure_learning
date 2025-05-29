@@ -7,6 +7,7 @@ import time
 import pandas as pd
 import networkx as nx
 import numpy as np
+from matplotlib import pyplot as plt
 from structure_learning.scores import Score, BGeScore, BDeuScore
 from structure_learning.proposals import StructureLearningProposal, GraphProposal, PartitionProposal
 from structure_learning.data_structures import OrderedPartition, DAG
@@ -57,6 +58,7 @@ class MCMC(ABC):
         self.num_nodes = len(self.node_labels)
         self.pc_graph = None
         self._rng = np.random.default_rng(seed=seed)
+        self._trace = []
 
         if score_object is None:
             print('Using default BGe score')
@@ -116,6 +118,7 @@ class MCMC(ABC):
             self.results[iteration] = info
         else:
             raise Exception("Unsupported result type")
+        self._trace.append(info['score_current'])
 
     def get_graphs(self, results):
         """
@@ -131,9 +134,23 @@ class MCMC(ABC):
 
     def get_chain_info(self, results, key='graph'):
         if self.result_type == 'distribution':
-            return results.prop('key')
+            return results.prop(key)
         else:
             return [result[key] for _,(i,result) in enumerate(results.items())]
 
     def __str__(self):
         return self._to_string
+
+    @property
+    def trace(self):
+        return self._trace
+    
+    def traceplot(self):
+        fig = plt.figure()
+        ax = fig.subplots(1,1)
+        ax.grid(alpha=0.5)
+        ax.set_axisbelow(True)
+        plot = ax.plot(self.trace)
+        ax.set_xlabel('Iterations')
+        ax.set_ylabel('Log score')
+        return plot

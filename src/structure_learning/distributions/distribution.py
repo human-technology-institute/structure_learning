@@ -119,7 +119,14 @@ class Distribution:
             sort_idx = np.argsort(count)
             particles, count = np.array(particles)[sort_idx], np.array(count)[sort_idx]
         limit = limit if limit > 0 else len(particles)
-        bars = plt.bar(particles[-limit:], count[-limit:])
+        fig = plt.figure()
+        ax = fig.subplots(1,1)
+        ax.grid(alpha=0.5)
+        ax.set_axisbelow(True)
+        bars = ax.bar(particles[-limit:], count[-limit:])
+        ax.set_xlabel('Particles')
+        ax.set_ylabel('Proportion')
+        ax.set_xticklabels(particles[-limit:], rotation=90)
         return bars, particles[-limit:], count[-limit:]
 
     # arithmetic

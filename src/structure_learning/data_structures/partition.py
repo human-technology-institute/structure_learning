@@ -56,7 +56,7 @@ class Partition:
     def info(self):
         print(f"Partition ID {self.get_ID()}: {self.nodes} | Size: {self.size} " )
 
-    def visualize_partition(self, fig_size=(2.7, 6)):
+    def plot(self, fig_size=(2.7, 6)):
         """
         Visualizes the given partition with an optimized layout, reducing the plot area outside the rectangle.
         The nodes are plotted as circles vertically aligned inside a slimmer rectangle.
@@ -283,7 +283,7 @@ class OrderedPartition:
         permy = flatten(permy)
         return party, permy, posy
     
-    def visualize_partitions(self, fig_size=(2.7, 6), title = "Ordered Partition"):
+    def plot(self, fig_size=(2.7, 6), title = "Ordered Partition"):
         """
         Visualizes a set of partition objects side by side with an optimized layout.
         Each partition's nodes are plotted as circles vertically aligned inside a slimmer rectangle.
