@@ -3,13 +3,10 @@
 """
 from typing import Union
 import time
-import random
 import numpy as np
-import scipy
 import pandas as pd
-from structure_learning.utils.graph_utils import collect_node_scores, generate_key_from_adj_matrix
-from structure_learning.proposals import StructureLearningProposal, GraphProposal
-from structure_learning.scores import Score, BGeScore, BDeuScore
+from structure_learning.proposals import StructureLearningProposal
+from structure_learning.scores import Score
 from structure_learning.samplers import MCMC
 
 class StructureMCMC(MCMC):
@@ -18,7 +15,8 @@ class StructureMCMC(MCMC):
     """
     def __init__(self, data: pd.DataFrame = None, initial_graph : np.ndarray = None, max_iter : int = 30000,
                  score_object : Union[str, Score] = None, proposal_object : StructureLearningProposal = None, pc_init = True,
-                 blacklist: np.ndarray = None, whitelist: np.ndarray = None, seed: int = 32, sparse=True):
+                 blacklist: np.ndarray = None, whitelist: np.ndarray = None, seed: int = 32, sparse=True,
+                 result_type: str = 'distribution'):
         """
         Initilialise Structure MCMC instance.
 
@@ -40,17 +38,15 @@ class StructureMCMC(MCMC):
 
         super().__init__(data=data, initial_state=initial_graph, max_iter=max_iter, score_object=score_object,
                          proposal_object='graph' if proposal_object is None else proposal_object, pc_init=pc_init,
-                         blacklist=blacklist, whitelist=whitelist, seed=seed)
+                         blacklist=blacklist, whitelist=whitelist, seed=seed, result_type=result_type)
 
         self._to_string = f"Structure_MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
         self.sparse = sparse
-        self.score_object.graph = self.proposal_object.current_state
-        state_score = self.score_object.compute()
-        self.scores = collect_node_scores(state_score)
+        state_score = self.score_object.compute(self.proposal_object.current_state)
+        self.scores = {node: info['score'] for node, info in state_score['parameters'].items()}
         result = {'graph': self.proposal_object.current_state, 'current_state': self.proposal_object.current_state, 'proposed_state': None, 'score_current': state_score['score'],
                   'operation': 'initial', 'accepted': False, 'acceptance_prob': 0, 'score_proposed': state_score['score'], 'timestamp': 0}
         self.update_results(0, result)
-
         self._rng = np.random.default_rng(seed=seed)
 
     def step(self):
@@ -72,7 +68,7 @@ class StructureMCMC(MCMC):
             scores_copy = self.scores.copy()
 
             for node in nodes_to_rescore:
-                scores_copy[node] = self.score_object.compute_node(node)['score']
+                scores_copy[node] = self.score_object.compute_node(proposed_state, node)['score']
             proposed_state_score = sum(list(scores_copy.values()))
 
             acceptance_prob = self.proposal_object.compute_acceptance_ratio(current_state_score, proposed_state_score)

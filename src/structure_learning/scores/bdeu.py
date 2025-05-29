@@ -5,40 +5,41 @@ import numpy as np
 import pandas as pd
 from scipy.special import gammaln
 from structure_learning.scores import Score
-from structure_learning.utils.graph_utils import find_parents
+from structure_learning.data import Data
+from structure_learning.data_structures import Graph
 
 class BDeuScore(Score):
     """
     BDeu Score
     """
-    def __init__(self, data : pd.DataFrame, incidence : Union[np.ndarray, nx.DiGraph] = None, alpha=10):
+    def __init__(self, data : Union[Data,pd.DataFrame], alpha=10):
         """
         Initialise BDeuScore instance.
 
         Parameters:
             data (pandas.DataFrame): data
-            graph (numpy.ndarray | networkx.DiGraph): graph
         """
-        super().__init__(data, incidence, "BDeu Score")
-        self.incidence = incidence
-        if incidence is not None and not isinstance(incidence, np.ndarray):
-            self.incidence = nx.from_numpy_array(incidence, create_using=nx.DiGraph)
-        self.alpha = 10.0
-        self.states = {node: self.data[node].unique() for node in list(self.data.columns)}
+        super().__init__(data)
+        self.alpha = alpha
+        self.states = {node: self.data.values[node].unique() for node in list(self.data.columns)}
 
     # todo: for larger datasets, this function is very slow.
-    def compute(self):
+    def compute(self, graph: Graph):
         """
         Compute BDeu score.
 
+        Parameter:
+            graph (Graph):      Graph object
         Returns:
             (float): BDeu score
         """
+        if Graph.has_cycle(graph):
+            return {'score': -np.inf}
         BDeu_score = 0.0
 
         parameters = {}
-        for node in self.node_labels:
-            node_score = self.compute_node(node)
+        for node in graph.nodes:
+            node_score = self.compute_node(graph, node)
             parameters[node] = node_score['parameters'][node]
             BDeu_score += node_score['score']
 
@@ -48,7 +49,7 @@ class BDeuScore(Score):
         }
         return score
 
-    def compute_node_with_edges(self, node: str, parents: list):
+    def compute_node_with_edges(self, graph: Graph, node: str, parents: list):
         """
         Adapted from https://github.com/pgmpy/pgmpy/blob/dev/pgmpy/estimators/StructureScore.py
         """
@@ -99,4 +100,4 @@ class BDeuScore(Score):
     @cache
     def _state_counts(self, node: str, parents: tuple):
         parents = list(parents)
-        return self.data.groupby([node] + parents).size().unstack(parents).fillna(0) if parents else self.data[node].value_counts().reindex(self.states[node]).to_frame()
+        return self.data.values.groupby([node] + parents).size().unstack(parents).fillna(0) if parents else self.data.values[node].value_counts().reindex(self.states[node]).to_frame()

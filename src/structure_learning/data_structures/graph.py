@@ -3,6 +3,7 @@ from math import comb, factorial
 import re
 import networkx as nx
 from matplotlib import pyplot as plt
+import seaborn as sns
 import numpy as np
 import pandas as pd
 
@@ -11,7 +12,7 @@ class Graph:
     """
     Class wrapper for graphs.
     """
-    def __init__(self, incidence: Union[np.ndarray, pd.DataFrame] = None, nodes: Union[List, Tuple] = None):
+    def __init__(self, incidence: Union[np.ndarray, pd.DataFrame] = None, nodes: Union[List, Tuple] = None, weights: Union[np.ndarray, pd.DataFrame] = None):
         """
         Initialise a graph instance.
 
@@ -21,7 +22,13 @@ class Graph:
         """
         self.incidence, self.nodes = None, None
         if incidence is not None:
-            self.incidence, self.nodes = (incidence.astype(bool), list(nodes)) if isinstance(incidence, np.ndarray) else (incidence.values.astype(bool), list(incidence.columns))
+            self.incidence, self.nodes = (incidence, nodes) if isinstance(incidence, np.ndarray) else (incidence.values, list(incidence.columns))
+            # if self.nodes is None or len(self.nodes) != self.incidence.shape[0]:
+            #     self.nodes = [f'{i+1}' for i in range(self.incidence.shape[0])]
+        self.weights = weights
+        if self.weights is None and self.incidence is not None:
+            self.weights = self.incidence.copy()
+            self.incidence = self.incidence!=0
         self._edges = None
         self._node_to_index_dict = None
 
@@ -379,4 +386,3 @@ class Graph:
                     return True
 
         return False
-    

@@ -9,8 +9,11 @@ import networkx as nx
 import numpy as np
 from structure_learning.scores import Score, BGeScore, BDeuScore
 from structure_learning.proposals import StructureLearningProposal, GraphProposal, PartitionProposal
-from structure_learning.data_structures import OrderedPartition, DAG, MCMCDistribution, Graph
-from structure_learning.utils.graph_utils import initial_graph_pc, generate_DAG
+from structure_learning.data_structures import OrderedPartition, DAG
+from structure_learning.data import Data
+from structure_learning.distributions import MCMCDistribution
+from .pc import PC
+from structure_learning.utils.graph_utils import initial_graph_pc
 from structure_learning.utils.partition_utils import build_partition
 
 State = TypeVar('State')
@@ -46,8 +49,8 @@ class MCMC(ABC):
             result_type (str):                              Save results as either dictionary or distribution object.
         """
 
-        if data is None or not isinstance(data, pd.DataFrame):
-            raise Exception("Data (as pandas dataframe) must be provided")
+        if data is None or not isinstance(data, (Data, pd.DataFrame)):
+            raise Exception("Data (as pandas dataframe or Data) must be provided")
         self.data  = data
         self.node_labels = list(data.columns)
         self.num_nodes = len(self.node_labels)
@@ -56,12 +59,12 @@ class MCMC(ABC):
 
         if score_object is None:
             print('Using default BGe score')
-            score_object = BGeScore(data=data, incidence=None)
+            score_object = BGeScore(data=data)
         elif isinstance(score_object, str):
             if score_object.lower() == 'bge':
-                score_object = BGeScore(data=data, incidence=None)
+                score_object = BGeScore(data=data)
             elif score_object.lower() in ['bde', 'bdeu']:
-                score_object = BDeuScore(data=data, incidence=None)
+                score_object = BDeuScore(data=data)
             else:
                 raise Exception(f"Unsupported score {score_object}")
         elif not isinstance(score_object, Score):
@@ -70,6 +73,7 @@ class MCMC(ABC):
 
         if pc_init:
             print('Running PC algorithm')
+            # pc = PC(data=score_object.data)
             self._pc_state, self.pc_graph = initial_graph_pc(score_object.data, True)
 
         if proposal_object is None or isinstance(proposal_object, str):
@@ -116,6 +120,7 @@ class MCMC(ABC):
         """
         for iter in range(self.max_iter):
             result = self.step()
+            # print(result['graph'], result['score_current'], result['proposed_state'], result['score_proposed'], result['graph'].nodes, result['operation'], result['accepted'], result['acceptance_prob'])
             self.update_results(iter, result)
         return self.results, self.n_accepted/self.max_iter
 

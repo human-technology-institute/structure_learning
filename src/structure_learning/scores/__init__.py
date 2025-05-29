@@ -9,5 +9,4 @@ additional scoring schemes must inherit from it.
 from .score import Score
 from .bd import BDScore
 from .bdeu import BDeuScore
-from .bge import BGeScore, WeightedBGeScore
-from .marginal import MarginalLogLikelihood
+from .bge import BGeScore

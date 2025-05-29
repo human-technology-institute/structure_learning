@@ -1,10 +1,10 @@
 from abc import abstractmethod
-from typing import List, Iterable, Dict, Hashable, TypeVar, Type
+from typing import List, Iterable, Dict, Union, TypeVar, Type
 from copy import deepcopy
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
-# from structure_learning.scores import Score
+from structure_learning.scores import Score
 from structure_learning.data_structures import DAG
 
 D = TypeVar('Distribution')
@@ -12,7 +12,7 @@ class Distribution:
     """
     Base class for distributions.
     """
-    def __init__(self, particles: Iterable[Hashable] = [], logp: Iterable = [], theta: Dict=None):
+    def __init__(self, particles: Iterable = [], logp: Iterable = [], theta: Dict = None):
         """
         Initialise distribution. Particles are stored internally as a dictionary to store their information. 
 
@@ -34,6 +34,35 @@ class Distribution:
     def logp(self):
         return self.prop('logp')
     
+    @classmethod
+    def compute_normalisation(cls, logp: Union[List, np.ndarray], return_constants=True):
+        """
+        Compute the normalisation factor given the log scores.
+
+        Parameters:
+            logp (list | np.ndarray):   The log scores 
+            return_constants (bool):    If True, also returns log(Z) and max score.
+
+        Returns:
+            (np.array):                          Normalised scores
+            (float):                             Normalisation factor
+            (np.array):                          Maximum score
+        """
+        max_logp = np.max(logp)
+        logp = np.array(logp)
+        diff = np.exp(logp - max_logp)
+        Z = diff.sum()
+        p = diff/Z
+        return p if not return_constants else (p, np.log(Z), max_logp)
+    
+    def normalise(self):
+        """
+        Normalise the current set of particles in the distribution.
+        """
+        self.p, self.logZ, self.max_log_p = self.compute_normalisation(self.logp)
+        for particle, _p in zip(self.particles.keys(), self.p):
+            self.particles[particle]['p'] = _p
+    
     def prop(self, name):
         """
         Return data about particles.
@@ -44,6 +73,8 @@ class Distribution:
         Returns:
             (list)          particle data
         """
+        if name=='p':
+            self.normalise()
         return [v[name] for v in self.particles.values()]
     
     def __contains__(self, particle):
@@ -70,20 +101,26 @@ class Distribution:
                 self.particles[particle][k] = [v] if not isinstance(v, list) else v
             self.particles[particle]['freq'] = 1
 
-    def hist(self, normalise=False):
+    def hist(self, prop='freq', normalise=False):
         """
         Returns the histogram of particles.
 
         Parameters:
             normalise (bool):       If True, return normalised counts.
         """
-        k, v = list(self.particles.keys()), self.prop('freq')
-        return k, np.array(v)/sum(v)
+        k, v = list(self.particles.keys()), self.prop(prop)
+        if normalise:
+            v = np.array(v)/sum(v)
+        return k, v
 
-    def plot(self, normalise=False):
-        particles, count = self.hist(normalise=normalise)
-        bars = plt.bar(particles, count)
-        return bars, particles, count
+    def plot(self, prop='freq', sort=True, normalise=False, limit=-1):
+        particles, count = self.hist(prop=prop, normalise=normalise)
+        if sort:
+            sort_idx = np.argsort(count)
+            particles, count = np.array(particles)[sort_idx], np.array(count)[sort_idx]
+        limit = limit if limit > 0 else len(particles)
+        bars = plt.bar(particles[-limit:], count[-limit:])
+        return bars, particles[-limit:], count[-limit:]
 
     # arithmetic
     def __copy__(self):
@@ -105,21 +142,21 @@ class Distribution:
                 dsub.update(particle, data)
         return dsub
         
-    # @classmethod
-    # def compute_distribution(cls, data: pd.DataFrame, score: Score, sort:bool = False):
-    #     dags = DAG.generate_all_dags(len(data.columns), list(data.columns))
+    @classmethod
+    def compute_distribution(cls, data: pd.DataFrame, score: Score):
+        dags = DAG.generate_all_dags(len(data.columns), list(data.columns))
 
-    #     logp = []
-    #     scorer = Score(data=data, graph=None)
-    #     for dag in dags:
-    #         scorer.graph = dag
-    #         logp.append(scorer.compute())
+        logp = []
+        scorer = score(data=data)
+        for dag in dags:
+            scorer.graph = dag
+            logp.append(scorer.compute(dag)['score'])
 
-    #     return Distribution(particles=dags, logp=logp)
+        return Distribution(particles=[dag.to_key() for dag in dags], logp=logp)
     
 class MCMCDistribution(Distribution):
 
-    def __init__(self, particles = [], logp = [], theta=None, keep_rejected=True):
+    def __init__(self, particles: Iterable = [], logp: Iterable = [], theta: Dict = None, keep_rejected: bool = True):
         """
         Initialise MCMC distribution.
 

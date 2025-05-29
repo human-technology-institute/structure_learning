@@ -7,13 +7,13 @@ import numpy as np
 from scipy.stats import gamma
 import networkx as nx
 from structure_learning.scores import Score
+from structure_learning.data_structures import Graph
 
 class BDScore(Score):
     """
     BD Score
     """
-    def __init__(self, data: pd.DataFrame, graph : Union[np.ndarray, nx.DiGraph],
-                alpha: float = 1.0):
+    def __init__(self, data: pd.DataFrame, alpha: float = 1.0):
         """
         Initialise BDScore instance.
 
@@ -21,22 +21,23 @@ class BDScore(Score):
             data (pandas.DataFrame): data
             graph (numpy.ndarray | networkx.DiGraph): graph
         """
-        super().__init__(data, graph, "BD Score")
-        self.graph = graph
-        if isinstance(graph, np.ndarray):
-            self.graph = nx.from_numpy_array(graph, create_using=nx.DiGraph)
+        super().__init__(data)
         self.alpha = alpha
 
-    def compute(self):
+    def compute(self, graph: Graph):
         """
         Compute BD score.
 
+        Parameter:
+            graph (Graph):      Graph object
         Returns:
             (float): BD score
         """
+        if Graph.has_cycle(graph):
+            return {'score': -np.inf}
         score = 1  # Initialize with 1 for multiplication
-        for node in self.graph.nodes():
-            parents = list(self.graph.predecessors(node))
+        for node in graph.nodes:
+            parents = list(graph.find_parents(node))
 
             # Derive alpha based on the structure provided
             r_i = 2  # Binary nodes

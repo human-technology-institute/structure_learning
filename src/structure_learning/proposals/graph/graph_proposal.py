@@ -63,7 +63,7 @@ class GraphProposal(StructureLearningProposal):
             (str): operation that generated the proposed graph
         """
         # add the whitelist to the current incidence matrix
-        current_state = update_matrix(self.current_state.incidence, self.current_state.incidence + self.whitelist)
+        current_state = self.current_state.incidence + self.whitelist
 
         # compute all possible neighbours
         num_neighbours, del_indx_mat, add_indx_mat, rev_indx_mat, num_deletion, num_addition, num_reversal = self._compute_nbhood(current_state)

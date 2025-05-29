@@ -1,2 +1,2 @@
 from .synthetic import SyntheticDataset
-from .data import datasets
+from .data import datasets, Data

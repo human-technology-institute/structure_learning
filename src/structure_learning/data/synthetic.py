@@ -1,11 +1,13 @@
 ## Simulate data
 ## https://github.com/ermongroup/BCD-Nets/blob/main/dag_utils.py
-
+from typing import Union
 import pandas as pd
 import numpy as np
 import scipy.stats as stats
 import networkx as nx
 from scipy.stats import multivariate_normal
+from structure_learning.data_structures import DAG
+from .data import Data
 from structure_learning.utils.partition_utils import find_parent_nodes, remove_outgoing_edges
 
 class SyntheticDataset(object):
@@ -46,6 +48,7 @@ class SyntheticDataset(object):
             self.graph_type,
             self.w_range
         )
+        print(self.W)
 
         if self.true_dag is None:
             self.data = pd.DataFrame(SyntheticDataset.simulate_data(
@@ -63,10 +66,11 @@ class SyntheticDataset(object):
                 self.noise_scale
             )
 
-        self.adj_mat = pd.DataFrame(np.where(self.W!=0, 1, 0), columns=self.node_labels)
+        self.graph = DAG(pd.DataFrame(np.where(self.W.incidence!=0, 1, 0), columns=self.node_labels))
+        self.data = Data(self.data, self.node_labels)
 
     @staticmethod
-    def simulate_data_from_dag(DAG: np.ndarray, num_obs, num_nodes, node_labels, w_range, noise_scale):
+    def simulate_data_from_dag(dag: Union[np.ndarray, DAG], num_obs, num_nodes, node_labels, w_range, noise_scale):
         """
         Simulate samples from ground truth DAG.
 
@@ -81,11 +85,11 @@ class SyntheticDataset(object):
         Returns:
             (numpy.ndarray): [n,d] sample matrix
         """
-
+        adj = dag if isinstance(dag, np.ndarray) else dag.incidence
         U = np.random.uniform(low=w_range[0], high=w_range[1], size=[num_nodes, num_nodes])
         U[np.random.rand(num_nodes, num_nodes) < 0.5] *= -1.0
 
-        W = (DAG != 0).astype(float) * U
+        W = (adj != 0).astype(float) * U
         W_mat = np.eye(num_nodes) + W
 
         sigmas = np.ones((num_nodes,)) * noise_scale # Assuming equal variances
@@ -100,32 +104,6 @@ class SyntheticDataset(object):
         # Generate data from MVN distribution
         return data, W
 
-    # def simulate_categorical_data_from_dag(DAG: np.ndarray, num_obs: int, node_labels: list, binary: bool = False, max_states = 5):
-
-    #     n_nodes = DAG.shape[1]
-    #     data = np.zeros((num_obs, n_nodes))
-
-    #     n_states = [2]*n_nodes
-    #     if not binary:
-    #         n_states = np.random.choice(list(range(2, max_states+1)), size=(n_nodes,))
-
-    #     incidence = DAG.copy()
-    #     ordering = []
-    #     for i in range(n_nodes):
-    #         parents = find_parent_nodes(incidence)
-    #         incidence = remove_outgoing_edges(incidence, parents)
-    #         ordering.extend(parents)
-
-    #     for node in ordering:
-    #         if not np.any(DAG[:,node]): # no parent
-    #             data[:, node] = np.random.choice(n_states[node], size=num_obs)
-    #         else:
-    #             states = np.arange(n_states[node])
-
-
-
-
-
     @staticmethod
     def simulate_random_dag(d, degree, graph_type, w_range):
         """Simulate random DAG with some expected degree.
@@ -137,7 +115,7 @@ class SyntheticDataset(object):
             w_range (2-tuple (float)): weight range +/- (low, high)
 
         Returns:
-            (numpy.ndarray): weighted DAG
+            (DAG): weighted DAG
             None
             (numpy.ndarray): permutation matrix
         """
@@ -171,7 +149,7 @@ class SyntheticDataset(object):
         # We can then return P.T, as we have
         # (P.T).T @ lower @ P.T = W.T
 
-        return W.T, None, P.T
+        return DAG(incidence=W.T), None, P.T
 
     @staticmethod
     def simulate_gaussian_dag(d, w_std):
@@ -194,10 +172,10 @@ class SyntheticDataset(object):
         L[np.tril_indices(d, -1)] = lower_entries
         P = np.random.permutation(np.eye(d, d))  # permutes first axis only
         W = (P @ L @ P.T).T
-        return W, None, P, L
+        return DAG(incidence=W), None, P, L
 
     @staticmethod
-    def simulate_data_V1(W, n, noise_scale=1.0, sigmas=None):
+    def simulate_data_V1(W: Union[np.ndarray, DAG], n, noise_scale=1.0, sigmas=None):
         """Simulate samples from SEM with specified type of noise.
 
         Parameters:
@@ -209,6 +187,8 @@ class SyntheticDataset(object):
         Returns:
             (numpy.ndarray) [n,d] sample matrix
         """
+        if isinstance(W, DAG):
+            W = W.incidence
         G = nx.DiGraph(W)
         d = W.shape[0]
         X = np.zeros([n, d], dtype=np.float64)
@@ -227,7 +207,7 @@ class SyntheticDataset(object):
         return X
 
     @staticmethod
-    def simulate_data(W, n, noise_scale=1.0, sigmas=None):
+    def simulate_data(W: Union[np.ndarray, DAG], n, noise_scale=1.0, sigmas=None):
         """Simulate samples from SEM with specified type of noise.
 
         Parameters:
@@ -239,7 +219,9 @@ class SyntheticDataset(object):
         Returns:
             (numpy.ndarray) [n,d] sample matrix
         """
-        d = W.shape[0]
+        if isinstance(W, DAG):
+            w = W.weights if W.weights is not None else W.incidence
+        d = w.shape[0]
         X = np.zeros([n, d], dtype=np.float64)
 
         if sigmas is None:
@@ -248,7 +230,7 @@ class SyntheticDataset(object):
         # Generate the diagonal conditional variance matrix, diagonal values indicate sigma^2_j
         D_mat = np.eye(d) * sigmas
 
-        W_mat = W + np.eye(d)
+        W_mat = w + np.eye(d)
 
         # Covariance matrix
         sigma = np.linalg.pinv(W_mat.T) @ D_mat @ np.linalg.pinv(W_mat)
