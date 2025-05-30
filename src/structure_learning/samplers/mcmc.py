@@ -110,6 +110,8 @@ class MCMC(ABC):
             result = self.step()
             # print(result['graph'], result['score_current'], result['proposed_state'], result['score_proposed'], result['graph'].nodes, result['operation'], result['accepted'], result['acceptance_prob'])
             self.update_results(iter, result)
+        if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD):
+            self.results.normalise()
         return self.results, self.n_accepted/self.max_iter
 
     @abstractmethod
@@ -167,10 +169,10 @@ class MCMC(ABC):
     def to_distribution(self):
         return MCMCDistribution.from_iterates(self.results) if self.result_type == self.RESULT_TYPE_ITER else self.results
     
-    def to_opad(self):
+    def to_opad(self, plus=False):
         if self.result_type == self.RESULT_TYPE_ITER:
-            return MCMCDistribution.from_iterates(self.results).to_opad()
+            return MCMCDistribution.from_iterates(self.results).to_opad(plus=plus)
         elif self.result_type == self.RESULT_TYPE_DIST:
-            return self.results.to_opad()
+            return self.results.to_opad(plus=plus)
         else:
             return self.results
