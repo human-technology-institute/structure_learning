@@ -8,7 +8,6 @@ import networkx as nx
 from scipy.stats import multivariate_normal
 from structure_learning.data_structures import DAG
 from .data import Data
-from structure_learning.utils.partition_utils import find_parent_nodes, remove_outgoing_edges
 
 class SyntheticDataset(object):
     """

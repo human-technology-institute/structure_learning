@@ -15,7 +15,6 @@ from structure_learning.data import Data
 from structure_learning.distributions import MCMCDistribution, OPAD
 from .pc import PC
 from structure_learning.utils.graph_utils import initial_graph_pc
-from structure_learning.utils.partition_utils import build_partition
 
 State = TypeVar('State')
 
