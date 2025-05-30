@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from typing import List, Tuple, Iterable, Dict, Union, TypeVar, Type
-from copy import deepcopy
+from copy import deepcopy, copy
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
@@ -19,7 +19,7 @@ class Distribution:
         Parameters:
             particles (Iterable):       List of particles to add in the distribution
             logp (Iterable):            Scores (log probabilities) of the particles
-            theta (Dict):           Additional particles data
+            theta (Dict):               Additional particles data
         """
         self.particles = {}
 
@@ -36,37 +36,21 @@ class Distribution:
     
     def clear(self):
         self.particles = {}
-    
-    @classmethod
-    def compute_normalisation(cls, logp: Union[List, np.ndarray], return_constants=True):
-        """
-        Compute the normalisation factor given the log scores.
 
-        Parameters:
-            logp (list | np.ndarray):   The log scores 
-            return_constants (bool):    If True, also returns log(Z) and max score.
-
-        Returns:
-            (np.array):                          Normalised scores
-            (float):                             Normalisation factor
-            (np.array):                          Maximum score
-        """
-        max_logp = np.max(logp)
-        logp = np.array(logp)
-        diff = np.exp(logp - max_logp)
-        Z = diff.sum()
-        p = diff/Z
-        return p if not return_constants else (p, np.log(Z), max_logp)
-    
-    def normalise(self):
+    def normalise(self, prop='freq', log=False):
         """
         Normalise the current set of particles in the distribution.
         """
         if len(self.particles) == 0:
             return
-        self.p, self.logZ, self.max_log_p = self.compute_normalisation(self.logp)
+        self.p = self.prop(prop)
+        if log:
+            self.p = np.exp(self.p - np.max(self.p))
+        Z = np.sum(self.p)
+        self.p /= Z
         for particle, _p in zip(self.particles.keys(), self.p):
             self.particles[particle]['p'] = _p.item()
+        return self
     
     def prop(self, name):
         """
@@ -78,8 +62,6 @@ class Distribution:
         Returns:
             (list)          particle data
         """
-        if name=='p':
-            self.normalise()
         return [v[name] for v in self.particles.values()]
     
     def __contains__(self, particle):
@@ -170,7 +152,9 @@ class Distribution:
             scorer.graph = dag
             logp.append(scorer.compute(dag)['score'])
 
-        return Distribution(particles=[dag.to_key() for dag in dags], logp=logp)
+        dist = Distribution(particles=[dag.to_key() for dag in dags], logp=logp).normalise(prop='logp', log=True)
+        dist.normalise = lambda: dist
+        return dist
     
 class MCMCDistribution(Distribution):
 
@@ -208,8 +192,8 @@ class MCMCDistribution(Distribution):
             
     def to_opad(self, plus=False):
         opad = OPAD(plus=plus)
-        opad.particles = self.particles
-        opad.rejected = self.rejected
+        opad.particles = deepcopy(self.particles)
+        opad.rejected = copy(self.rejected)
         opad.normalise()
         return opad
     
@@ -219,6 +203,7 @@ class MCMCDistribution(Distribution):
         for iteration, data in iterates.items():
             particle = data['graph'].to_key()
             dist.update(particle=particle, iteration=iteration, data=data)
+        dist.normalise()
         return dist
 
 class OPAD(MCMCDistribution):
@@ -252,3 +237,35 @@ class OPAD(MCMCDistribution):
     
     def plot(self, prop='p', sort=True, normalise=False, limit=-1):
         return super().plot(prop=prop, sort=sort, normalise=normalise, limit=limit)
+    
+        
+    @classmethod
+    def compute_normalisation(cls, logp: Union[List, np.ndarray], return_constants=True):
+        """
+        Compute the normalisation factor given the log scores.
+
+        Parameters:
+            logp (list | np.ndarray):   The log scores 
+            return_constants (bool):    If True, also returns log(Z) and max score.
+
+        Returns:
+            (np.array):                          Normalised scores
+            (float):                             Normalisation factor
+            (np.array):                          Maximum score
+        """
+        max_logp = np.max(logp)
+        logp = np.array(logp)
+        diff = np.exp(logp - max_logp)
+        Z = diff.sum()
+        p = diff/Z
+        return p if not return_constants else (p, np.log(Z), max_logp)
+    
+    def normalise(self, prop=None):
+        """
+        Normalise the current set of particles in the distribution.
+        """
+        if len(self.particles) == 0:
+            return
+        self.p, self.logZ, self.max_log_p = self.compute_normalisation(self.logp)
+        for particle, _p in zip(self.particles.keys(), self.p):
+            self.particles[particle]['p'] = _p.item()

@@ -104,8 +104,8 @@ class PartitionMCMC(MCMC):
         sample = self._sample_from_partition(self.num_nodes, self.node_labels, self.scores, self.parent_table, self._node_label_to_idx)
         G, DAG_score = DAG(incidence=sample['incidence'], nodes=self.node_labels), sample['logscore']
         result = {
-            'graph': G, 'DAG_score': DAG_score, 'operation': 'initial', 'accepted' : False, 'score_current' : self.current_state_score, 'score_proposed' : -1,
-            'acceptance_prob' : -1, 'proposed_state': None, 'proposed_DAG_score': -1, 'timestamp': time.time() - self._start_time
+            'graph': G, 'score_current': DAG_score, 'operation': 'initial', 'accepted' : False, 'pscore_current' : self.current_state_score, 'pscore_proposed' : -1,
+            'acceptance_prob' : -1, 'proposed_state': None, 'score_proposed': -1, 'timestamp': time.time() - self._start_time
         }
 
         if not self.concise:
@@ -130,7 +130,7 @@ class PartitionMCMC(MCMC):
             sample = self._sample_from_partition(self.num_nodes, self.node_labels, self.scores, self.parent_table, self._node_label_to_idx)
             G, DAG_score = DAG(incidence=sample['incidence'], nodes=self.node_labels), sample['logscore']
             result = self.current_step.copy()
-            result['DAG_score'] = DAG_score
+            result['score_current'] = DAG_score
             result['operation'] = operation
             result['accepted'] = False
             result['graph'] = G
@@ -161,8 +161,8 @@ class PartitionMCMC(MCMC):
             G, DAG_score = DAG(incidence=sample['incidence'], nodes=self.node_labels), sample['logscore']
 
             result = {
-                'graph': G, 'DAG_score': DAG_score, 'operation': operation, 'accepted' : is_accepted, 'score_current' : self.current_state_score, 'score_proposed' : proposed_state_score,
-                'acceptance_prob' : acceptance_prob, 'proposed_state': proposed_G, 'proposed_DAG_score': proposed_DAG_score, 'timestamp': time.time() - self._start_time
+                'graph': G, 'score_current': DAG_score, 'operation': operation, 'accepted' : is_accepted, 'pscore_current' : self.current_state_score, 'pscore_proposed' : proposed_state_score,
+                'acceptance_prob' : acceptance_prob, 'proposed_state': proposed_G, 'score_proposed': proposed_DAG_score, 'timestamp': time.time() - self._start_time
             }
 
             if not self.concise:
