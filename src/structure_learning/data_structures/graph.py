@@ -53,6 +53,18 @@ class Graph:
             self._edges.add((self.nodes[r], self.nodes[c]))
         return self._edges
     
+    def v_structures(self):
+        v = set()
+        incidence = self.incidence
+        for i in range(self.dim):
+            for j in range(i+1, self.dim):
+                for k in range(self.dim):
+                    if i==k or j==k:
+                        continue
+                    if incidence[i,k] and incidence[j,k] and not (incidence[i,j] or incidence[j,i]):
+                        v.add((i,k,j))
+        return v
+    
     def _update_node_index(self):
         """
         Update node-index dictionary
