@@ -1,3 +1,4 @@
+from typing import List
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
@@ -106,11 +107,11 @@ class Partition:
         plt.show()
 
 class OrderedPartition:
-    def __init__(self, partitions: list[Partition]):
+    def __init__(self, partitions: List[Partition]):
         self._partitions = partitions
 
     @property
-    def size(self):
+    def size(self) -> int:
         return len(self.partitions)
 
     @property
@@ -118,7 +119,7 @@ class OrderedPartition:
         return set.union(*(partition.nodes for partition in self.partitions))
 
     @property
-    def partitions(self) -> list[Partition]:
+    def partitions(self) -> List[Partition]:
         return self._partitions
 
     @partitions.setter
@@ -233,7 +234,6 @@ class OrderedPartition:
 
         while remaining_nodes:
             parent_nodes = Graph.find_parent_nodes(graph_matrix)
-            print(parent_nodes)
             if not parent_nodes:
                 break
 

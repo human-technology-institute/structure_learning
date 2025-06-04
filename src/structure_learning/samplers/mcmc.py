@@ -29,9 +29,10 @@ class MCMC(ABC):
     RESULT_TYPE_OPAD = 'opad'
     RESULT_TYPE_ITER = 'iterates'
     def __init__(self, data: pd.DataFrame, initial_state: State, max_iter: int = 30000, score_object: Union[str, Score] = None,
-                 proposal_object: Union[str, StructureLearningProposal] = None, pc_init: bool = True,
+                 proposal_object: Union[str, StructureLearningProposal] = None, 
+                 pc_init: bool = True, pc_significance_level = 0.01, pc_ci_test = 'pearsonr',
                  blacklist: np.ndarray = None, whitelist: np.ndarray = None, plus1: bool = False, seed: int = 32, 
-                 result_type: str = RESULT_TYPE_DIST):
+                 result_type: str = RESULT_TYPE_DIST, graph_type='dag'):
         """
         Initilialise MCMC instance.
 
@@ -51,6 +52,7 @@ class MCMC(ABC):
             whitelist (numpy.ndarray):                      Mask for edges to include
             plus1 (bool):                                   Use plus1 neighborhood
             result_type (str):                              Options: iterates | distribution (default) | opad
+            graph_type (str):                               Options: dag (default) | cpdag
         """
 
         if data is None or not isinstance(data, (Data, pd.DataFrame)):
@@ -79,8 +81,9 @@ class MCMC(ABC):
 
         if pc_init:
             print('Running PC algorithm')
-            # pc = PC(data=score_object.data)
-            self._pc_state, self.pc_graph = initial_graph_pc(score_object.data, True)
+            pc = PC(data=score_object.data, significance_level=pc_significance_level, ci_test=pc_ci_test)
+            self._pc_state, self.pc_graph = pc.run()
+            # self._pc_state, self.pc_graph = initial_graph_pc(score_object.data, True)
         
         self.initial_state = initial_state
         self.proposal_object = proposal_object
@@ -90,6 +93,7 @@ class MCMC(ABC):
         self.n_accepted = 0
         self.scores = None
         self.result_type = result_type
+        self.graph_type = graph_type
         self.results = {}
         if result_type == MCMC.RESULT_TYPE_DIST:
             self.results = MCMCDistribution()
@@ -107,7 +111,6 @@ class MCMC(ABC):
         """
         for iter in range(self.max_iter):
             result = self.step()
-            # print(result['graph'], result['score_current'], result['proposed_state'], result['score_proposed'], result['graph'].nodes, result['operation'], result['accepted'], result['acceptance_prob'])
             self.update_results(iter, result)
         if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD):
             self.results.normalise()
@@ -121,8 +124,9 @@ class MCMC(ABC):
         pass
 
     def update_results(self, iteration, info):
+        info['graph'] = info['graph'] if self.graph_type=='dag' else info['graph'].to_cpdag()
         if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD):
-            self.results.update(info['graph'].to_key(), iteration, info)
+            self.results.update(particle=info['graph'].to_key(), iteration=iteration, data=info.copy())
         elif self.result_type == 'iterates':
             self.results[iteration] = info
         else:

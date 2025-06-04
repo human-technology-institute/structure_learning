@@ -4,7 +4,9 @@ from typing import Union, List, Tuple, Type, TypeVar
 import pandas as pd
 import networkx as nx
 import numpy as np
-from structure_learning.data_structures import Graph
+import graphical_models as gm
+from .graph import Graph
+from .cpdag import CPDAG
 
 D = TypeVar('DAG')
 class DAG(Graph):
@@ -13,6 +15,10 @@ class DAG(Graph):
         super().__init__(incidence, nodes)
         if self.has_cycle(self.incidence):
             raise Exception('Cycle found in adjacency matrix')
+        
+    def to_cpdag(self):
+        DAG_gm = gm.DAG.from_amat(self.incidence)
+        return CPDAG(incidence=DAG_gm.cpdag().to_amat()[0], nodes=self.nodes)
 
     @classmethod
     def compute_ancestor_matrix(cls, adj_matrix = None):
@@ -117,12 +123,12 @@ class DAG(Graph):
             for subset in itertools.combinations(all_possible_edges, r):
 
                 # Initialize an NxN matrix filled with zeros
-                adj_matrix = np.zeros((n_nodes, n_nodes))
+                adj_matrix = np.zeros((n_nodes, n_nodes), dtype=bool)
 
                 # Set entries corresponding to the edges in the current subset to 1
                 for edge in subset:
                     source, target = edge
-                    adj_matrix[node_labels.index(source)][node_labels.index(target)] = 1
+                    adj_matrix[node_labels.index(source)][node_labels.index(target)] = True
 
                 if not cls.has_cycle(adj_matrix):
 

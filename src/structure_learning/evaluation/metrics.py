@@ -15,7 +15,7 @@ class Metric:
 def entropy(P, Q):
     return np.sum(P * (np.log(P) - np.log(Q)))
 
-def kl_divergence(P : list, Q : list, epsilon: float = 1e-15):
+def kl_divergence(P : list, Q : list, epsilon: float = 1e-10):
     """
     Computes the KL divergence between two distributions.
     Requires that the two distributions have the same length and keys.
@@ -26,10 +26,10 @@ def kl_divergence(P : list, Q : list, epsilon: float = 1e-15):
         return -1
 
     # Convert the distributions to lists (ensuring consistent order)
-    p = np.array(P) + epsilon
-    q = np.array(Q) + epsilon
+    p = np.maximum(np.array(P), epsilon)
+    q = np.maximum(np.array(Q), epsilon)
 
-    return entropy(P, Q)
+    return entropy(p, q)
 
 class KLD(Metric):
 
@@ -38,7 +38,7 @@ class KLD(Metric):
 
     def compute(self, dist1: Distribution, dist2: Distribution):
         
-        keys = set(dist1.particles.keys()) & set(dist2.particles.keys())
+        keys = set(dist1.particles.keys()).union(set(dist2.particles.keys()))
 
         dist1.normalise()
         dist2.normalise()
@@ -48,7 +48,7 @@ class KLD(Metric):
 
         return kl_divergence(P, Q)
 
-def jensen_shannon_divergence(P : list, Q : list, epsilon: float = 1e-15):
+def jensen_shannon_divergence(P : list, Q : list, epsilon: float = 1e-10):
     """
     Compute the jensen_shannon_divergence between two distributions.
     Requires that the two distributions have the same length.
@@ -59,8 +59,10 @@ def jensen_shannon_divergence(P : list, Q : list, epsilon: float = 1e-15):
         return -1
 
     # Convert the distributions to lists (ensuring consistent order)
-    p = np.array(P) + epsilon
-    q = np.array(Q) + epsilon
+    p = np.array(P)
+    q = np.array(Q)
+    p[p<epsilon] = epsilon
+    q[q<epsilon] = epsilon
 
     # Normalize the distributions to ensure they are proper probability distributions
     p /= p.sum()
@@ -81,13 +83,13 @@ class JSD(Metric):
 
     def compute(self, dist1: Distribution, dist2: Distribution):
         
-        keys = set(dist1.particles.keys()) & set(dist2.particles.keys())
+        keys = set(dist1.particles.keys()).union(set(dist2.particles.keys()))
 
         dist1.normalise()
         dist2.normalise()
 
-        P = [dist1.particles[key]['p'] if key in dist1 else 0 for key in keys]
-        Q = [dist2.particles[key]['p'] if key in dist2 else 0 for key in keys]
+        P = [dist1.particles[key]['p'] if key in dist1 else 0. for key in keys]
+        Q = [dist2.particles[key]['p'] if key in dist2 else 0. for key in keys]
 
         return jensen_shannon_divergence(P, Q)
 
@@ -111,7 +113,7 @@ class MSE(Metric):
 
     def compute(self, dist1: Distribution, dist2: Distribution):
         
-        keys = set(dist1.particles.keys()) & set(dist2.particles.keys())
+        keys = set(dist1.particles.keys()).union(set(dist2.particles.keys()))
 
         dist1.normalise()
         dist2.normalise()
@@ -141,7 +143,7 @@ class MAE(Metric):
 
     def compute(self, dist1: Distribution, dist2: Distribution):
         
-        keys = set(dist1.particles.keys()) & set(dist2.particles.keys())
+        keys = set(dist1.particles.keys()).union(set(dist2.particles.keys()))
 
         dist1.normalise()
         dist2.normalise()
@@ -204,3 +206,11 @@ class SHD(Metric):
             dags = [DAG.from_key(key=dag, nodes=true_DAG.nodes).incidence for dag in dags.particles]
 
         return expected_shd(dags, true_DAG.incidence, p)
+    
+class RHat(Metric):
+
+    def __init__(self):
+        super().__init__()
+
+    def compute(self, dists: List[Distribution]):
+        pass

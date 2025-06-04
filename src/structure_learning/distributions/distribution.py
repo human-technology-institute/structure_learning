@@ -41,6 +41,7 @@ class Distribution:
         """
         Normalise the current set of particles in the distribution.
         """
+        print('parent norm')
         if len(self.particles) == 0:
             return
         self.p = self.prop(prop)
@@ -48,7 +49,8 @@ class Distribution:
             self.p = np.exp(self.p - np.max(self.p))
         Z = np.sum(self.p)
         self.p /= Z
-        for particle, _p in zip(self.particles.keys(), self.p):
+        keys = list(self.particles.keys())
+        for particle, _p in zip(keys, self.p):
             self.particles[particle]['p'] = _p.item()
         return self
     
@@ -83,15 +85,16 @@ class Distribution:
         """
         if particle in self:
             for k,v in data.items():    
-                if 'logp' == k:
+                if k in ('freq', 'logp'):
                     continue
                 self.particles[particle][k].append(v)
-            self.particles[particle]['freq'] += 1
+                
+            self.particles[particle]['freq'] += (1 if 'freq' not in data else data['freq'])
         else:
             self.particles[particle] = {}
             for k,v in data.items():
-                self.particles[particle][k] = [v] if not isinstance(v, list) else v
-            self.particles[particle]['freq'] = 1
+                self.particles[particle][k] = [v] if not isinstance(v, list) and k!='logp' else v
+            self.particles[particle]['freq'] = (1 if 'freq' not in data else data['freq'])
 
     def hist(self, prop='freq', normalise=False):
         """
@@ -121,6 +124,11 @@ class Distribution:
         ax.set_ylabel('Proportion')
         ax.set_xticklabels(particles[-limit:], rotation=90)
         return bars, particles[-limit:], count[-limit:]
+    
+    def top(self, prop='freq', n=1):
+        k, v = self.hist(prop=prop)
+        idx = np.argsort(v)
+        return np.array(k)[idx][-n:]
 
     # arithmetic
     def __copy__(self):
@@ -182,7 +190,7 @@ class MCMCDistribution(Distribution):
             iteration (int):        Iteration number at which the particle was generated.
             data (dict):            Particle data
         """
-        data.update({'iteration': iteration, 'logp': data['score_current']})
+        data.update({'iteration': iteration, 'logp': data['score_current'] if 'logp' not in data else data['logp']})
         super().update(particle, data)
             
         if self.rejected is not None and (not data['accepted'] and data['operation'] != 'initial'):
@@ -194,6 +202,7 @@ class MCMCDistribution(Distribution):
         opad = OPAD(plus=plus)
         opad.particles = deepcopy(self.particles)
         opad.rejected = copy(self.rejected)
+        opad._add_rejected_particles_()
         opad.normalise()
         return opad
     
@@ -216,12 +225,17 @@ class OPAD(MCMCDistribution):
         self.normalise()
 
     def normalise(self):
+        print('norm')
+        self._add_rejected_particles_()
+        return super().normalise(prop='logp', log=True)
+    
+    def _add_rejected_particles_(self):
         if self.plus: # add rejected to particles
             if len(self.rejected) > 0:
+                print('Adding rejected particles')
                 for particle, data in self.rejected.particles.items():
-                    self.update(particle, data['iteration'], data, normalise=False)
+                    super(MCMCDistribution, self).update(particle, data)
                 self.rejected.clear()
-        return super().normalise()
 
     def update(self, particle, iteration, data, normalise=True):
         """
@@ -238,7 +252,6 @@ class OPAD(MCMCDistribution):
     def plot(self, prop='p', sort=True, normalise=False, limit=-1):
         return super().plot(prop=prop, sort=sort, normalise=normalise, limit=limit)
     
-        
     @classmethod
     def compute_normalisation(cls, logp: Union[List, np.ndarray], return_constants=True):
         """
@@ -260,12 +273,13 @@ class OPAD(MCMCDistribution):
         p = diff/Z
         return p if not return_constants else (p, np.log(Z), max_logp)
     
-    def normalise(self, prop=None):
-        """
-        Normalise the current set of particles in the distribution.
-        """
-        if len(self.particles) == 0:
-            return
-        self.p, self.logZ, self.max_log_p = self.compute_normalisation(self.logp)
-        for particle, _p in zip(self.particles.keys(), self.p):
-            self.particles[particle]['p'] = _p.item()
+    # def normalise(self):
+    #     """
+    #     Normalise the current set of particles in the distribution.
+    #     """
+    #     print('norm')
+    #     if len(self.particles) == 0:
+    #         return
+    #     self.p, self.logZ, self.max_log_p = self.compute_normalisation(self.logp)
+    #     for particle, _p in zip(self.particles.keys(), self.p):
+    #         self.particles[particle]['p'] = _p.item()

@@ -23,8 +23,7 @@ class Graph:
         self.incidence, self.nodes = None, None
         if incidence is not None:
             self.incidence, self.nodes = (incidence, nodes) if isinstance(incidence, np.ndarray) else (incidence.values, list(incidence.columns))
-            # if self.nodes is None or len(self.nodes) != self.incidence.shape[0]:
-            #     self.nodes = [f'{i+1}' for i in range(self.incidence.shape[0])]
+
         self.weights = weights
         if self.weights is None and self.incidence is not None:
             self.weights = self.incidence.copy()

@@ -38,8 +38,6 @@ class PartitionMCMC(MCMC):
                                                                     (data must be provided). Default: None.
             proposal_object (StructureLearningProposal):            A proposal object. If None, a GraphProposal instance is used.
                                                                     Default: None.
-            pc_init (bool):                                         If True and initial_graph is not given, PC algorithm will be used
-                                                                    to generate initial graph (start DAG).
             blacklist (numpy.ndarray):                              Mask for edges to ignore in the proposal
             whitelist (numpy.ndarray):                              Mask for edges to include in the proposal
             searchspace (str | numpy.ndarray):                      Graph search space. "FULL" | "PC" | np.ndarray | None. If none, full search space is used.
@@ -51,17 +49,21 @@ class PartitionMCMC(MCMC):
         #     raise Exception("Initial state must be of type Graph, numpy array, or an OrderedPartition")
 
         super().__init__(data=data, initial_state=initial_state, max_iter=max_iter, proposal_object=proposal_object,
-                         score_object=score_object, pc_init=(pc_init or searchspace=="PC"), blacklist=blacklist, whitelist=whitelist, plus1=plus1, seed=seed, result_type=result_type)
+                         score_object=score_object, pc_init=(searchspace=="PC"), blacklist=blacklist, whitelist=whitelist, plus1=plus1, seed=seed, result_type=result_type)
         self._to_string = f"Partition_MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
         self.concise = concise
 
         if self.proposal_object is None:
             if self.initial_state is None:
-                self.initial_state = self.pc_graph if pc_init else DAG.generate_random(self.node_labels, 0.5, seed)
+                self.initial_state = DAG.generate_random(self.node_labels, 0.5, seed)
+                if searchspace=="PC":
+                    self.initial_state = self._pc_state.incidence.astype(int) - self.initial_state.incidence.astype(int) 
+                    self.initial_state[self.initial_state < 0] = 0
+                    self.initial_state = self.initial_state.astype(bool)
                 if whitelist is not None:
-                    self.initial_state[whitelist > 0] = 1
+                    self.initial_state[whitelist > 0] = True
                 if blacklist is not None:
-                    self.initial_state[blacklist > 0] = 0
+                    self.initial_state[blacklist > 0] = False
             if isinstance(self.initial_state, np.ndarray):
                 self.initial_state = OrderedPartition.from_numpy(self.initial_state, list(self.score_object.data.columns if self.score_object else data.columns))
             elif isinstance(self.initial_state, Graph):
@@ -78,17 +80,15 @@ class PartitionMCMC(MCMC):
 
         if isinstance(searchspace, str):
             if searchspace == "FULL":
-                searchspace = np.ones((self.num_nodes, self.num_nodes)) - np.eye(self.num_nodes)
+                searchspace = (np.ones((self.num_nodes, self.num_nodes)) - np.eye(self.num_nodes)).astype(bool)
             elif searchspace == "PC":
-                searchspace = self.pc_graph
+                searchspace = self.pc_graph.incidence
             else:
                 raise Exception("Unsupported search space")
-        print(searchspace)
 
         self.parent_table = self._list_possible_parents(self._max_parents, self.node_labels, whitelist=whitelist,
                                                   blacklist=blacklist, plus1=plus1, searchspace=searchspace)
         self.score_table = self._score_possible_parents(self.parent_table, self.node_labels, self.score_object)
-        print('Precomputed score tables')
         self._rng = np.random.default_rng(seed=seed)
         random.seed(42)
         torch.random.manual_seed(seed)
@@ -121,10 +121,17 @@ class PartitionMCMC(MCMC):
         Returns:
             (dict): information on one MCMC iteration
         """
-
-        proposed_state, operation = self.proposal_object.propose()
-
-        nodes_to_rescore = self.proposal_object.get_nodes_to_rescore()
+        while True:
+            proposed_state, operation = self.proposal_object.propose()
+            nodes_to_rescore = self.proposal_object.get_nodes_to_rescore()
+            party_prop, permy_prop, posy_prop = proposed_state.to_party_permy_posy()
+            scores_copy = deepcopy(self.scores)
+            rescore = self._partition_score(list(nodes_to_rescore), self.node_labels, self.parent_table, self.score_table, permy_prop, party_prop, posy_prop)
+            for key in scores_copy:
+                scores_copy[key].update(rescore[key])
+            proposed_state_score = sum(scores_copy['total_scores'].values())
+            if operation == StructureLearningProposal.STAY_STILL or not (np.isinf(proposed_state_score) or np.isnan(proposed_state_score)):
+                break
 
         if operation == StructureLearningProposal.STAY_STILL:
             sample = self._sample_from_partition(self.num_nodes, self.node_labels, self.scores, self.parent_table, self._node_label_to_idx)
@@ -136,13 +143,6 @@ class PartitionMCMC(MCMC):
             result['graph'] = G
             result['timestamp'] = time.time() - self._start_time
         else:
-            party_prop, permy_prop, posy_prop = proposed_state.to_party_permy_posy()
-            scores_copy = deepcopy(self.scores)
-            rescore = self._partition_score(list(nodes_to_rescore), self.node_labels, self.parent_table, self.score_table, permy_prop, party_prop, posy_prop)
-            for key in scores_copy:
-                scores_copy[key].update(rescore[key])
-            proposed_state_score = sum(scores_copy['total_scores'].values())
-
             proposed_sample = self._sample_from_partition(self.num_nodes, self.node_labels, scores_copy, self.parent_table, self._node_label_to_idx)
             proposed_G, proposed_DAG_score = DAG(incidence=proposed_sample['incidence'], nodes=self.node_labels), proposed_sample['logscore']
 
@@ -170,6 +170,18 @@ class PartitionMCMC(MCMC):
                 
         self.current_step = result
         return result
+    
+    def __is_valid_partition__(self, partition: OrderedPartition, searchspace: np.ndarray):
+        party, permy, posy = partition.to_party_permy_posy()
+        for nodeidx in range(len(searchspace)):
+            pos_node = posy.find(nodeidx)
+            perm_node = permy[pos_node]
+            parentidx = np.argwhere(searchspace[:,nodeidx])
+            for parent in parentidx:
+                pos_parent = posy.find(parent)
+                perm_parent = permy[pos_parent]
+
+
 
     def _sample_from_partition(self, n, node_labels, scores, parenttable, node_label_to_idx):
         """
@@ -187,8 +199,6 @@ class PartitionMCMC(MCMC):
                 incidence[parent_set,i] = 1
                 sample_score += scores['all_possible_scores_node'][node][k]
             except Exception as e:
-                print(e)
-                print('Possible inf')
                 sample_score += -np.inf
         dag = {}
         dag['incidence'] = incidence
@@ -308,7 +318,7 @@ class PartitionMCMC(MCMC):
         for i, element in enumerate(elements):
             remaining_elements = [e for e in elements if e != element] # all nodes except self
 
-            possible_parent_nodes = remaining_elements if searchspace is None else elements[searchspace[:,i]==1] # possible parents
+            possible_parent_nodes = remaining_elements if searchspace is None else elements[searchspace[:,i]] # possible parents
 
             remaining_elements = (set(remaining_elements) - set(possible_parent_nodes)) if plus1 else [] # possible plus 1
 
