@@ -62,6 +62,10 @@ class DAG:
 # for ease of understanding and debugging.
 # It keeps tracks of all iterations, including
 # those iterations that resulted in non-compliant dags (unsuccesful iterations).
+
+# Update: since the proposal is uniform over all neighbours, the reverse proposal
+# probability can be computed easily.
+
 # It returns:
 # - the best dag structure
 # - scores: a list of all scores for succesful iterations
@@ -69,6 +73,8 @@ class DAG:
 # i.e. an array of graphs, each with its sampled frequency and 
 # corresponding score.
 # It also reports the number of un succesfull iterations.
+# Update: now, given the proposal distribution, the number of successful iterations
+# is equal to num_iterations, i.e. the number of iterations requested.
 def structure_mcmc(data_df, num_iterations=1000):
     num_nodes = data_df.shape[1]
     current_dag = DAG(num_nodes)
@@ -90,32 +96,108 @@ def structure_mcmc(data_df, num_iterations=1000):
     posterior[dag_repr] = {'score': current_score, 'count': 1}
     scores.append(current_score)
 
+    proposal_probs_trace = []  # q(G' | G) at each successful iteration
+    reverse_probs_trace = []   # q(G  | G') at each successful iteration
+
     # Unsucessful iterations are disregarded, i.e. the num of iterations only
     # represents the sucessful number of iterations.
     while successful_iterations < num_iterations:
-        proposal_dag = current_dag.copy()
-        # Randomly choose a move
-        move_type = np.random.choice(['add', 'remove', 'reverse'])
-        i, j = np.random.choice(num_nodes, size=2, replace=False)
+        # --- Step 1: Enumerate ALL possible valid neighbour moves from current_dag ---
+        neighbours = []  # each entry: (move_type, i, j, resulting_dag)
+        # 1a. “Add” moves: any i→j where no edge currently exists and adding is acyclic
+        for i in range(num_nodes):
+            for j in range(num_nodes):
+                if i == j:
+                    continue
+                if not current_dag.has_edge(i, j):
+                    # try adding and check acyclicity
+                    temp = current_dag.copy()
+                    temp.add_edge(i, j)
+                    if temp.is_acyclic():
+                        neighbours.append(('add', i, j, temp))
 
-        if move_type == 'add' and not proposal_dag.has_edge(i, j):
-            proposal_dag.add_edge(i, j)
-        elif move_type == 'remove' and proposal_dag.has_edge(i, j):
-            proposal_dag.remove_edge(i, j)
-        elif move_type == 'reverse' and proposal_dag.has_edge(i, j):
-            proposal_dag.reverse_edge(i, j)
+        # 1b. “Remove” moves: any existing edge i→j (removing never introduces a cycle)
+        for i in range(num_nodes):
+            for j in range(num_nodes):
+                if current_dag.has_edge(i, j):
+                    temp = current_dag.copy()
+                    temp.remove_edge(i, j)
+                    # removal always keeps acyclicity
+                    neighbours.append(('remove', i, j, temp))
+
+        # 1c. “Reverse” moves: any i→j where reverse is acyclic
+        for i in range(num_nodes):
+            for j in range(num_nodes):
+                if current_dag.has_edge(i, j):
+                    temp = current_dag.copy()
+                    temp.reverse_edge(i, j)
+                    if temp.is_acyclic():
+                        neighbours.append(('reverse', i, j, temp))
+
+        # If no valid neighbour (unlikely on >1 node), skip
+        if len(neighbours) == 0:
+            unsuccessful_iterations += 1
+            continue
+
+        q_forward = 1.0 / len(neighbours)
+
+        # --- Step 2: Sample one neighbour at random using these counts ---
+        # This is a better - and more complete - representation of how this should be done
+        idx = np.random.choice(len(neighbours))
+        move_type, i, j, proposal_dag = neighbours[idx]
+
+        # --- Step 3: Compute the reverse-proposal probability q(G | G') ===
+        # We must enumerate all neighbours of proposal_dag (i.e. its moves back to current_dag)
+        reverse_neighbours = []
+        # a) Check all “add” on proposal_dag (which, when applied to proposal_dag, yields something acyclic)
+        for ii in range(num_nodes):
+            for jj in range(num_nodes):
+                if ii == jj:
+                    continue
+                if not proposal_dag.has_edge(ii, jj):
+                    temp = proposal_dag.copy()
+                    temp.add_edge(ii, jj)
+                    if temp.is_acyclic():
+                        reverse_neighbours.append(('add', ii, jj, temp))
+
+        # b) “Remove” moves from proposal_dag
+        for ii in range(num_nodes):
+            for jj in range(num_nodes):
+                if proposal_dag.has_edge(ii, jj):
+                    temp = proposal_dag.copy()
+                    temp.remove_edge(ii, jj)
+                    reverse_neighbours.append(('remove', ii, jj, temp))
+
+        # c) “Reverse” moves from proposal_dag
+        for ii in range(num_nodes):
+            for jj in range(num_nodes):
+                if proposal_dag.has_edge(ii, jj):
+                    temp = proposal_dag.copy()
+                    temp.reverse_edge(ii, jj)
+                    if temp.is_acyclic():
+                        reverse_neighbours.append(('reverse', ii, jj, temp))
+
+        # Now count how many of those actually lead back to the original current_dag
+        # (We only care about the number of valid reverse moves, since q is uniform over them.)
+        num_reverse_neighbours = len(reverse_neighbours)
+        if num_reverse_neighbours == 0:
+            # Shouldn’t happen—there’s always at least one way back—but just in case:
+            q_reverse = 0
         else:
-            unsuccessful_iterations += 1
-            continue  # Invalid move; do not count
+            q_reverse = 1.0 / num_reverse_neighbours
 
-        if not proposal_dag.is_acyclic():
-            unsuccessful_iterations += 1
-            continue  # Reject non-acyclic proposals
-
-        # Evaluate new graph and accept/reject
-        # Valid proposal: count as a successful iteration.
+        # --- Step 4: Evaluate new graph and MH acceptance ratio (including q terms) ---
         proposal_score = compute_bge_score_for_dag(proposal_dag, data_df)
-        acceptance_prob = min(1, np.exp(proposal_score - current_score))
+
+        # MH acceptance: min(1, [p(G') * q(G | G')] / [p(G) * q(G' | G)])
+        # since compute_bge_score_for_dag returns log-score:
+        log_alpha = (proposal_score - current_score) + np.log(q_reverse) - np.log(q_forward)
+        alpha = np.exp(log_alpha)
+        acceptance_prob = min(1, alpha)
+
+        # Store raw probabilities regardless of acceptance (for trace plotting)
+        proposal_probs_trace.append(q_forward)     # q(G'|G)
+        reverse_probs_trace.append(q_reverse)      # q(G|G')
 
         if np.random.rand() < acceptance_prob:
             current_dag = proposal_dag
@@ -123,7 +205,8 @@ def structure_mcmc(data_df, num_iterations=1000):
             if current_score > best_score:
                 best_dag = current_dag.copy()
                 best_score = current_score
-                
+
+        # Record current score (whether or not the move was accepted)
         scores.append(current_score)
         successful_iterations += 1
 
@@ -138,7 +221,14 @@ def structure_mcmc(data_df, num_iterations=1000):
     for key in posterior:
         posterior[key]['rel_freq'] = posterior[key]['count'] / successful_iterations
 
-    return best_dag, scores, posterior, unsuccessful_iterations
+    return (
+        best_dag,
+        scores,
+        posterior,
+        unsuccessful_iterations,
+        proposal_probs_trace,
+        reverse_probs_trace
+    )
 
 
 # Wrapper to compute BGe score for a DAG
@@ -232,7 +322,16 @@ plt.title('True Posterior (Enumeration) of DAGs')
 plt.show()
 
 # Run MCMC.
-best_dag, scores, mcmc_posterior, unsuccessful_iters = structure_mcmc(data_df, num_iterations=1000)
+# Run MCMC with corrected acceptance ratio
+(
+    best_dag,
+    scores,
+    mcmc_posterior,
+    unsuccessful_iters,
+    proposal_qs,
+    reverse_qs
+) = structure_mcmc(data_df, num_iterations=1000)
+
 print("Unsuccessful iterations:", unsuccessful_iters)
 
 # Plot the MCMC posterior distribution.
@@ -262,6 +361,16 @@ plt.title('Comparison of True Distribution and MCMC Posterior')
 plt.legend()
 plt.xticks(x, ['DAG {}'.format(i+1) for i in range(len(all_keys_sorted))], rotation=45)
 plt.tight_layout()
+plt.show()
+
+ratio_qs = [rev / fwd if fwd != 0 else np.nan for rev, fwd in zip(reverse_qs, proposal_qs)]
+
+plt.figure(figsize=(8, 4))
+plt.plot(ratio_qs, label='q(G | G\') / q(G\' | G): Ratio of proposal probabilities')
+plt.xlabel('Iteration (successful)')
+plt.ylabel('Proposal Probability Ratio')
+plt.title('Trace of Proposal Probability Ratios')
+plt.legend()
 plt.show()
 
 print("Finished")
