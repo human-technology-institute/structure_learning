@@ -132,7 +132,7 @@ class DAG(Graph):
 
                 if not cls.has_cycle(adj_matrix):
 
-                    base_dag_lst.append(Graph(incidence=adj_matrix, nodes=node_labels))
+                    base_dag_lst.append(DAG(incidence=adj_matrix, nodes=node_labels))
 
         return base_dag_lst
     

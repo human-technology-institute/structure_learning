@@ -46,9 +46,12 @@ class Distribution:
         self.p = self.prop(prop)
         if log:
             self.p = np.exp(self.p - np.max(self.p))
+        
+        keys = list(self.particles.keys())
+        weights = np.array([(1. if 'weight' not in self.particles[particle] else self.particles[particle]['weight']) for particle in keys])
+        self.p = self.p*weights
         Z = np.sum(self.p)
         self.p /= Z
-        keys = list(self.particles.keys())
         for particle, _p in zip(keys, self.p):
             self.particles[particle]['p'] = _p.item()
         return self
@@ -63,7 +66,7 @@ class Distribution:
         Returns:
             (list)          particle data
         """
-        return [v[name] for v in self.particles.values()]
+        return np.array([v[name] for v in self.particles.values()])
     
     def __contains__(self, particle):
         """
@@ -84,7 +87,7 @@ class Distribution:
         """
         if particle in self:
             for k,v in data.items():    
-                if k in ('freq', 'logp'):
+                if k in ('freq', 'logp', 'weight'):
                     continue
                 self.particles[particle][k].append(v)
                 
@@ -92,7 +95,7 @@ class Distribution:
         else:
             self.particles[particle] = {}
             for k,v in data.items():
-                self.particles[particle][k] = [v] if not isinstance(v, list) and k!='logp' else v
+                self.particles[particle][k] = [v] if not isinstance(v, list) and k not in ('logp', 'weight') else v
             self.particles[particle]['freq'] = (1 if 'freq' not in data else data['freq'])
 
     def hist(self, prop='freq', normalise=False):
@@ -150,16 +153,26 @@ class Distribution:
         return dsub
         
     @classmethod
-    def compute_distribution(cls, data: pd.DataFrame, score: Score):
+    def compute_distribution(cls, data: pd.DataFrame, score: Score, graph_type='dag'):
         dags = DAG.generate_all_dags(len(data.columns), list(data.columns))
+        if graph_type=='cpdag':
+            cpdags = {}
 
-        logp = []
+        particles = {}
+        particle_weights = {}
         scorer = score(data=data)
         for dag in dags:
-            scorer.graph = dag
-            logp.append(scorer.compute(dag)['score'])
+            particle = dag.to_key()
+            if graph_type=='cpdag':
+                particle = dag.to_cpdag().to_key()
+            if particle not in particles:
+                scorer.graph = dag
+                particles[particle] = scorer.compute(dag)['score']
+                particle_weights[particle] = {'weight': 1}
+            else:
+                particle_weights[particle]['weight'] += 1
 
-        dist = Distribution(particles=[dag.to_key() for dag in dags], logp=logp).normalise(prop='logp', log=True)
+        dist = Distribution(particles=list(particles.keys()), logp=particles.values(), theta=particle_weights.values()).normalise(prop='logp', log=True)
         dist.normalise = lambda: dist
         return dist
     

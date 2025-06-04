@@ -24,7 +24,7 @@ class PartitionMCMC(MCMC):
     def __init__(self, data : pd.DataFrame = None, initial_state : Union[OrderedPartition, np.ndarray] = None, max_iter : int = 30000,
                  proposal_object : StructureLearningProposal = None, score_object : Union[str, Score] = None,
                  pc_init: bool = True, blacklist = None, whitelist = None, searchspace = None, plus1: bool = False, seed : int  = 32, 
-                 result_type='iterations', concise=True):
+                 result_type='iterations', graph_type='dag', concise=True):
         """
         Initilialise Partition MCMC instance.
 
@@ -49,7 +49,7 @@ class PartitionMCMC(MCMC):
         #     raise Exception("Initial state must be of type Graph, numpy array, or an OrderedPartition")
 
         super().__init__(data=data, initial_state=initial_state, max_iter=max_iter, proposal_object=proposal_object,
-                         score_object=score_object, pc_init=(searchspace=="PC"), blacklist=blacklist, whitelist=whitelist, plus1=plus1, seed=seed, result_type=result_type)
+                         score_object=score_object, pc_init=(searchspace=="PC"), blacklist=blacklist, whitelist=whitelist, plus1=plus1, seed=seed, result_type=result_type, graph_type=graph_type)
         self._to_string = f"Partition_MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
         self.concise = concise
 

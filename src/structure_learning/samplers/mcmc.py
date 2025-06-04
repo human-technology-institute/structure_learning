@@ -103,6 +103,7 @@ class MCMC(ABC):
         elif result_type == MCMC.RESULT_TYPE_OPAD_PLUS:
             self.results = OPAD(plus=True)
         self._start_time = time.time()
+        self._cpdag_sizes = {}
         self._to_string = f"MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
 
     def run(self) -> Tuple[dict, float]:
@@ -128,8 +129,13 @@ class MCMC(ABC):
 
     def update_results(self, iteration, info):
         info['graph'] = info['graph'] if self.graph_type=='dag' else info['graph'].to_cpdag()
+        key = info['graph'].to_key()
+        if self.graph_type=='cpdag':
+            if key not in self._cpdag_sizes:
+                self._cpdag_sizes[key] = len(info['graph'])
+            info['weight'] = self._cpdag_sizes[key]
         if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS):
-            self.results.update(particle=info['graph'].to_key(), iteration=iteration, data=info.copy())
+            self.results.update(particle=key, iteration=iteration, data=info.copy())
         elif self.result_type == 'iterates':
             self.results[iteration] = info
         else:
