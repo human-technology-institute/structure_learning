@@ -41,7 +41,6 @@ class Distribution:
         """
         Normalise the current set of particles in the distribution.
         """
-        print('parent norm')
         if len(self.particles) == 0:
             return
         self.p = self.prop(prop)
@@ -225,7 +224,6 @@ class OPAD(MCMCDistribution):
         self.normalise()
 
     def normalise(self):
-        print('norm')
         self._add_rejected_particles_()
         return super().normalise(prop='logp', log=True)
     
@@ -272,14 +270,3 @@ class OPAD(MCMCDistribution):
         Z = diff.sum()
         p = diff/Z
         return p if not return_constants else (p, np.log(Z), max_logp)
-    
-    # def normalise(self):
-    #     """
-    #     Normalise the current set of particles in the distribution.
-    #     """
-    #     print('norm')
-    #     if len(self.particles) == 0:
-    #         return
-    #     self.p, self.logZ, self.max_log_p = self.compute_normalisation(self.logp)
-    #     for particle, _p in zip(self.particles.keys(), self.p):
-    #         self.particles[particle]['p'] = _p.item()
