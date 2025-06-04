@@ -206,11 +206,41 @@ class SHD(Metric):
             dags = [DAG.from_key(key=dag, nodes=true_DAG.nodes).incidence for dag in dags.particles]
 
         return expected_shd(dags, true_DAG.incidence, p)
-    
+
+def rhat(P: list, th: list):
+    """
+    Compute rhat metric for the provided distributions and measurement.
+
+    Parameters:
+        P (list):       distributions (must be normalised)
+        th (list):      scores/measurements
+    """
+    M = len(P)
+    theta_m = np.array([np.sum(np.array(p)*np.array(t)) for p,t in zip(P,th)])
+    theta = np.mean(theta_m)
+    s_m = [np.sum(np.array(p)*(np.array(t)**2)) for p,t in zip(P,th)] - theta_m**2
+    B = (1/(M-1))*np.sum((theta_m - theta)**2)
+    W = np.mean(s_m)
+    v = W + B
+    Rhat = np.sqrt(v/W)
+    return Rhat
+
 class RHat(Metric):
 
     def __init__(self):
         super().__init__()
 
-    def compute(self, dists: List[Distribution]):
-        pass
+    def compute(self, dists: List[Distribution], prop='logp'):
+        if len(dists) < 2:
+            raise Exception("There must be at least 2 distributions.")
+        keys = set(dists[0].particles.keys())
+        dists[0].normalise()
+        for dist in dists[1:]:
+            keys = keys.union(dist.particles.keys())
+            dist.normalise()
+
+        P = [[dist.particles[key]['p'] if key in dist else 0 for key in keys] for dist in dists]
+        th = [[dist.particles[key][prop] if key in dist else 0 for key in keys] for dist in dists]
+
+        return rhat(P, th)
+
