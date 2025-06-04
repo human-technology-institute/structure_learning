@@ -27,6 +27,7 @@ class MCMC(ABC):
 
     RESULT_TYPE_DIST = 'distribution'
     RESULT_TYPE_OPAD = 'opad'
+    RESULT_TYPE_OPAD_PLUS = 'opad+'
     RESULT_TYPE_ITER = 'iterates'
     def __init__(self, data: pd.DataFrame, initial_state: State, max_iter: int = 30000, score_object: Union[str, Score] = None,
                  proposal_object: Union[str, StructureLearningProposal] = None, 
@@ -51,7 +52,7 @@ class MCMC(ABC):
             blacklist (numpy.ndarray):                      Mask for edges to ignore in the proposal
             whitelist (numpy.ndarray):                      Mask for edges to include
             plus1 (bool):                                   Use plus1 neighborhood
-            result_type (str):                              Options: iterates | distribution (default) | opad
+            result_type (str):                              Options: iterates | distribution (default) | opad | opad+
             graph_type (str):                               Options: dag (default) | cpdag
         """
 
@@ -99,6 +100,8 @@ class MCMC(ABC):
             self.results = MCMCDistribution()
         elif result_type == MCMC.RESULT_TYPE_OPAD:
             self.results = OPAD()
+        elif result_type == MCMC.RESULT_TYPE_OPAD_PLUS:
+            self.results = OPAD(plus=True)
         self._start_time = time.time()
         self._to_string = f"MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
 
@@ -125,7 +128,7 @@ class MCMC(ABC):
 
     def update_results(self, iteration, info):
         info['graph'] = info['graph'] if self.graph_type=='dag' else info['graph'].to_cpdag()
-        if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD):
+        if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS):
             self.results.update(particle=info['graph'].to_key(), iteration=iteration, data=info.copy())
         elif self.result_type == 'iterates':
             self.results[iteration] = info
@@ -175,7 +178,7 @@ class MCMC(ABC):
     def to_opad(self, plus=False):
         if self.result_type == self.RESULT_TYPE_ITER:
             return MCMCDistribution.from_iterates(self.results).to_opad(plus=plus)
-        elif self.result_type == self.RESULT_TYPE_DIST:
+        elif self.result_type == self.RESULT_TYPE_DIST :
             return self.results.to_opad(plus=plus)
         else:
             return self.results
