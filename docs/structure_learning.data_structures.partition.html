@@ -1,10 +1,27 @@
-<!DOCTYPE html>
+<!DOCTYPE>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Python: module structure_learning.data_structures.partition</title>
-</head><body>
-
+<title>Pydoc: module structure_learning.data_structures.partition</title>
+<link rel="stylesheet" type="text/css" href="_pydoc.css"></head><body>
+                <div style='float:right'>
+                    <div style='text-align:center'>
+                    <a href="index.html">Module Index</a>
+                    : <a href="topics.html">Topics</a>
+                    : <a href="keywords.html">Keywords</a>
+                    </div>
+                    <div>
+                        <form action="get" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Get">
+                        </form>&nbsp;
+                        <form action="search" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Search">
+                        </form>
+                    </div>
+                </div>
+                <div style="clear:both;padding-top:.5em;">
 <table class="heading">
 <tr class="heading-text decor">
 <td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.data_structures.html" class="white">data_structures</a>.partition</strong></td>
@@ -16,10 +33,11 @@
 <td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
     
 <tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
-<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="matplotlib.patches.html">matplotlib.patches</a><br>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="numpy.html">numpy</a><br>
+</td><td class="multicolumn"><a href="matplotlib.patches.html">matplotlib.patches</a><br>
 </td><td class="multicolumn"><a href="matplotlib.pyplot.html">matplotlib.pyplot</a><br>
 </td><td class="multicolumn"><a href="seaborn.html">seaborn</a><br>
-</td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+</td></tr></table></td></tr></table><p>
 <table class="section">
 <tr class="decor index-decor heading-text">
 <td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
@@ -40,12 +58,12 @@
 <td class="section-title" colspan=3>&nbsp;<br><a name="OrderedPartition">class <strong>OrderedPartition</strong></a>(<a href="builtins.html#object">builtins.object</a>)</td></tr>
     
 <tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
-<td class="decor title-decor" colspan=2><span class="code"><a href="#OrderedPartition">OrderedPartition</a>(partitions:&nbsp;list[structure_learning.data_structures.partition.<a href="#Partition">Partition</a>])<br>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#OrderedPartition">OrderedPartition</a>(partitions:&nbsp;List[structure_learning.data_structures.partition.<a href="#Partition">Partition</a>])<br>
 &nbsp;<br>
 <br>&nbsp;</span></td></tr>
 <tr><td>&nbsp;</td>
 <td class="singlecolumn">Methods defined here:<br>
-<dl><dt><a name="OrderedPartition-__init__"><strong>__init__</strong></a>(self, partitions: list[structure_learning.data_structures.partition.Partition])</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+<dl><dt><a name="OrderedPartition-__init__"><strong>__init__</strong></a>(self, partitions: List[structure_learning.data_structures.partition.Partition])</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
 
 <dl><dt><a name="OrderedPartition-__str__"><strong>__str__</strong></a>(self)</dt><dd><span class="code">Return&nbsp;str(self).</span></dd></dl>
 
@@ -75,6 +93,15 @@
 
 <dl><dt><a name="OrderedPartition-join_partition"><strong>join_partition</strong></a>(self, part_id: int)</dt></dl>
 
+<dl><dt><a name="OrderedPartition-plot"><strong>plot</strong></a>(self, fig_size=(2.7, 6), title='Ordered Partition')</dt><dd><span class="code">Visualizes&nbsp;a&nbsp;set&nbsp;of&nbsp;partition&nbsp;objects&nbsp;side&nbsp;by&nbsp;side&nbsp;with&nbsp;an&nbsp;optimized&nbsp;layout.<br>
+Each&nbsp;partition's&nbsp;nodes&nbsp;are&nbsp;plotted&nbsp;as&nbsp;circles&nbsp;vertically&nbsp;aligned&nbsp;inside&nbsp;a&nbsp;slimmer&nbsp;rectangle.<br>
+The&nbsp;partition&nbsp;ID&nbsp;and&nbsp;size&nbsp;are&nbsp;displayed&nbsp;at&nbsp;the&nbsp;top&nbsp;of&nbsp;each&nbsp;rectangle.<br>
+Allows&nbsp;control&nbsp;over&nbsp;the&nbsp;figure&nbsp;size&nbsp;through&nbsp;the&nbsp;fig_size&nbsp;parameter&nbsp;for&nbsp;each&nbsp;individual&nbsp;partition&nbsp;visualization.<br>
+&nbsp;<br>
+Args:<br>
+-&nbsp;partitions:&nbsp;A&nbsp;list&nbsp;of&nbsp;<a href="#Partition">Partition</a>&nbsp;class&nbsp;instances&nbsp;to&nbsp;be&nbsp;visualized.<br>
+-&nbsp;fig_size:&nbsp;A&nbsp;tuple&nbsp;(width,&nbsp;height)&nbsp;specifying&nbsp;the&nbsp;size&nbsp;of&nbsp;the&nbsp;figure&nbsp;for&nbsp;each&nbsp;partition.</span></dd></dl>
+
 <dl><dt><a name="OrderedPartition-print_partitions"><strong>print_partitions</strong></a>(self)</dt></dl>
 
 <dl><dt><a name="OrderedPartition-remove_empty_partitions"><strong>remove_empty_partitions</strong></a>(self)</dt></dl>
@@ -85,16 +112,17 @@
 
 <dl><dt><a name="OrderedPartition-replace_partition"><strong>replace_partition</strong></a>(self, new_partition: structure_learning.data_structures.partition.Partition, index: int)</dt></dl>
 
+<dl><dt><a name="OrderedPartition-to_party_permy_posy"><strong>to_party_permy_posy</strong></a>(self)</dt></dl>
+
 <dl><dt><a name="OrderedPartition-update_IDs"><strong>update_IDs</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="OrderedPartition-visualize_partitions"><strong>visualize_partitions</strong></a>(self, fig_size=(2.7, 6), title='Ordered Partition')</dt><dd><span class="code">Visualizes&nbsp;a&nbsp;set&nbsp;of&nbsp;partition&nbsp;objects&nbsp;side&nbsp;by&nbsp;side&nbsp;with&nbsp;an&nbsp;optimized&nbsp;layout.<br>
-Each&nbsp;partition's&nbsp;nodes&nbsp;are&nbsp;plotted&nbsp;as&nbsp;circles&nbsp;vertically&nbsp;aligned&nbsp;inside&nbsp;a&nbsp;slimmer&nbsp;rectangle.<br>
-The&nbsp;partition&nbsp;ID&nbsp;and&nbsp;size&nbsp;are&nbsp;displayed&nbsp;at&nbsp;the&nbsp;top&nbsp;of&nbsp;each&nbsp;rectangle.<br>
-Allows&nbsp;control&nbsp;over&nbsp;the&nbsp;figure&nbsp;size&nbsp;through&nbsp;the&nbsp;fig_size&nbsp;parameter&nbsp;for&nbsp;each&nbsp;individual&nbsp;partition&nbsp;visualization.<br>
-&nbsp;<br>
-Args:<br>
--&nbsp;partitions:&nbsp;A&nbsp;list&nbsp;of&nbsp;<a href="#Partition">Partition</a>&nbsp;class&nbsp;instances&nbsp;to&nbsp;be&nbsp;visualized.<br>
--&nbsp;fig_size:&nbsp;A&nbsp;tuple&nbsp;(width,&nbsp;height)&nbsp;specifying&nbsp;the&nbsp;size&nbsp;of&nbsp;the&nbsp;figure&nbsp;for&nbsp;each&nbsp;partition.</span></dd></dl>
+<hr>
+Class methods defined here:<br>
+<dl><dt><a name="OrderedPartition-from_graph"><strong>from_graph</strong></a>(g: structure_learning.data_structures.graph.Graph)</dt></dl>
+
+<dl><dt><a name="OrderedPartition-from_numpy"><strong>from_numpy</strong></a>(incidence: numpy.ndarray, node_labels: list)</dt><dd><span class="code"><a href="#Partition">Partition</a>&nbsp;the&nbsp;graph&nbsp;based&nbsp;on&nbsp;the&nbsp;connectivity.</span></dd></dl>
+
+<dl><dt><a name="OrderedPartition-from_string"><strong>from_string</strong></a>(string: str)</dt></dl>
 
 <hr>
 Readonly properties defined here:<br>
@@ -137,15 +165,7 @@ Data descriptors defined here:<br>
 
 <dl><dt><a name="Partition-info"><strong>info</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="Partition-remove_nodes"><strong>remove_nodes</strong></a>(self, nodes: set)</dt></dl>
-
-<dl><dt><a name="Partition-remove_single_node"><strong>remove_single_node</strong></a>(self, node: str)</dt></dl>
-
-<dl><dt><a name="Partition-replace_partition"><strong>replace_partition</strong></a>(self, new_partition)</dt></dl>
-
-<dl><dt><a name="Partition-set_ID"><strong>set_ID</strong></a>(self, ID)</dt></dl>
-
-<dl><dt><a name="Partition-visualize_partition"><strong>visualize_partition</strong></a>(self, fig_size=(2.7, 6))</dt><dd><span class="code">Visualizes&nbsp;the&nbsp;given&nbsp;partition&nbsp;with&nbsp;an&nbsp;optimized&nbsp;layout,&nbsp;reducing&nbsp;the&nbsp;plot&nbsp;area&nbsp;outside&nbsp;the&nbsp;rectangle.<br>
+<dl><dt><a name="Partition-plot"><strong>plot</strong></a>(self, fig_size=(2.7, 6))</dt><dd><span class="code">Visualizes&nbsp;the&nbsp;given&nbsp;partition&nbsp;with&nbsp;an&nbsp;optimized&nbsp;layout,&nbsp;reducing&nbsp;the&nbsp;plot&nbsp;area&nbsp;outside&nbsp;the&nbsp;rectangle.<br>
 The&nbsp;nodes&nbsp;are&nbsp;plotted&nbsp;as&nbsp;circles&nbsp;vertically&nbsp;aligned&nbsp;inside&nbsp;a&nbsp;slimmer&nbsp;rectangle.<br>
 The&nbsp;partition&nbsp;ID&nbsp;and&nbsp;size&nbsp;are&nbsp;displayed&nbsp;at&nbsp;the&nbsp;top&nbsp;of&nbsp;the&nbsp;rectangle.<br>
 Allows&nbsp;control&nbsp;over&nbsp;the&nbsp;figure&nbsp;size&nbsp;through&nbsp;the&nbsp;fig_size&nbsp;parameter.<br>
@@ -153,6 +173,14 @@ Allows&nbsp;control&nbsp;over&nbsp;the&nbsp;figure&nbsp;size&nbsp;through&nbsp;t
 Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;partition:&nbsp;An&nbsp;instance&nbsp;of&nbsp;the&nbsp;<a href="#Partition">Partition</a>&nbsp;class.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;fig_size:&nbsp;A&nbsp;tuple&nbsp;(width,&nbsp;height)&nbsp;specifying&nbsp;the&nbsp;size&nbsp;of&nbsp;the&nbsp;figure.</span></dd></dl>
+
+<dl><dt><a name="Partition-remove_nodes"><strong>remove_nodes</strong></a>(self, nodes: set)</dt></dl>
+
+<dl><dt><a name="Partition-remove_single_node"><strong>remove_single_node</strong></a>(self, node: str)</dt></dl>
+
+<dl><dt><a name="Partition-replace_partition"><strong>replace_partition</strong></a>(self, new_partition)</dt></dl>
+
+<dl><dt><a name="Partition-set_ID"><strong>set_ID</strong></a>(self, ID)</dt></dl>
 
 <hr>
 Readonly properties defined here:<br>
@@ -168,5 +196,11 @@ Data descriptors defined here:<br>
 </dl>
 <dl><dt><strong>nodes</strong></dt>
 </dl>
-</td></tr></table></td></tr></table>
+</td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>List</strong> = typing.List</td></tr></table></div>
 </body></html>

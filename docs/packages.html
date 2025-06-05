@@ -1,0 +1,159 @@
+<html>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+      <div class="mermaid">
+    
+        classDiagram
+          class structure_learning {
+          }
+          class data {
+          }
+          class data {
+          }
+          class synthetic {
+          }
+          class data_structures {
+          }
+          class cpdag {
+          }
+          class dag {
+          }
+          class graph {
+          }
+          class partition {
+          }
+          class distributions {
+          }
+          class distribution {
+          }
+          class evaluation {
+          }
+          class metrics {
+          }
+          class metrics_old {
+          }
+          class tests {
+          }
+          class proposals {
+          }
+          class graph {
+          }
+          class graph_proposal {
+          }
+          class partition {
+          }
+          class partition_proposal {
+          }
+          class proposal {
+          }
+          class samplers {
+          }
+          class greedy {
+          }
+          class hillclimb {
+          }
+          class mcmc {
+          }
+          class partition_mcmc {
+          }
+          class pc {
+          }
+          class structure_mcmc {
+          }
+          class scores {
+          }
+          class bd {
+          }
+          class bdeu {
+          }
+          class bge {
+          }
+          class score {
+          }
+          class tests {
+          }
+          class test_simulation_structure_mcmc_synthetic {
+          }
+          class utils {
+          }
+          class graph_utils {
+          }
+          data --> data
+          data --> synthetic
+          synthetic --> data
+          synthetic --> data_structures
+          data_structures --> cpdag
+          data_structures --> dag
+          data_structures --> graph
+          data_structures --> partition
+          cpdag --> graph
+          dag --> cpdag
+          dag --> graph
+          partition --> graph
+          distributions --> distribution
+          distribution --> data_structures
+          distribution --> scores
+          metrics --> data_structures
+          metrics --> distributions
+          metrics_old --> graph_utils
+          tests --> graph_utils
+          proposals --> graph_proposal
+          proposals --> partition_proposal
+          proposals --> proposal
+          graph_proposal --> data_structures
+          graph_proposal --> proposals
+          partition_proposal --> partition
+          partition_proposal --> proposals
+          samplers --> greedy
+          samplers --> hillclimb
+          samplers --> mcmc
+          samplers --> partition_mcmc
+          samplers --> structure_mcmc
+          greedy --> data
+          greedy --> data_structures
+          greedy --> proposals
+          greedy --> scores
+          hillclimb --> cpdag
+          hillclimb --> dag
+          hillclimb --> scores
+          mcmc --> data
+          mcmc --> data_structures
+          mcmc --> distributions
+          mcmc --> proposals
+          mcmc --> pc
+          mcmc --> scores
+          mcmc --> graph_utils
+          partition_mcmc --> data_structures
+          partition_mcmc --> proposals
+          partition_mcmc --> samplers
+          partition_mcmc --> scores
+          pc --> cpdag
+          pc --> dag
+          structure_mcmc --> data_structures
+          structure_mcmc --> proposals
+          structure_mcmc --> samplers
+          structure_mcmc --> scores
+          scores --> bd
+          scores --> bdeu
+          scores --> bge
+          scores --> score
+          bd --> data_structures
+          bd --> scores
+          bdeu --> data
+          bdeu --> data_structures
+          bdeu --> scores
+          bge --> data
+          bge --> data_structures
+          bge --> scores
+          score --> data
+          score --> data_structures
+          score --> graph_utils
+          test_simulation_structure_mcmc_synthetic --> data
+          test_simulation_structure_mcmc_synthetic --> proposals
+          test_simulation_structure_mcmc_synthetic --> samplers
+          test_simulation_structure_mcmc_synthetic --> scores
+          test_simulation_structure_mcmc_synthetic --> graph_utils
+  
+       </div>
+  </body>
+</html>

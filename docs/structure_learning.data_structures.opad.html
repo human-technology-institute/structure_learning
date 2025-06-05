@@ -50,14 +50,28 @@
 Methods defined here:<br>
 <dl><dt><a name="OPAD-__init__"><strong>__init__</strong></a>(self, particles: Union[List, Tuple], logp: Union[List, numpy.ndarray], theta: Union[List, numpy.ndarray])</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
 
+<dl><dt><a name="OPAD-normalise"><strong>normalise</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="OPAD-update"><strong>update</strong></a>(self, particle, iteration, data)</dt></dl>
+
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="OPAD-normalise"><strong>normalise</strong></a>(logp: Union[List, numpy.ndarray], return_constants=False)</dt></dl>
+<dl><dt><a name="OPAD-compute_normalisation"><strong>compute_normalisation</strong></a>(logp: Union[List, numpy.ndarray], return_constants=False)</dt></dl>
 
 <hr>
 Methods inherited from <a href="structure_learning.data_structures.distribution.html#Distribution">structure_learning.data_structures.distribution.Distribution</a>:<br>
+<dl><dt><a name="OPAD-__contains__"><strong>__contains__</strong></a>(self, particle)</dt></dl>
+
+<dl><dt><a name="OPAD-hist"><strong>hist</strong></a>(self, normalise=False)</dt></dl>
+
+<dl><dt><a name="OPAD-prop"><strong>prop</strong></a>(self, name)</dt></dl>
+
 <dl><dt><a name="OPAD-visualise"><strong>visualise</strong></a>(self)</dt></dl>
 
+<hr>
+Readonly properties inherited from <a href="structure_learning.data_structures.distribution.html#Distribution">structure_learning.data_structures.distribution.Distribution</a>:<br>
+<dl><dt><strong>logp</strong></dt>
+</dl>
 <hr>
 Data descriptors inherited from <a href="structure_learning.data_structures.distribution.html#Distribution">structure_learning.data_structures.distribution.Distribution</a>:<br>
 <dl><dt><strong>__dict__</strong></dt>

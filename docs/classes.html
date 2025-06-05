@@ -1,0 +1,399 @@
+<html>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+      <div class="mermaid">
+    
+        classDiagram
+          class BDScore {
+            alpha : float
+            compute(graph: Graph)
+          }
+          class BDeuScore {
+            alpha : int
+            graph
+            incidence
+            states
+            compute(graph: Graph)
+            compute_node_with_edges(node: str, parents: list, node_index_map: dict)
+          }
+          class BGeScore {
+            am
+            graph
+            incidence
+            parameters
+            reg_coefficients
+            compute(graph: Graph)
+            compute_node_with_edges(node: str, parents: list, node_index_map: dict)
+          }
+          class CPDAG {
+            dags : NoneType, list
+            undirected_edges : list
+            enumerate_dags(generate)
+            from_dag(dag)
+          }
+          class DAG {
+            compute_ancestor_matrix(adj_matrix)
+            count_dags(n: int) int
+            generate_all_dags(n_nodes: int, node_labels: List[str]) List[Type[D]]
+            generate_random(nodes: Union[List[str], Tuple[str]], prob, seed)
+            to_cpdag()
+          }
+          class Data {
+            BINARY_TYPE : str
+            CONTINUOUS_TYPE : str
+            MULTINOMIAL_TYPE : str
+            ORDINAL_TYPE : str
+            columns
+            shape
+            values : DataFrame
+            variable_types
+            variables : NoneType, list
+            k_fold(k)*
+            normalise(variables: List)
+          }
+          class Distribution {
+            logp
+            normalise
+            p : ndarray
+            particles : dict
+            clear()
+            compute_distribution(data: pd.DataFrame, score: Score, graph_type)
+            hist(prop, normalise)
+            normalise(prop, log)
+            plot(prop, sort, normalise, limit, ax)
+            prop(name)
+            top(prop, n)
+            update(particle, data)
+          }
+          class Graph {
+            dim
+            edges
+            incidence : NoneType, ndarray
+            nodes : NoneType, list
+            shape
+            weights : Optional[Union[np.ndarray, pd.DataFrame]]
+            add_edge(edge: Union[List[str], Tuple[str]])
+            add_edges(edges: Union[List[Tuple], Tuple[Tuple]])
+            add_node(node: str)
+            add_nodes(nodes: Union[List[str], Tuple[str]])
+            compare(other: Type[G], operation: str)
+            find_parent_nodes(incidence)
+            find_parents(node, return_index)
+            from_csv(filename)
+            from_key(type: str, nodes: Union[List, Tuple, np.ndarray]) Type[G]
+            from_numpy(incidence: np.ndarray, nodes: Union[List, Tuple, np.ndarray]) Type[G]
+            from_nx(graph: nx.DiGraph) Type[G]
+            from_pandas(graph: pd.DataFrame) Type[G]
+            has_cycle(graph: Union[np.ndarray, Type[G]]) bool
+            plot(title, figsize, node_size, node_color, k)
+            remove_edge(edge: Union[List, Tuple])
+            remove_edges(edges: Union[List[Tuple], Tuple[Tuple]])
+            remove_node(node: str)
+            remove_nodes(nodes: Union[List[str], Tuple[str]])
+            to_csv(filename)
+            to_key(type: str)
+            to_numpy(return_node_labels)
+            to_nx()
+            to_pandas()
+            v_structures()
+          }
+          class GraphProposal {
+            ADD_EDGE : str
+            DELETE_EDGE : str
+            REVERSE_EDGE : str
+            blacklist : ndarray
+            initial_state
+            num_nodes
+            operation
+            operations : list
+            proposed_state : ndarray
+            whitelist : ndarray
+            compute_acceptance_ratio(current_state_score, proposed_state_score)
+            get_nodes_to_rescore() List[str]
+            propose()
+          }
+          class GreedySearch {
+            DETERMINISTIC_STRATEGY : str
+            PROBABILISTIC_PARTIAL_EXPLORATION_STRATEGY : str
+            PROBABILISTIC_STRATEGY : str
+            data : Union[Data, pd.DataFrame]
+            include_reversal : bool
+            initial_state : Union[np.ndarray, DAG]
+            max_evaluations : int
+            max_unexplored : int
+            n_nodes
+            n_particles : int
+            neighbour_count : defaultdict
+            neighbour_score : defaultdict
+            particles : OrderedDict
+            proposal
+            retain_size : int
+            scorer
+            state_score : dict
+            strategy : str
+            unexplored : list
+            unexplored_keys : list
+            unexplored_scores : list
+            unexplored_timestamp : list
+            add_neighbours(neighbours)
+            get_state_to_explore()
+            run()
+          }
+          class HillClimb {
+          }
+          class JSD {
+            compute(dist1: Distribution, dist2: Distribution)
+          }
+          class KLD {
+            compute(dist1: Distribution, dist2: Distribution)
+          }
+          class LazyDataset {
+          }
+          class MAE {
+            compute(dist1: Distribution, dist2: Distribution)
+          }
+          class MCMC {
+            RESULT_TYPE_DIST : str
+            RESULT_TYPE_ITER : str
+            RESULT_TYPE_OPAD : str
+            RESULT_TYPE_OPAD_PLUS : str
+            blacklist : ndarray
+            data : DataFrame
+            graph_type : str
+            initial_state : State
+            max_iter : int
+            n_accepted : int
+            node_labels : list
+            num_nodes
+            pc_graph : NoneType
+            proposal_object : Optional[Union[str, StructureLearningProposal]]
+            result_type : str
+            results : dict
+            score_object : Optional[Union[str, Score]]
+            scores : NoneType
+            trace
+            whitelist : ndarray
+            get_chain_info(results, key)
+            get_graphs(results)
+            run() Tuple[dict, float]
+            step()* dict
+            to_distribution()
+            to_opad(plus)
+            traceplot(ax)
+            update_results(iteration, info)
+          }
+          class MCMCDistribution {
+            rejected : NoneType
+            from_iterates(iterates: dict)
+            to_opad(plus)
+            update(particle, iteration, data)
+          }
+          class MSE {
+            compute(dist1: Distribution, dist2: Distribution)
+          }
+          class Metric {
+            compute(dist1: Distribution, dist2: Distribution)*
+          }
+          class OPAD {
+            particles : dict
+            plus : bool
+            rejected : NoneType
+            compute_normalisation(logp: Union[List, np.ndarray], return_constants)
+            from_mcmc(dist: Distribution, plus)
+            normalise()
+            plot(prop, sort, normalise, limit)
+            update(particle, iteration, data, normalise)
+          }
+          class OrderedPartition {
+            all_nodes
+            partitions
+            size
+            add_node_to_partition(part_indx: int, node: str)
+            copy()
+            find_node(node_label)
+            from_graph(g: Graph)
+            from_numpy(incidence: np.ndarray, node_labels: list)
+            from_string(string: str)
+            get_all_nodes()
+            get_all_nodes_adj_left(indx)
+            get_all_nodes_adj_right(indx)
+            get_all_nodes_from_left(indx)
+            get_all_nodes_from_right(indx)
+            get_partition_by_indx(index)
+            get_partitions()
+            info()
+            insert_partition(part_id: int, nodes: set)
+            join_partition(part_id: int)
+            plot(fig_size, title)
+            print_partitions()
+            remove_empty_partitions()
+            remove_node_from_partition(part_id: int, node: str)
+            remove_partition(part_id)
+            replace_partition(new_partition: Partition, index: int)
+            to_party_permy_posy()
+            update_IDs()
+          }
+          class PC {
+            ci_test : str
+            cpdag
+            dag
+            data : DataFrame
+            results : NoneType, dict
+            significance_level : float
+            run()
+          }
+          class Partition {
+            ID : int
+            nodes
+            size
+            add_nodes(nodes: set)
+            add_single_node(node: str)
+            copy()
+            get_ID()
+            info()
+            plot(fig_size)
+            remove_nodes(nodes: set)
+            remove_single_node(node: str)
+            replace_partition(new_partition)
+            set_ID(ID)
+          }
+          class PartitionMCMC {
+            concise : bool
+            current_state_score
+            current_step : dict
+            initial_state
+            n_accepted
+            parent_table
+            proposal_object : Optional[StructureLearningProposal]
+            score_table
+            scores : NoneType, dict
+            step()
+          }
+          class PartitionProposal {
+            MERGE_PARTITIONS : str
+            MOVE_NODE_TO_EXISTING_PARTITION : str
+            MOVE_NODE_TO_NEW_OR_EXISTING : str
+            MOVE_NODE_TO_NEW_PARTITION : str
+            SPLIT_OR_MERGE : str
+            SPLIT_PARTITIONS : str
+            STAY_STILL : str
+            SWAP_ADJACENT : str
+            SWAP_GLOBAL : str
+            current_state : NoneType
+            move_probs
+            nbh
+            nbh_create_new : NoneType
+            nbh_join_existing : NoneType
+            nbh_size
+            nodes
+            num_moves : int
+            num_nodes
+            num_part
+            operation : NoneType, str
+            operations : list
+            proposed_state : NoneType
+            to_rescore : set
+            accept()
+            compute_acceptance_ratio(current_state_score, proposed_state_score)
+            compute_neighborhoods(state)
+            get_nodes_to_rescore()
+            propose()
+          }
+          class RHat {
+            compute(dists: List[Distribution], prop)
+          }
+          class SHD {
+            compute(dags: Union[Distribution, DAG], true_DAG: DAG)
+          }
+          class Score {
+            data
+            node_labels
+            compute(graph: Graph)*
+            compute_node(graph: Graph, node: str)
+            compute_node_with_edges(node: str, parents: list, node_index_map: dict)*
+          }
+          class StructureLearningProposal {
+            INITIAL : str
+            STAY_STILL : str
+            blacklist : NoneType
+            current_state : NoneType, State
+            initial_state : State
+            operation : NoneType
+            operations : list
+            proposed_state : NoneType
+            whitelist : NoneType
+            accept()
+            compute_acceptance_ratio()* float
+            get_nodes_to_rescore()* List[str]
+            propose()* Tuple[State, str]
+          }
+          class StructureMCMC {
+            initial_state
+            n_accepted
+            proposal_object : Optional[StructureLearningProposal]
+            scores
+            sparse : bool
+            step()
+          }
+          class SyntheticDataset {
+            P
+            W
+            data : DataFrame
+            degree : float
+            graph
+            graph_type : str
+            node_labels : list
+            noise_scale : float
+            num_nodes : float
+            num_obs : float
+            true_dag : NoneType
+            w_range : tuple
+            simulate_data(W: Union[np.ndarray, DAG], n, noise_scale, sigmas)
+            simulate_data_V1(W: Union[np.ndarray, DAG], n, noise_scale, sigmas)
+            simulate_data_from_dag(dag: Union[np.ndarray, DAG], num_obs, num_nodes, node_labels, w_range, noise_scale)
+            simulate_gaussian_dag(d, w_std)
+            simulate_random_dag(d, degree, graph_type, w_range)
+          }
+          CPDAG --|> Graph
+          DAG --|> Graph
+          MCMCDistribution --|> Distribution
+          OPAD --|> MCMCDistribution
+          JSD --|> Metric
+          KLD --|> Metric
+          MAE --|> Metric
+          MSE --|> Metric
+          RHat --|> Metric
+          SHD --|> Metric
+          GraphProposal --|> StructureLearningProposal
+          PartitionProposal --|> StructureLearningProposal
+          PartitionMCMC --|> MCMC
+          StructureMCMC --|> MCMC
+          BDScore --|> Score
+          BDeuScore --|> Score
+          BGeScore --|> Score
+          Data --* SyntheticDataset : data
+          Data --* Score : _data
+          CPDAG --* MCMC : pc_graph
+          CPDAG --* PC : cpdag
+          DAG --* SyntheticDataset : W
+          DAG --* SyntheticDataset : graph
+          DAG --* MCMC : _pc_state
+          DAG --* PartitionMCMC : initial_state
+          DAG --* PC : dag
+          Graph --* GraphProposal : initial_state
+          Graph --* GraphProposal : proposed_state
+          OrderedPartition --* PartitionMCMC : initial_state
+          OrderedPartition --* PartitionMCMC : initial_state
+          Distribution --* MCMCDistribution : rejected
+          Distribution --* OPAD : rejected
+          MCMCDistribution --* MCMC : results
+          OPAD --* MCMC : results
+          OPAD --* MCMC : results
+          GraphProposal --* GreedySearch : proposal
+          BDeuScore --* GreedySearch : scorer
+          BGeScore --* GreedySearch : scorer
+          OrderedPartition --o PartitionProposal : current_state
+  
+       </div>
+  </body>
+</html>

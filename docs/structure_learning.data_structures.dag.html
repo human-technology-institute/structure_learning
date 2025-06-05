@@ -1,10 +1,27 @@
-<!DOCTYPE html>
+<!DOCTYPE>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Python: module structure_learning.data_structures.dag</title>
-</head><body>
-
+<title>Pydoc: module structure_learning.data_structures.dag</title>
+<link rel="stylesheet" type="text/css" href="_pydoc.css"></head><body>
+                <div style='float:right'>
+                    <div style='text-align:center'>
+                    <a href="index.html">Module Index</a>
+                    : <a href="topics.html">Topics</a>
+                    : <a href="keywords.html">Keywords</a>
+                    </div>
+                    <div>
+                        <form action="get" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Get">
+                        </form>&nbsp;
+                        <form action="search" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Search">
+                        </form>
+                    </div>
+                </div>
+                <div style="clear:both;padding-top:.5em;">
 <table class="heading">
 <tr class="heading-text decor">
 <td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.data_structures.html" class="white">data_structures</a>.dag</strong></td>
@@ -16,9 +33,11 @@
 <td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
     
 <tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
-<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="itertools.html">itertools</a><br>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="graphical_models.html">graphical_models</a><br>
+<a href="itertools.html">itertools</a><br>
 </td><td class="multicolumn"><a href="numpy.html">numpy</a><br>
-</td><td class="multicolumn"><a href="networkx.html">networkx</a><br>
+<a href="networkx.html">networkx</a><br>
+</td><td class="multicolumn"><a href="pandas.html">pandas</a><br>
 </td><td class="multicolumn"></td></tr></table></td></tr></table><p>
 <table class="section">
 <tr class="decor index-decor heading-text">
@@ -50,9 +69,17 @@
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="DAG-__init__"><strong>__init__</strong></a>(self, incidence=None, nodes=None)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+<dl><dt><a name="DAG-__init__"><strong>__init__</strong></a>(self, incidence=None, nodes=None)</dt><dd><span class="code">Initialise&nbsp;a&nbsp;graph&nbsp;instance.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;incidence&nbsp;(np.ndarray&nbsp;|&nbsp;pd.DataFrame):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adjacency&nbsp;matrix<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nodes&nbsp;(list&nbsp;|&nbsp;tuple):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;node&nbsp;labels.&nbsp;If&nbsp;incidence&nbsp;is&nbsp;a&nbsp;dataframe,&nbsp;this&nbsp;parameter&nbsp;is&nbsp;ignored.</span></dd></dl>
 
-<dl><dt><a name="DAG-compute_ancestor_matrix"><strong>compute_ancestor_matrix</strong></a>(self)</dt><dd><span class="code">Compute&nbsp;ancestor&nbsp;matrix&nbsp;from&nbsp;adjacency&nbsp;matrix.<br>
+<dl><dt><a name="DAG-to_cpdag"><strong>to_cpdag</strong></a>(self)</dt></dl>
+
+<hr>
+Class methods defined here:<br>
+<dl><dt><a name="DAG-compute_ancestor_matrix"><strong>compute_ancestor_matrix</strong></a>(adj_matrix=None)</dt><dd><span class="code">Compute&nbsp;ancestor&nbsp;matrix&nbsp;from&nbsp;adjacency&nbsp;matrix.<br>
 &nbsp;<br>
 Parameter:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;adj_matrix&nbsp;(numpy.ndarray):&nbsp;graph&nbsp;adjancency&nbsp;matrix<br>
@@ -60,8 +87,6 @@ Parameter:<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;ancestor&nbsp;matrix</span></dd></dl>
 
-<hr>
-Class methods defined here:<br>
 <dl><dt><a name="DAG-count_dags"><strong>count_dags</strong></a>(n: int) -&gt; int</dt><dd><span class="code">Count&nbsp;all&nbsp;possible&nbsp;DAGs.&nbsp;Given&nbsp;$n$&nbsp;nodes,&nbsp;the&nbsp;possible&nbsp;number&nbsp;of&nbsp;DAGs<br>
 that&nbsp;can&nbsp;be&nbsp;built&nbsp;is&nbsp;given&nbsp;by<br>
 &nbsp;&nbsp;&nbsp;&nbsp;a(n)&nbsp;=&nbsp;\sum_{k=1}^{n}&nbsp;(-1)^{(k+1)}&nbsp;inom{n}{k}&nbsp;2^{k(n-k)}&nbsp;a(n-k)<br>
@@ -72,13 +97,14 @@ Parameter:<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;(int):&nbsp;number&nbsp;of&nbsp;possible&nbsp;directed&nbsp;graphs</span></dd></dl>
 
-<dl><dt><a name="DAG-generate_all_dags_from_ordering"><strong>generate_all_dags_from_ordering</strong></a>()</dt><dd><span class="code">Generate&nbsp;all&nbsp;DAGs&nbsp;from&nbsp;a&nbsp;topological&nbsp;ordering&nbsp;of&nbsp;nodes.<br>
+<dl><dt><a name="DAG-generate_all_dags"><strong>generate_all_dags</strong></a>(n_nodes: int, node_labels: List[str] = None) -&gt; List[Type[~DAG]]</dt><dd><span class="code">Generate&nbsp;a&nbsp;dictionary&nbsp;of&nbsp;all&nbsp;unique&nbsp;DAGs&nbsp;with&nbsp;N&nbsp;nodes.<br>
 &nbsp;<br>
-Parameter:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;nodes&nbsp;(list):&nbsp;nodes&nbsp;in&nbsp;topological&nbsp;order<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;n_nodes&nbsp;(int):&nbsp;number&nbsp;of&nbsp;nodes&nbsp;in&nbsp;the&nbsp;graph<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_labels&nbsp;(list):&nbsp;list&nbsp;of&nbsp;node&nbsp;labels.&nbsp;Each&nbsp;label&nbsp;is&nbsp;a&nbsp;string.<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;generator&nbsp;of&nbsp;DAGs</span></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;dict:&nbsp;dictionary&nbsp;of&nbsp;all&nbsp;unique&nbsp;DAGs&nbsp;with&nbsp;N&nbsp;nodes.</span></dd></dl>
 
 <dl><dt><a name="DAG-generate_random"><strong>generate_random</strong></a>(nodes: Union[List[str], Tuple[str]], prob=0.5, seed=None)</dt><dd><span class="code">Generate&nbsp;a&nbsp;random&nbsp;<a href="#DAG">DAG</a>,&nbsp;represented&nbsp;by&nbsp;a&nbsp;lower&nbsp;triangular&nbsp;adjacency&nbsp;matrix.<br>
 &nbsp;<br>
@@ -92,6 +118,12 @@ Returns:<br>
 
 <hr>
 Methods inherited from <a href="structure_learning.data_structures.graph.html#Graph">structure_learning.data_structures.graph.Graph</a>:<br>
+<dl><dt><a name="DAG-__eq__"><strong>__eq__</strong></a>(self, g: Type[ForwardRef('G')])</dt><dd><span class="code">Return&nbsp;self==value.</span></dd></dl>
+
+<dl><dt><a name="DAG-__mul__"><strong>__mul__</strong></a>(self, g: Type[ForwardRef('G')])</dt><dd><span class="code">#&nbsp;arithmetic</span></dd></dl>
+
+<dl><dt><a name="DAG-__rmul__"><strong>__rmul__</strong></a>(self, g: Type[ForwardRef('G')])</dt></dl>
+
 <dl><dt><a name="DAG-__str__"><strong>__str__</strong></a>(self)</dt><dd><span class="code">Convert&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>&nbsp;object&nbsp;to&nbsp;string.</span></dd></dl>
 
 <dl><dt><a name="DAG-add_edge"><strong>add_edge</strong></a>(self, edge: Union[List[str], Tuple[str]])</dt><dd><span class="code">Add&nbsp;an&nbsp;edge&nbsp;to&nbsp;graph.</span></dd></dl>
@@ -111,6 +143,8 @@ Parameters:<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;(str)|(list&nbsp;(str)):&nbsp;label(s)&nbsp;of&nbsp;node(s)&nbsp;connected&nbsp;to&nbsp;relevant&nbsp;edge(s)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;under&nbsp;specified&nbsp;operation,&nbsp;or&nbsp;error&nbsp;message</span></dd></dl>
+
+<dl><dt><a name="DAG-find_parents"><strong>find_parents</strong></a>(self, node, return_index=False)</dt></dl>
 
 <dl><dt><a name="DAG-from_key"><strong>from_key</strong></a>(key: str, type: str = 'default', nodes: Union[List, Tuple, numpy.ndarray] = None) -&gt; Type[~Graph]</dt><dd><span class="code">Create&nbsp;graph&nbsp;from&nbsp;key.<br>
 &nbsp;<br>
@@ -151,8 +185,12 @@ Parameters:<br>
 
 <dl><dt><a name="DAG-to_pandas"><strong>to_pandas</strong></a>(self)</dt><dd><span class="code">Convert&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>&nbsp;object&nbsp;to&nbsp;Pandas&nbsp;Dataframe.</span></dd></dl>
 
+<dl><dt><a name="DAG-v_structures"><strong>v_structures</strong></a>(self)</dt></dl>
+
 <hr>
 Class methods inherited from <a href="structure_learning.data_structures.graph.html#Graph">structure_learning.data_structures.graph.Graph</a>:<br>
+<dl><dt><a name="DAG-find_parent_nodes"><strong>find_parent_nodes</strong></a>(incidence)</dt><dd><span class="code">Find&nbsp;parent&nbsp;nodes&nbsp;(nodes&nbsp;with&nbsp;no&nbsp;incoming&nbsp;edges).</span></dd></dl>
+
 <dl><dt><a name="DAG-from_csv"><strong>from_csv</strong></a>(filename)</dt></dl>
 
 <dl><dt><a name="DAG-from_numpy"><strong>from_numpy</strong></a>(incidence: numpy.ndarray, nodes: Union[List, Tuple, numpy.ndarray]) -&gt; Type[~Graph]</dt><dd><span class="code">Create&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>&nbsp;object&nbsp;from&nbsp;numpy&nbsp;array.</span></dd></dl>
@@ -177,6 +215,8 @@ Readonly properties inherited from <a href="structure_learning.data_structures.g
 <dl><dt><strong>edges</strong></dt>
 <dd><span class="code">Returns&nbsp;list&nbsp;of&nbsp;edges</span></dd>
 </dl>
+<dl><dt><strong>shape</strong></dt>
+</dl>
 <hr>
 Data descriptors inherited from <a href="structure_learning.data_structures.graph.html#Graph">structure_learning.data_structures.graph.Graph</a>:<br>
 <dl><dt><strong>__dict__</strong></dt>
@@ -185,13 +225,36 @@ Data descriptors inherited from <a href="structure_learning.data_structures.grap
 <dl><dt><strong>__weakref__</strong></dt>
 <dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
 </dl>
+<hr>
+Data and other attributes inherited from <a href="structure_learning.data_structures.graph.html#Graph">structure_learning.data_structures.graph.Graph</a>:<br>
+<dl><dt><strong>__hash__</strong> = None</dl>
+
 </td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-comb"><strong>comb</strong></a>(n, k, /)</dt><dd><span class="code">Number&nbsp;of&nbsp;ways&nbsp;to&nbsp;choose&nbsp;k&nbsp;items&nbsp;from&nbsp;n&nbsp;items&nbsp;without&nbsp;repetition&nbsp;and&nbsp;without&nbsp;order.<br>
+&nbsp;<br>
+Evaluates&nbsp;to&nbsp;n!&nbsp;/&nbsp;(k!&nbsp;*&nbsp;(n&nbsp;-&nbsp;k)!)&nbsp;when&nbsp;k&nbsp;&lt;=&nbsp;n&nbsp;and&nbsp;evaluates<br>
+to&nbsp;zero&nbsp;when&nbsp;k&nbsp;&gt;&nbsp;n.<br>
+&nbsp;<br>
+Also&nbsp;called&nbsp;the&nbsp;binomial&nbsp;coefficient&nbsp;because&nbsp;it&nbsp;is&nbsp;equivalent<br>
+to&nbsp;the&nbsp;coefficient&nbsp;of&nbsp;k-th&nbsp;term&nbsp;in&nbsp;polynomial&nbsp;expansion&nbsp;of&nbsp;the<br>
+expression&nbsp;(1&nbsp;+&nbsp;x)**n.<br>
+&nbsp;<br>
+Raises&nbsp;TypeError&nbsp;if&nbsp;either&nbsp;of&nbsp;the&nbsp;arguments&nbsp;are&nbsp;not&nbsp;integers.<br>
+Raises&nbsp;ValueError&nbsp;if&nbsp;either&nbsp;of&nbsp;the&nbsp;arguments&nbsp;are&nbsp;negative.</span></dd></dl>
+</td></tr></table><p>
 <table class="section">
 <tr class="decor data-decor heading-text">
 <td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
     
 <tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
-<td class="singlecolumn"><strong>List</strong> = typing.List<br>
+<td class="singlecolumn"><strong>D</strong> = ~DAG<br>
+<strong>List</strong> = typing.List<br>
 <strong>Tuple</strong> = typing.Tuple<br>
-<strong>Union</strong> = typing.Union</td></tr></table>
+<strong>Type</strong> = typing.Type<br>
+<strong>Union</strong> = typing.Union</td></tr></table></div>
 </body></html>

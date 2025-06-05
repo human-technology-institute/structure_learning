@@ -1,10 +1,27 @@
-<!DOCTYPE html>
+<!DOCTYPE>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Python: module structure_learning.proposals.graph.graph_proposal</title>
-</head><body>
-
+<title>Pydoc: module structure_learning.proposals.graph.graph_proposal</title>
+<link rel="stylesheet" type="text/css" href="_pydoc.css"></head><body>
+                <div style='float:right'>
+                    <div style='text-align:center'>
+                    <a href="index.html">Module Index</a>
+                    : <a href="topics.html">Topics</a>
+                    : <a href="keywords.html">Keywords</a>
+                    </div>
+                    <div>
+                        <form action="get" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Get">
+                        </form>&nbsp;
+                        <form action="search" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Search">
+                        </form>
+                    </div>
+                </div>
+                <div style="clear:both;padding-top:.5em;">
 <table class="heading">
 <tr class="heading-text decor">
 <td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.proposals.html" class="white">proposals</a>.<a href="structure_learning.proposals.graph.html" class="white">graph</a>.graph_proposal</strong></td>
@@ -38,7 +55,7 @@
 <td class="section-title" colspan=3>&nbsp;<br><a name="GraphProposal">class <strong>GraphProposal</strong></a>(<a href="structure_learning.proposals.proposal.html#StructureLearningProposal">structure_learning.proposals.proposal.StructureLearningProposal</a>)</td></tr>
     
 <tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
-<td class="decor title-decor" colspan=2><span class="code"><a href="#GraphProposal">GraphProposal</a>(initial_state:&nbsp;Union[numpy.ndarray,&nbsp;networkx.classes.digraph.DiGraph],&nbsp;blacklist=None,&nbsp;whitelist=None,&nbsp;seed:&nbsp;int&nbsp;=&nbsp;32)<br>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#GraphProposal">GraphProposal</a>(initial_state:&nbsp;Union[numpy.ndarray,&nbsp;networkx.classes.digraph.DiGraph,&nbsp;structure_learning.data_structures.graph.Graph],&nbsp;blacklist=None,&nbsp;whitelist=None,&nbsp;seed:&nbsp;int&nbsp;=&nbsp;32)<br>
 &nbsp;<br>
 Graph&nbsp;Proposal&nbsp;by&nbsp;adding,&nbsp;deleting,&nbsp;reversing&nbsp;edges.<br>&nbsp;</span></td></tr>
 <tr><td>&nbsp;</td>
@@ -50,7 +67,7 @@ Graph&nbsp;Proposal&nbsp;by&nbsp;adding,&nbsp;deleting,&nbsp;reversing&nbsp;edge
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="GraphProposal-__init__"><strong>__init__</strong></a>(self, initial_state: Union[numpy.ndarray, networkx.classes.digraph.DiGraph], blacklist=None, whitelist=None, seed: int = 32)</dt><dd><span class="code">Initialise&nbsp;<a href="#GraphProposal">GraphProposal</a>&nbsp;instance.<br>
+<dl><dt><a name="GraphProposal-__init__"><strong>__init__</strong></a>(self, initial_state: Union[numpy.ndarray, networkx.classes.digraph.DiGraph, structure_learning.data_structures.graph.Graph], blacklist=None, whitelist=None, seed: int = 32)</dt><dd><span class="code">Initialise&nbsp;<a href="#GraphProposal">GraphProposal</a>&nbsp;instance.<br>
 &nbsp;<br>
 Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;initial_state&nbsp;(networkx.DiGraph&nbsp;|&nbsp;numpy.ndarray):&nbsp;graph<br>
@@ -96,6 +113,8 @@ Data descriptors inherited from <a href="structure_learning.proposals.proposal.h
 </dl>
 <hr>
 Data and other attributes inherited from <a href="structure_learning.proposals.proposal.html#StructureLearningProposal">structure_learning.proposals.proposal.StructureLearningProposal</a>:<br>
+<dl><dt><strong>INITIAL</strong> = 'initial'</dl>
+
 <dl><dt><strong>STAY_STILL</strong> = 'stay_still'</dl>
 
 </td></tr></table></td></tr></table><p>
@@ -105,5 +124,5 @@ Data and other attributes inherited from <a href="structure_learning.proposals.p
     
 <tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
 <td class="singlecolumn"><strong>List</strong> = typing.List<br>
-<strong>Union</strong> = typing.Union</td></tr></table>
+<strong>Union</strong> = typing.Union</td></tr></table></div>
 </body></html>

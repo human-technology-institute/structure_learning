@@ -1,10 +1,27 @@
-<!DOCTYPE html>
+<!DOCTYPE>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Python: module structure_learning.evaluation.metrics</title>
-</head><body>
-
+<title>Pydoc: module structure_learning.evaluation.metrics</title>
+<link rel="stylesheet" type="text/css" href="_pydoc.css"></head><body>
+                <div style='float:right'>
+                    <div style='text-align:center'>
+                    <a href="index.html">Module Index</a>
+                    : <a href="topics.html">Topics</a>
+                    : <a href="keywords.html">Keywords</a>
+                    </div>
+                    <div>
+                        <form action="get" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Get">
+                        </form>&nbsp;
+                        <form action="search" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Search">
+                        </form>
+                    </div>
+                </div>
+                <div style="clear:both;padding-top:.5em;">
 <table class="heading">
 <tr class="heading-text decor">
 <td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.evaluation.html" class="white">evaluation</a>.metrics</strong></td>
@@ -16,34 +33,210 @@
 <td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
     
 <tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
-<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="sklearn.metrics.html">sklearn.metrics</a><br>
-</td><td class="multicolumn"><a href="numpy.html">numpy</a><br>
-</td><td class="multicolumn"><a href="pickle.html">pickle</a><br>
-</td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="numpy.html">numpy</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
+    
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="builtins.html#object">builtins.object</a>
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="structure_learning.evaluation.metrics.html#JSD">JSD</a>
+</dt><dt class="heading-text"><a href="structure_learning.evaluation.metrics.html#KLD">KLD</a>
+</dt><dt class="heading-text"><a href="structure_learning.evaluation.metrics.html#MAE">MAE</a>
+</dt><dt class="heading-text"><a href="structure_learning.evaluation.metrics.html#MSE">MSE</a>
+</dt><dt class="heading-text"><a href="structure_learning.evaluation.metrics.html#RHat">RHat</a>
+</dt><dt class="heading-text"><a href="structure_learning.evaluation.metrics.html#SHD">SHD</a>
+</dt></dl>
+</dd>
+</dl>
+</dd>
+</dl>
+ <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="JSD">class <strong>JSD</strong></a>(<a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>)</td></tr>
+    
+<tr><td class="decor title-decor"><span class="code">&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.evaluation.metrics.html#JSD">JSD</a></dd>
+<dd><a href="structure_learning.evaluation.metrics.html#Metric">Metric</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="JSD-__init__"><strong>__init__</strong></a>(self)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="JSD-compute"><strong>compute</strong></a>(self, dist1: structure_learning.distributions.distribution.Distribution, dist2: structure_learning.distributions.distribution.Distribution)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="KLD">class <strong>KLD</strong></a>(<a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>)</td></tr>
+    
+<tr><td class="decor title-decor"><span class="code">&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.evaluation.metrics.html#KLD">KLD</a></dd>
+<dd><a href="structure_learning.evaluation.metrics.html#Metric">Metric</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="KLD-__init__"><strong>__init__</strong></a>(self)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="KLD-compute"><strong>compute</strong></a>(self, dist1: structure_learning.distributions.distribution.Distribution, dist2: structure_learning.distributions.distribution.Distribution)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="MAE">class <strong>MAE</strong></a>(<a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>)</td></tr>
+    
+<tr><td class="decor title-decor"><span class="code">&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.evaluation.metrics.html#MAE">MAE</a></dd>
+<dd><a href="structure_learning.evaluation.metrics.html#Metric">Metric</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="MAE-__init__"><strong>__init__</strong></a>(self)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="MAE-compute"><strong>compute</strong></a>(self, dist1: structure_learning.distributions.distribution.Distribution, dist2: structure_learning.distributions.distribution.Distribution)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="MSE">class <strong>MSE</strong></a>(<a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>)</td></tr>
+    
+<tr><td class="decor title-decor"><span class="code">&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.evaluation.metrics.html#MSE">MSE</a></dd>
+<dd><a href="structure_learning.evaluation.metrics.html#Metric">Metric</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="MSE-__init__"><strong>__init__</strong></a>(self)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="MSE-compute"><strong>compute</strong></a>(self, dist1: structure_learning.distributions.distribution.Distribution, dist2: structure_learning.distributions.distribution.Distribution)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="Metric">class <strong>Metric</strong></a>(<a href="builtins.html#object">builtins.object</a>)</td></tr>
+    
+<tr><td class="decor title-decor"><span class="code">&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn">Methods defined here:<br>
+<dl><dt><a name="Metric-__init__"><strong>__init__</strong></a>(self)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="Metric-compute"><strong>compute</strong></a>(self, dist1: structure_learning.distributions.distribution.Distribution, dist2: structure_learning.distributions.distribution.Distribution)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="RHat">class <strong>RHat</strong></a>(<a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>)</td></tr>
+    
+<tr><td class="decor title-decor"><span class="code">&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.evaluation.metrics.html#RHat">RHat</a></dd>
+<dd><a href="structure_learning.evaluation.metrics.html#Metric">Metric</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="RHat-__init__"><strong>__init__</strong></a>(self)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="RHat-compute"><strong>compute</strong></a>(self, dists: List[structure_learning.distributions.distribution.Distribution], prop='logp')</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="SHD">class <strong>SHD</strong></a>(<a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>)</td></tr>
+    
+<tr><td class="decor title-decor"><span class="code">&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.evaluation.metrics.html#SHD">SHD</a></dd>
+<dd><a href="structure_learning.evaluation.metrics.html#Metric">Metric</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="SHD-__init__"><strong>__init__</strong></a>(self)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="SHD-compute"><strong>compute</strong></a>(self, dags: Union[structure_learning.distributions.distribution.Distribution, structure_learning.data_structures.dag.DAG], true_DAG: structure_learning.data_structures.dag.DAG)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
 <table class="section">
 <tr class="decor functions-decor heading-text">
 <td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
     
 <tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
-<td class="singlecolumn"><dl><dt><a name="-compute_divergence"><strong>compute_divergence</strong></a>(self, interval=100, results_output_path=None)</dt></dl>
- <dl><dt><a name="-expected_edges_DAGFlows"><strong>expected_edges_DAGFlows</strong></a>(mcmc_graph_list)</dt><dd><span class="code">Compute&nbsp;the&nbsp;expected&nbsp;number&nbsp;of&nbsp;edges.<br>
+<td class="singlecolumn"><dl><dt><a name="-entropy"><strong>entropy</strong></a>(P, Q)</dt></dl>
+ <dl><dt><a name="-expected_shd"><strong>expected_shd</strong></a>(chain_list: List[numpy.ndarray], true_DAG: numpy.ndarray, p: List = None)</dt><dd><span class="code">Compute&nbsp;the&nbsp;Expected&nbsp;Structural&nbsp;Hamming&nbsp;Distance.<br>
 &nbsp;<br>
-This&nbsp;function&nbsp;computes&nbsp;the&nbsp;expected&nbsp;number&nbsp;of&nbsp;edges&nbsp;in&nbsp;graphs&nbsp;sampled&nbsp;from<br>
-the&nbsp;posterior&nbsp;approximation.<br>
-Code&nbsp;from:<br>
-<a href="https://github.com/tristandeleu/jax-dag-gflownet/blob/master/dag_gflownet/utils/metrics.py">https://github.com/tristandeleu/jax-dag-gflownet/blob/master/dag_gflownet/utils/metrics.py</a><br>
-&nbsp;<br>
-Parameters:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;mcmc_graph_list&nbsp;(list&nbsp;(numpy.ndarray)):&nbsp;&nbsp;Posterior&nbsp;approximation.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;must&nbsp;have&nbsp;size&nbsp;`(B,&nbsp;N,&nbsp;N)`,&nbsp;where&nbsp;`B`&nbsp;is&nbsp;the<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;number&nbsp;of&nbsp;sample&nbsp;graphs&nbsp;from&nbsp;the&nbsp;posterior&nbsp;approximation,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;`N`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;variables&nbsp;in&nbsp;the&nbsp;graphs.<br>
-&nbsp;<br>
-Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(float):&nbsp;The&nbsp;expected&nbsp;number&nbsp;of&nbsp;edges.</span></dd></dl>
- <dl><dt><a name="-expected_shd_DAGFlows"><strong>expected_shd_DAGFlows</strong></a>(chain_list: list, true_DAG: numpy.ndarray)</dt><dd><span class="code">Compute&nbsp;the&nbsp;Expected&nbsp;Structural&nbsp;Hamming&nbsp;Distance.<br>
-&nbsp;<br>
-This&nbsp;function&nbsp;computes&nbsp;the&nbsp;Expected&nbsp;SHD&nbsp;between&nbsp;a&nbsp;posterior&nbsp;approximation<br>
+This&nbsp;function&nbsp;computes&nbsp;the&nbsp;Expected&nbsp;<a href="#SHD">SHD</a>&nbsp;between&nbsp;a&nbsp;posterior&nbsp;approximation<br>
 given&nbsp;as&nbsp;a&nbsp;collection&nbsp;of&nbsp;samples&nbsp;from&nbsp;the&nbsp;posterior,&nbsp;and&nbsp;the&nbsp;ground-truth<br>
 graph&nbsp;used&nbsp;in&nbsp;the&nbsp;original&nbsp;data&nbsp;generation&nbsp;process.<br>
 Code&nbsp;from:<br>
@@ -59,39 +252,24 @@ Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;`N`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;variables&nbsp;in&nbsp;the&nbsp;graph.<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(float):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;Expected&nbsp;SHD.</span></dd></dl>
- <dl><dt><a name="-jensen_shannon_divergence"><strong>jensen_shannon_divergence</strong></a>(P: dict, Q: dict, epsilon: float = 1e-15)</dt><dd><span class="code">Compute&nbsp;the&nbsp;jensen_shannon_divergence&nbsp;between&nbsp;two&nbsp;distributions.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(float):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;Expected&nbsp;<a href="#SHD">SHD</a>.</span></dd></dl>
+ <dl><dt><a name="-jensen_shannon_divergence"><strong>jensen_shannon_divergence</strong></a>(P: list, Q: list, epsilon: float = 1e-10)</dt><dd><span class="code">Compute&nbsp;the&nbsp;jensen_shannon_divergence&nbsp;between&nbsp;two&nbsp;distributions.<br>
 Requires&nbsp;that&nbsp;the&nbsp;two&nbsp;distributions&nbsp;have&nbsp;the&nbsp;same&nbsp;length.</span></dd></dl>
- <dl><dt><a name="-kl_divergence"><strong>kl_divergence</strong></a>(P: dict, Q: dict, epsilon: float = 1e-15)</dt><dd><span class="code">Computes&nbsp;the&nbsp;KL&nbsp;divergence&nbsp;between&nbsp;two&nbsp;distributions.<br>
-Requires&nbsp;that&nbsp;the&nbsp;two&nbsp;distributions&nbsp;have&nbsp;the&nbsp;same&nbsp;length.</span></dd></dl>
- <dl><dt><a name="-mean_absolute_error"><strong>mean_absolute_error</strong></a>(P: dict, Q: dict)</dt><dd><span class="code">Compute&nbsp;mean&nbsp;absolute&nbsp;error.</span></dd></dl>
- <dl><dt><a name="-mean_squared_error"><strong>mean_squared_error</strong></a>(P: dict, Q: dict)</dt><dd><span class="code">Compute&nbsp;mean&nbsp;squared&nbsp;error.</span></dd></dl>
- <dl><dt><a name="-pairwise_structural_hamming_distance"><strong>pairwise_structural_hamming_distance</strong></a>(x, y)</dt><dd><span class="code">Computes&nbsp;pairwise&nbsp;Structural&nbsp;Hamming&nbsp;distance,&nbsp;i.e.<br>
-the&nbsp;number&nbsp;of&nbsp;edge&nbsp;insertions,&nbsp;deletions&nbsp;or&nbsp;flips&nbsp;in&nbsp;order&nbsp;to&nbsp;transform&nbsp;one&nbsp;graph&nbsp;to&nbsp;another<br>
-This&nbsp;means,&nbsp;edge&nbsp;reversals&nbsp;do&nbsp;not&nbsp;double&nbsp;count,&nbsp;and&nbsp;that&nbsp;getting&nbsp;an&nbsp;undirected&nbsp;edge&nbsp;wrong&nbsp;only&nbsp;counts&nbsp;1<br>
+ <dl><dt><a name="-kl_divergence"><strong>kl_divergence</strong></a>(P: list, Q: list, epsilon: float = 1e-10)</dt><dd><span class="code">Computes&nbsp;the&nbsp;KL&nbsp;divergence&nbsp;between&nbsp;two&nbsp;distributions.<br>
+Requires&nbsp;that&nbsp;the&nbsp;two&nbsp;distributions&nbsp;have&nbsp;the&nbsp;same&nbsp;length&nbsp;and&nbsp;keys.</span></dd></dl>
+ <dl><dt><a name="-mean_absolute_error"><strong>mean_absolute_error</strong></a>(P: list, Q: list)</dt><dd><span class="code">Compute&nbsp;mean&nbsp;absolute&nbsp;error.</span></dd></dl>
+ <dl><dt><a name="-mean_squared_error"><strong>mean_squared_error</strong></a>(P: list, Q: list)</dt><dd><span class="code">Compute&nbsp;mean&nbsp;squared&nbsp;error.</span></dd></dl>
+ <dl><dt><a name="-rhat"><strong>rhat</strong></a>(P: list, th: list)</dt><dd><span class="code">Compute&nbsp;rhat&nbsp;metric&nbsp;for&nbsp;the&nbsp;provided&nbsp;distributions&nbsp;and&nbsp;measurement.<br>
 &nbsp;<br>
 Parameters:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;(numpy.ndarray):&nbsp;batch&nbsp;of&nbsp;adjacency&nbsp;matrices&nbsp;&nbsp;[N,&nbsp;d,&nbsp;d]<br>
-&nbsp;&nbsp;&nbsp;&nbsp;y&nbsp;(numpy.ndarray):&nbsp;batch&nbsp;of&nbsp;adjacency&nbsp;matrices&nbsp;&nbsp;[M,&nbsp;d,&nbsp;d]<br>
-&nbsp;<br>
-Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;matrix&nbsp;of&nbsp;shape&nbsp;``[N,&nbsp;M]``&nbsp;&nbsp;where&nbsp;elt&nbsp;``i,j``&nbsp;is&nbsp;&nbsp;SHD(``x[i]``,&nbsp;``y[j]``)</span></dd></dl>
- <dl><dt><a name="-save_results"><strong>save_results</strong></a>(self, results, filename)</dt><dd><span class="code">Pickle&nbsp;results</span></dd></dl>
- <dl><dt><a name="-threshold_metrics_DAGFlows"><strong>threshold_metrics_DAGFlows</strong></a>(mcmc_graph_list, true_DAG)</dt><dd><span class="code">Compute&nbsp;threshold&nbsp;metrics&nbsp;(e.g.&nbsp;AUROC,&nbsp;Precision,&nbsp;Recall,&nbsp;etc...).<br>
-Code&nbsp;from:<br>
-<a href="https://github.com/tristandeleu/jax-dag-gflownet/blob/master/dag_gflownet/utils/metrics.py">https://github.com/tristandeleu/jax-dag-gflownet/blob/master/dag_gflownet/utils/metrics.py</a><br>
-&nbsp;<br>
-&nbsp;Parameters:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;mcmc_graph_list&nbsp;(list&nbsp;(numpy.ndarray)):&nbsp;&nbsp;Posterior&nbsp;approximation.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;must&nbsp;have&nbsp;size&nbsp;`(B,&nbsp;N,&nbsp;N)`,&nbsp;where&nbsp;`B`&nbsp;is&nbsp;the<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;number&nbsp;of&nbsp;sample&nbsp;graphs&nbsp;from&nbsp;the&nbsp;posterior&nbsp;approximation,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;`N`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;variables&nbsp;in&nbsp;the&nbsp;graphs.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;true_DAG&nbsp;(numpy.ndarray):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Adjacency&nbsp;matrix&nbsp;of&nbsp;the&nbsp;ground-truth&nbsp;graph.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;must&nbsp;have&nbsp;size&nbsp;`(N,&nbsp;N)`,<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;`N`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;variables&nbsp;in&nbsp;the&nbsp;graph.<br>
-&nbsp;<br>
-Returns<br>
--------<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(dict):&nbsp;threshold&nbsp;metrics.</span></dd></dl>
-</td></tr></table>
+&nbsp;&nbsp;&nbsp;&nbsp;P&nbsp;(list):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;distributions&nbsp;(must&nbsp;be&nbsp;normalised)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;th&nbsp;(list):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scores/measurements</span></dd></dl>
+</td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>List</strong> = typing.List<br>
+<strong>Union</strong> = typing.Union</td></tr></table></div>
 </body></html>
