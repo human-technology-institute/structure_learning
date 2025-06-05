@@ -171,18 +171,6 @@ class PartitionMCMC(MCMC):
         self.current_step = result
         return result
     
-    def __is_valid_partition__(self, partition: OrderedPartition, searchspace: np.ndarray):
-        party, permy, posy = partition.to_party_permy_posy()
-        for nodeidx in range(len(searchspace)):
-            pos_node = posy.find(nodeidx)
-            perm_node = permy[pos_node]
-            parentidx = np.argwhere(searchspace[:,nodeidx])
-            for parent in parentidx:
-                pos_parent = posy.find(parent)
-                perm_parent = permy[pos_parent]
-
-
-
     def _sample_from_partition(self, n, node_labels, scores, parenttable, node_label_to_idx):
         """
         Sample DAG from partition
@@ -298,7 +286,8 @@ class PartitionMCMC(MCMC):
         """
         return [x for x in row if not isinstance(x, float) or not np.isnan(x)]
     
-    def _list_possible_parents(self, max_parents, elements, whitelist=None, blacklist=None, plus1=False, searchspace=None):
+    @classmethod
+    def _list_possible_parents(cls, max_parents, elements, whitelist=None, blacklist=None, plus1=False, searchspace=None):
         """
         Generate a matrix with all the possible parents of a given node
         up to the maximum number of parents.

@@ -1,9 +1,9 @@
 import unittest
-from pgmpy.estimators.StructureScore import BDeuScore as target_bdeu
+from pgmpy.estimators.StructureScore import BDeu as target_bdeu
 import numpy as np
 import pandas as pd
 from structure_learning.scores import BDeuScore as implemented_bdeu
-from structure_learning.utils.score_utils import list_possible_parents
+from structure_learning.samplers import PartitionMCMC
 
 class TestBDeu(unittest.TestCase):
 
@@ -14,10 +14,9 @@ class TestBDeu(unittest.TestCase):
         n_vars = 5
         vars = [str(i) for i in range(n_vars)]
         data = pd.DataFrame(np.random.choice([0,1], (N, n_vars)), columns=vars)
-
-        possible_parents = list_possible_parents(n_vars-1, vars)
+        possible_parents = PartitionMCMC._list_possible_parents(n_vars-1, vars)
         bdeu1 = target_bdeu(data=data)
-        bdeu2 = implemented_bdeu(data=data, incidence=np.zeros((n_vars, n_vars)))
+        bdeu2 = implemented_bdeu(data=data)
 
         for i,pmat in enumerate(possible_parents):
             for j in range(pmat.shape[0]):

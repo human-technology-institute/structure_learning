@@ -49,7 +49,7 @@ class BDeuScore(Score):
         }
         return score
 
-    def compute_node_with_edges(self, node: str, parents: list, node_index_map: dict):
+    def compute_node_with_edges(self, node: str, parents: list, node_index_map: dict=None):
         """
         Adapted from https://github.com/pgmpy/pgmpy/blob/dev/pgmpy/estimators/StructureScore.py
         """
