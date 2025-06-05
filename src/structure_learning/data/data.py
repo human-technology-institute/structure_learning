@@ -5,6 +5,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import KFold
 from pathlib import Path
 
 path = Path(__file__).parent.absolute()
@@ -74,8 +75,12 @@ class Data:
         transformed_data._scaler = _scaler
         return transformed_data
 
-    def k_fold(self, k):
-        pass
+    def k_fold(self, k=5, shuffle=True, seed=None):
+        fold = KFold(n_splits=k, shuffle=shuffle, random_state=seed)
+        for i, (train_index, test_index) in enumerate(fold.split(self.values)):
+            train_data = pd.DataFrame(self.values.iloc[train_index, :], columns=self.variables)
+            test_data = pd.DataFrame(self.values.iloc[test_index, :], columns=self.variables)
+            yield Data(values=train_data, variable_types=self.variable_types), Data(values=test_data, variable_types=self.variable_types)
 
     # visualise
 
