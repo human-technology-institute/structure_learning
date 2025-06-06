@@ -13,7 +13,7 @@ class PartitionProposal(StructureLearningProposal):
     MOVE_NODE_TO_NEW_OR_EXISTING = "move_node_to_new_or_existing"
     MOVE_NODE_TO_EXISTING_PARTITION = "move_node_to_existing_partition"
     MOVE_NODE_TO_NEW_PARTITION = "move_node_to_new_partition"
-    STAY_STILL = "stay_still"
+    STAY_STILL = StructureLearningProposal.STAY_STILL
 
     operations = [SWAP_ADJACENT, SWAP_GLOBAL, SPLIT_OR_MERGE, MOVE_NODE_TO_NEW_OR_EXISTING, STAY_STILL]
 

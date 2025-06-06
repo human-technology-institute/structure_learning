@@ -31,7 +31,7 @@ class Data:
     CONTINUOUS_TYPE = 'continuous'
     BINARY_TYPE = 'binary'
     ORDINAL_TYPE = 'ordinal'
-    MULTINOMIAL_TYPE = 'multinomial'
+    CATEGORICAL_TYPE = 'categorical'
 
     def __init__(self, values: Union[np.ndarray, pd.DataFrame], variables: List = None, variable_types: Dict = None):
         if isinstance(values, pd.DataFrame):
@@ -69,6 +69,8 @@ class Data:
     def normalise(self, variables: List = None):
         _scaler = StandardScaler()
         variables = variables if variables is not None else self.variables
+        # only normalise continuous variables
+        variables = [variable for variable in variables if variable in self.variables and self.variable_types[variable]==self.CONTINUOUS_TYPE]
         x = _scaler.fit_transform(self.data[variables])
         transformed_data = self.__copy__()
         transformed_data.values.loc[:,variables] = x
