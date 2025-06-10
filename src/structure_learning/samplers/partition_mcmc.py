@@ -1,4 +1,23 @@
 """
+This module implements the PartitionMCMC class, which is a specialized version of the MCMC algorithm for Bayesian network structure learning.
+
+The PartitionMCMC class provides functionality for sampling Directed Acyclic Graphs (DAGs) from partitions, scoring partitions, and performing MCMC iterations to explore the space of possible network structures. It supports various configurations, including custom scoring methods, proposal objects, and search spaces.
+
+Key Features:
+- Initialization with custom data, initial states, and scoring objects.
+- Sampling DAGs from partitions using categorical distributions.
+- Scoring partitions based on parent sets and constraints.
+- Performing MCMC iterations with acceptance criteria.
+- Configurable search spaces, blacklists, whitelists, and neighborhood settings.
+
+Dependencies:
+- numpy
+- pandas
+- networkx
+- torch
+
+Classes:
+- PartitionMCMC: Implements the Partition MCMC algorithm.
 
 """
 import time

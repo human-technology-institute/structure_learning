@@ -1,3 +1,14 @@
+"""
+This module defines classes for representing and manipulating distributions, including MCMC-based distributions and OPAD re-weighting mechanisms.
+
+Classes:
+    Distribution: Base class for distributions, providing methods for particle management, normalization, and visualization.
+    MCMCDistribution: Extends Distribution to support MCMC-specific operations, including rejected particle handling.
+    OPAD: Implements the OPAD re-weighting mechanism for MCMC distributions.
+
+The module also includes utility methods for computing distributions from data and scores, as well as normalization factors.
+"""
+
 from abc import abstractmethod
 from typing import List, Tuple, Iterable, Dict, Union, TypeVar, Type
 from copy import deepcopy, copy
@@ -32,9 +43,18 @@ class Distribution:
 
     @property
     def logp(self):
+        """
+        Retrieve the log probabilities of all particles in the distribution.
+
+        Returns:
+            np.ndarray: Array of log probabilities.
+        """
         return self.prop('logp')
     
     def clear(self):
+        """
+        Clear all particles from the distribution.
+        """
         self.particles = {}
 
     def normalise(self, prop='freq', log=False):
@@ -75,6 +95,12 @@ class Distribution:
         return particle in self.particles
     
     def __len__(self):
+        """
+        Get the number of particles in the distribution.
+
+        Returns:
+            int: The number of particles.
+        """
         return len(self.particles)
     
     def update(self, particle, data):
@@ -111,6 +137,19 @@ class Distribution:
         return k, v
 
     def plot(self, prop='freq', sort=True, normalise=False, limit=-1, ax=None):
+        """
+        Plot a histogram of the particles in the distribution.
+
+        Parameters:
+            prop (str): The property to plot (default is 'freq').
+            sort (bool): Whether to sort the particles by the property values.
+            normalise (bool): Whether to normalise the property values.
+            limit (int): The maximum number of particles to display (default is -1, which shows all).
+            ax (matplotlib.axes.Axes): The axes to plot on (default is None).
+
+        Returns:
+            tuple: Bars, particles, and counts displayed in the plot.
+        """
         particles, count = self.hist(prop=prop, normalise=normalise)
         if sort:
             sort_idx = np.argsort(count)
@@ -128,17 +167,42 @@ class Distribution:
         return bars, particles[-limit:], count[-limit:]
     
     def top(self, prop='freq', n=1):
+        """
+        Retrieve the top N particles based on a specified property.
+
+        Parameters:
+            prop (str): The property to sort by (default is 'freq').
+            n (int): The number of top particles to retrieve.
+
+        Returns:
+            np.ndarray: Array of the top N particles.
+        """
         k, v = self.hist(prop=prop)
         idx = np.argsort(v)
         return np.array(k)[idx][-n:]
 
     # arithmetic
     def __copy__(self):
+        """
+        Create a shallow copy of the current distribution.
+
+        Returns:
+            Distribution: A shallow copy of the distribution.
+        """
         dclone = Distribution()
         dclone.particles = deepcopy(self.particles)
         return dclone
 
     def __add__(self, other: Type['D']) -> Type['D']:
+        """
+        Add two distributions together by combining their particles and frequencies.
+
+        Parameters:
+            other (Distribution): The distribution to add.
+
+        Returns:
+            Distribution: The resulting distribution after addition.
+        """
         dsum = self.__copy__()
         for particle, data in other.particles.items():
             dsum.update(particle, data)
@@ -146,6 +210,15 @@ class Distribution:
         return dsum
 
     def __sub__(self, other: Type['D']) -> Type['D']:
+        """
+        Subtract one distribution from another by removing particles present in the other distribution.
+
+        Parameters:
+            other (Distribution): The distribution to subtract.
+
+        Returns:
+            Distribution: The resulting distribution after subtraction.
+        """
         dsub = Distribution()
         for particle, data in self.particles.items():
             if particle not in other:
@@ -154,6 +227,17 @@ class Distribution:
         
     @classmethod
     def compute_distribution(cls, data: pd.DataFrame, score: Score, graph_type='dag'):
+        """
+        Compute a distribution from data and a scoring function.
+
+        Parameters:
+            data (pd.DataFrame): The dataset to compute the distribution from.
+            score (Score): The scoring function to evaluate particles.
+            graph_type (str): The type of graph to use ('dag' or 'cpdag').
+
+        Returns:
+            Distribution: The computed distribution.
+        """
         dags = DAG.generate_all_dags(len(data.columns), list(data.columns))
         if graph_type=='cpdag':
             cpdags = {}
@@ -211,6 +295,15 @@ class MCMCDistribution(Distribution):
                                             'operation': data['operation'], 'timestamp': data['timestamp']})
             
     def to_opad(self, plus=False):
+        """
+        Convert the current MCMC distribution to an OPAD distribution.
+
+        Parameters:
+            plus (bool): If True, include rejected particles in the OPAD distribution.
+
+        Returns:
+            OPAD: The OPAD distribution.
+        """
         opad = OPAD(plus=plus)
         opad.particles = deepcopy(self.particles)
         opad.rejected = copy(self.rejected)
@@ -220,6 +313,15 @@ class MCMCDistribution(Distribution):
     
     @classmethod
     def from_iterates(cls, iterates: dict):
+        """
+        Create an MCMCDistribution from iteration data.
+
+        Parameters:
+            iterates (dict): A dictionary where keys are iteration numbers and values are data about the particles.
+
+        Returns:
+            MCMCDistribution: The resulting MCMC distribution.
+        """
         dist = MCMCDistribution()
         for iteration, data in iterates.items():
             particle = data['graph'].to_key()
@@ -237,10 +339,19 @@ class OPAD(MCMCDistribution):
         self.normalise()
 
     def normalise(self):
+        """
+        Normalise the OPAD distribution by adding rejected particles and computing probabilities.
+
+        Returns:
+            OPAD: The normalised OPAD distribution.
+        """
         self._add_rejected_particles_()
         return super().normalise(prop='logp', log=True)
     
     def _add_rejected_particles_(self):
+        """
+        Add rejected particles to the distribution if the `plus` attribute is True.
+        """
         if self.plus: # add rejected to particles
             if len(self.rejected) > 0:
                 print('Adding rejected particles')
@@ -250,7 +361,13 @@ class OPAD(MCMCDistribution):
 
     def update(self, particle, iteration, data, normalise=True):
         """
-        Add new particles to the distribution and renormalise.
+        Add new particles to the OPAD distribution and optionally renormalise.
+
+        Parameters:
+            particle (Hashable): The particle to add.
+            iteration (int): The iteration number at which the particle was generated.
+            data (dict): Data associated with the particle.
+            normalise (bool): If True, renormalise the distribution after adding the particle.
         """
         super().update(particle, iteration, data)
         if normalise:
@@ -258,9 +375,31 @@ class OPAD(MCMCDistribution):
 
     @classmethod
     def from_mcmc(cls, dist: Distribution, plus=False):
+        """
+        Create an OPAD distribution from an MCMC distribution.
+
+        Parameters:
+            dist (Distribution): The MCMC distribution to convert.
+            plus (bool): Whether to include rejected particles in the OPAD distribution.
+
+        Returns:
+            OPAD: The resulting OPAD distribution.
+        """
         return dist.to_opad(plus=plus)
     
     def plot(self, prop='p', sort=True, normalise=False, limit=-1):
+        """
+        Plot a histogram of the particles in the OPAD distribution.
+
+        Parameters:
+            prop (str): The property to plot (default is 'p').
+            sort (bool): Whether to sort the particles by the property values.
+            normalise (bool): Whether to normalise the property values.
+            limit (int): The maximum number of particles to display (default is -1, which shows all).
+
+        Returns:
+            tuple: Bars, particles, and counts displayed in the plot.
+        """
         return super().plot(prop=prop, sort=sort, normalise=normalise, limit=limit)
     
     @classmethod

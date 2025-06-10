@@ -26,7 +26,25 @@
 <tr class="heading-text decor">
 <td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.samplers.html" class="white">samplers</a>.partition_mcmc</strong></td>
 <td class="extra"><a href=".">index</a><br><a href="file:/Users/165421/Documents/code/structure_learning/src/structure_learning/samplers/partition_mcmc.py">/Users/165421/Documents/code/structure_learning/src/structure_learning/samplers/partition_mcmc.py</a></td></tr></table>
-    <p></p>
+    <p><span class="code">This&nbsp;module&nbsp;implements&nbsp;the&nbsp;<a href="#PartitionMCMC">PartitionMCMC</a>&nbsp;class,&nbsp;which&nbsp;is&nbsp;a&nbsp;specialized&nbsp;version&nbsp;of&nbsp;the&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;algorithm&nbsp;for&nbsp;Bayesian&nbsp;network&nbsp;structure&nbsp;learning.<br>
+&nbsp;<br>
+The&nbsp;<a href="#PartitionMCMC">PartitionMCMC</a>&nbsp;class&nbsp;provides&nbsp;functionality&nbsp;for&nbsp;sampling&nbsp;Directed&nbsp;Acyclic&nbsp;Graphs&nbsp;(DAGs)&nbsp;from&nbsp;partitions,&nbsp;scoring&nbsp;partitions,&nbsp;and&nbsp;performing&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;iterations&nbsp;to&nbsp;explore&nbsp;the&nbsp;space&nbsp;of&nbsp;possible&nbsp;network&nbsp;structures.&nbsp;It&nbsp;supports&nbsp;various&nbsp;configurations,&nbsp;including&nbsp;custom&nbsp;scoring&nbsp;methods,&nbsp;proposal&nbsp;objects,&nbsp;and&nbsp;search&nbsp;spaces.<br>
+&nbsp;<br>
+Key&nbsp;Features:<br>
+-&nbsp;Initialization&nbsp;with&nbsp;custom&nbsp;data,&nbsp;initial&nbsp;states,&nbsp;and&nbsp;scoring&nbsp;objects.<br>
+-&nbsp;Sampling&nbsp;DAGs&nbsp;from&nbsp;partitions&nbsp;using&nbsp;categorical&nbsp;distributions.<br>
+-&nbsp;Scoring&nbsp;partitions&nbsp;based&nbsp;on&nbsp;parent&nbsp;sets&nbsp;and&nbsp;constraints.<br>
+-&nbsp;Performing&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;iterations&nbsp;with&nbsp;acceptance&nbsp;criteria.<br>
+-&nbsp;Configurable&nbsp;search&nbsp;spaces,&nbsp;blacklists,&nbsp;whitelists,&nbsp;and&nbsp;neighborhood&nbsp;settings.<br>
+&nbsp;<br>
+Dependencies:<br>
+-&nbsp;numpy<br>
+-&nbsp;pandas<br>
+-&nbsp;networkx<br>
+-&nbsp;torch<br>
+&nbsp;<br>
+Classes:<br>
+-&nbsp;<a href="#PartitionMCMC">PartitionMCMC</a>:&nbsp;Implements&nbsp;the&nbsp;Partition&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;algorithm.</span></p>
 <p>
 <table class="section">
 <tr class="decor pkg-content-decor heading-text">
@@ -101,28 +119,54 @@ Data and other attributes defined here:<br>
 Methods inherited from <a href="structure_learning.samplers.mcmc.html#MCMC">structure_learning.samplers.mcmc.MCMC</a>:<br>
 <dl><dt><a name="PartitionMCMC-__str__"><strong>__str__</strong></a>(self)</dt><dd><span class="code">Return&nbsp;str(self).</span></dd></dl>
 
-<dl><dt><a name="PartitionMCMC-get_chain_info"><strong>get_chain_info</strong></a>(self, results, key='graph')</dt></dl>
-
-<dl><dt><a name="PartitionMCMC-get_graphs"><strong>get_graphs</strong></a>(self, results)</dt><dd><span class="code">Returns&nbsp;list&nbsp;of&nbsp;sampled&nbsp;graphs&nbsp;from&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;simulation&nbsp;results.<br>
+<dl><dt><a name="PartitionMCMC-get_chain_info"><strong>get_chain_info</strong></a>(self, results, key='graph')</dt><dd><span class="code">Extract&nbsp;chain&nbsp;information&nbsp;from&nbsp;the&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;results.<br>
 &nbsp;<br>
 Parameters:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;results&nbsp;(dict):&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;simulation&nbsp;results.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;results&nbsp;(dict):&nbsp;Results&nbsp;of&nbsp;the&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;simulation.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;key&nbsp;(str):&nbsp;Key&nbsp;to&nbsp;extract&nbsp;information&nbsp;for.&nbsp;Default&nbsp;is&nbsp;'graph'.<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(list):&nbsp;sampled&nbsp;graphs</span></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;list:&nbsp;Chain&nbsp;information.</span></dd></dl>
 
-<dl><dt><a name="PartitionMCMC-run"><strong>run</strong></a>(self) -&gt; Tuple[dict, float]</dt><dd><span class="code">Run&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;simulation.<br>
+<dl><dt><a name="PartitionMCMC-get_graphs"><strong>get_graphs</strong></a>(self, results)</dt><dd><span class="code">Retrieve&nbsp;a&nbsp;list&nbsp;of&nbsp;sampled&nbsp;graphs&nbsp;from&nbsp;the&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;results.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;results&nbsp;(dict):&nbsp;Results&nbsp;of&nbsp;the&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;simulation.<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(dict):&nbsp;dictionary&nbsp;(iteration&nbsp;number&nbsp;as&nbsp;keys)&nbsp;of&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;state&nbsp;chain&nbsp;information</span></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;list:&nbsp;Sampled&nbsp;graphs.</span></dd></dl>
 
-<dl><dt><a name="PartitionMCMC-to_distribution"><strong>to_distribution</strong></a>(self)</dt></dl>
+<dl><dt><a name="PartitionMCMC-run"><strong>run</strong></a>(self) -&gt; Tuple[dict, float]</dt><dd><span class="code">Execute&nbsp;the&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;simulation.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Tuple[dict,&nbsp;float]:&nbsp;Results&nbsp;of&nbsp;the&nbsp;simulation&nbsp;and&nbsp;acceptance&nbsp;ratio.</span></dd></dl>
 
-<dl><dt><a name="PartitionMCMC-to_opad"><strong>to_opad</strong></a>(self, plus=False)</dt></dl>
+<dl><dt><a name="PartitionMCMC-to_distribution"><strong>to_distribution</strong></a>(self)</dt><dd><span class="code">Convert&nbsp;the&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;results&nbsp;to&nbsp;a&nbsp;distribution.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;MCMCDistribution:&nbsp;Distribution&nbsp;object.</span></dd></dl>
 
-<dl><dt><a name="PartitionMCMC-traceplot"><strong>traceplot</strong></a>(self, ax=None)</dt></dl>
+<dl><dt><a name="PartitionMCMC-to_opad"><strong>to_opad</strong></a>(self, plus=False)</dt><dd><span class="code">Convert&nbsp;the&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;results&nbsp;to&nbsp;an&nbsp;OPAD&nbsp;object.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;plus&nbsp;(bool):&nbsp;Whether&nbsp;to&nbsp;use&nbsp;the&nbsp;plus1&nbsp;neighborhood.&nbsp;Default&nbsp;is&nbsp;False.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;OPAD:&nbsp;OPAD&nbsp;object.</span></dd></dl>
 
-<dl><dt><a name="PartitionMCMC-update_results"><strong>update_results</strong></a>(self, iteration, info)</dt></dl>
+<dl><dt><a name="PartitionMCMC-traceplot"><strong>traceplot</strong></a>(self, ax=None)</dt><dd><span class="code">Generate&nbsp;a&nbsp;trace&nbsp;plot&nbsp;of&nbsp;the&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;simulation.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ax&nbsp;(matplotlib.axes.Axes):&nbsp;Matplotlib&nbsp;axis&nbsp;to&nbsp;plot&nbsp;on.&nbsp;Default&nbsp;is&nbsp;None.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;list:&nbsp;Plot&nbsp;object.</span></dd></dl>
+
+<dl><dt><a name="PartitionMCMC-update_results"><strong>update_results</strong></a>(self, iteration, info)</dt><dd><span class="code">Update&nbsp;the&nbsp;results&nbsp;of&nbsp;the&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;simulation&nbsp;with&nbsp;information&nbsp;from&nbsp;the&nbsp;current&nbsp;iteration.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;iteration&nbsp;(int):&nbsp;Current&nbsp;iteration&nbsp;number.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;info&nbsp;(dict):&nbsp;Information&nbsp;about&nbsp;the&nbsp;current&nbsp;iteration.</span></dd></dl>
 
 <hr>
 Readonly properties inherited from <a href="structure_learning.samplers.mcmc.html#MCMC">structure_learning.samplers.mcmc.MCMC</a>:<br>

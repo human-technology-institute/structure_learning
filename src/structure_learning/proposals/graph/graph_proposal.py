@@ -1,6 +1,12 @@
 """
+This module implements the GraphProposal class, which generates proposals for graph structures by performing edge operations such as addition, deletion, and reversal.
 
+The GraphProposal class is used in structure learning algorithms to explore the space of possible graph structures. It supports constraints through blacklist and whitelist matrices and calculates acceptance ratios for proposed changes.
+
+Classes:
+    GraphProposal: Generates graph proposals and computes acceptance ratios for structure learning.
 """
+
 from typing import List, Union
 import networkx as nx
 import numpy as np

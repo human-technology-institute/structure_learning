@@ -1,3 +1,11 @@
+"""
+This module contains unit tests for the BGe (Bayesian Gaussian equivalent) score implementation.
+
+The tests validate the correctness of the BGe score by comparing the implementation
+against the reference implementation in the R package BiDAG. The tests ensure that
+both implementations produce equivalent scores for various parent configurations.
+"""
+
 import unittest
 import rpy2
 from rpy2.robjects.packages import importr
@@ -8,12 +16,28 @@ import numpy as np
 import pandas as pd
 from structure_learning.scores import BGeScore as implemented_BGe
 from structure_learning.samplers import PartitionMCMC
+
 rules = default_converter + numpy2ri.converter + pandas2ri.converter
 bidag = importr('BiDAG')
 
 class TestBGe(unittest.TestCase):
+    """
+    Unit tests for the BGe (Bayesian Gaussian equivalent) score implementation.
+    
+    This test class compares our implementation of the BGe score against the 
+    reference implementation in the R package BiDAG. It verifies that both 
+    implementations produce equivalent scores for various parent configurations.
+    """
 
     def test_compute(self):
+        """
+        Test the BGe score computation against BiDAG's implementation.
+        
+        Creates synthetic data and compares the BGe scores computed by our 
+        implementation against the scores computed by BiDAG's implementation 
+        for various parent configurations. The scores should match within a 
+        small numerical tolerance.
+        """
         # create synthetic data
         N = 1000
         n_vars = 5

@@ -1,6 +1,14 @@
 """
+This module implements the BGe (Bayesian Gaussian Equivalent) score for evaluating Bayesian networks.
 
+The BGe score is used to compute the marginal likelihood of a Bayesian network given data. It supports operations
+such as computing the score for the entire graph, individual nodes, and edges. The implementation includes
+parameters for regularization and scoring.
+
+Classes:
+    BGeScore: Implements the BGe score computation.
 """
+
 from typing import Union
 import pandas as pd
 import numpy as np

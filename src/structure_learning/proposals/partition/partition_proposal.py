@@ -1,3 +1,34 @@
+"""
+This module defines the PartitionProposal class, which implements various operations
+for proposing modifications to partitions in a structure learning context.
+
+Classes:
+    PartitionProposal: Implements operations such as swapping, splitting, merging,
+    and moving nodes between partitions.
+
+Methods:
+    propose: Proposes a new state by applying one of the defined operations.
+    compute_acceptance_ratio: Computes the acceptance ratio for the proposed state.
+    get_nodes_to_rescore: Returns the nodes that need to be rescored.
+    accept: Accepts the proposed state and updates the current state.
+    compute_neighborhoods: Computes the number of neighborhoods for a given state.
+    _calculate_move_probs: Calculates probabilities for different moves.
+    _swap_adjacent: Swaps nodes between adjacent partitions.
+    _swap_global: Swaps nodes between non-adjacent partitions.
+    _split_or_merge_move: Performs either a split or merge operation.
+    _split_move: Splits a partition into two.
+    _join_move: Merges two adjacent partitions.
+    _node_to_existing_partition: Moves a node to an existing partition.
+    _node_to_new_partition: Moves a node to a new partition.
+    _move_node_to_existing_or_new_partition: Moves a node to either an existing or new partition.
+    _compute_neighborhoods_new_existing_partition: Computes neighborhoods for new and existing partitions.
+    _calculate_join_possibilities: Calculates join possibilities for nodes.
+    _calculate_partition_transitions: Calculates partition transition possibilities.
+    _possible_splits_joins: Calculates possible splits and joins.
+    _possible_permutations_neighbors: Calculates permutations for neighboring partitions.
+    _possible_permutations: Calculates permutations for all partitions.
+"""
+
 import numpy as np
 import math
 from structure_learning.data_structures.partition import *
@@ -31,6 +62,12 @@ class PartitionProposal(StructureLearningProposal):
         self.proposed_state = None
 
     def propose(self):
+        """
+        Proposes a new state by applying one of the defined operations.
+
+        Returns:
+            tuple: A tuple containing the proposed state and the operation applied.
+        """
         # reset the nodes to rescore
         self.to_rescore = set()
         while True:
@@ -52,6 +89,16 @@ class PartitionProposal(StructureLearningProposal):
         return self.proposed_state, self.operation
 
     def compute_acceptance_ratio(self, current_state_score, proposed_state_score):
+        """
+        Computes the acceptance ratio for the proposed state.
+
+        Args:
+            current_state_score (float): The score of the current state.
+            proposed_state_score (float): The score of the proposed state.
+
+        Returns:
+            float: The acceptance ratio, capped at 0.
+        """
         if self.SWAP_ADJACENT == self.operation or self.SWAP_GLOBAL == self.operation:
             self._Q_current_proposed = 1
             self._Q_proposed_current = 1
@@ -76,9 +123,18 @@ class PartitionProposal(StructureLearningProposal):
         return min(0, acceptance_ratio)
 
     def get_nodes_to_rescore(self):
+        """
+        Returns the nodes that need to be rescored.
+
+        Returns:
+            set: A set of nodes to be rescored.
+        """
         return self.to_rescore
 
     def accept(self):
+        """
+        Accepts the proposed state and updates the current state.
+        """
         self.current_state = self.proposed_state
         self._update()
 
@@ -91,13 +147,25 @@ class PartitionProposal(StructureLearningProposal):
 
     def compute_neighborhoods(self, state):
         """
-        Compute the number of neighborhoods of an ordered partiion by using the equation
+        Computes the number of neighborhoods of an ordered partiion by using the equation
         sum_{i=1}^{m} ( sum_{c=1}^{k_i-1} ( comb( k_i, c) ) ) + m - 1
+
+        Args:
+            state (OrderedPartition): The state for which neighborhoods are computed.
+
+        Returns:
+            tuple: A tuple containing the total number of neighborhoods and a list of combinations.
         """
         comb_lst = [sum(math.comb(part_i.size, c) for c in range(1, part_i.size)) for part_i in state.partitions]
         return np.sum(comb_lst) + self.num_part - 1, comb_lst
 
     def _calculate_move_probs(self):
+        """
+        Calculates probabilities for different moves.
+
+        Returns:
+            np.ndarray: An array of normalized probabilities for each move.
+        """
 
         # Choose the probability of the different moves
         prob1start = 40 / 100
@@ -119,6 +187,12 @@ class PartitionProposal(StructureLearningProposal):
         return move_probs
 
     def _swap_adjacent(self):
+        """
+        Swaps nodes between adjacent partitions.
+
+        Returns:
+            OrderedPartition: The proposed state after the swap.
+        """
 
         assert self.current_state.size >= 2
         self.operation = self.SWAP_ADJACENT
@@ -148,6 +222,12 @@ class PartitionProposal(StructureLearningProposal):
         return self.proposed_state
 
     def _swap_global(self ):
+        """
+        Swaps nodes between non-adjacent partitions.
+
+        Returns:
+            OrderedPartition: The proposed state after the swap.
+        """
 
         assert self.current_state.size >= 2
         self.operation = self.SWAP_GLOBAL
@@ -180,6 +260,12 @@ class PartitionProposal(StructureLearningProposal):
         return self.proposed_state
 
     def _split_or_merge_move(self):
+        """
+        Performs either a split or merge operation.
+
+        Returns:
+            OrderedPartition: The proposed state after the operation.
+        """
 
         party, _, _ = self.proposed_state.to_party_permy_posy()
         p = np.array(self._possible_splits_joins(sum(party), party))
@@ -200,6 +286,15 @@ class PartitionProposal(StructureLearningProposal):
             return self.current_state.copy()
 
     def _split_move(self, idx : int):
+        """
+        Splits a partition into two.
+
+        Args:
+            idx (int): The index of the partition to split.
+
+        Returns:
+            OrderedPartition: The proposed state after the split.
+        """
 
         self.operation = self.SPLIT_PARTITIONS
         assert self.proposed_state.partitions[idx].size >= 2
@@ -224,6 +319,15 @@ class PartitionProposal(StructureLearningProposal):
         return self.proposed_state
 
     def _join_move(self, idx : int):
+        """
+        Merges two adjacent partitions.
+
+        Args:
+            idx (int): The index of the partition to merge.
+
+        Returns:
+            OrderedPartition: The proposed state after the merge.
+        """
 
         assert self.current_state.size >= 2
         self.operation = self.MERGE_PARTITIONS
@@ -253,6 +357,12 @@ class PartitionProposal(StructureLearningProposal):
         return self.proposed_state
 
     def _node_to_existing_partition(self):
+        """
+        Moves a node to an existing partition.
+
+        Returns:
+            OrderedPartition: The proposed state after the move.
+        """
 
         assert self.current_state.size >= 2
         self.operation = self.MOVE_NODE_TO_EXISTING_PARTITION
@@ -286,6 +396,12 @@ class PartitionProposal(StructureLearningProposal):
         return self.proposed_state
 
     def _node_to_new_partition(self):
+        """
+        Moves a node to a new partition.
+
+        Returns:
+            OrderedPartition: The proposed state after the move.
+        """
 
         self.operation = self.MOVE_NODE_TO_NEW_PARTITION
 
@@ -325,6 +441,12 @@ class PartitionProposal(StructureLearningProposal):
         return self.proposed_state
 
     def _move_node_to_existing_or_new_partition(self):
+        """
+        Moves a node to either an existing or new partition.
+
+        Returns:
+            OrderedPartition: The proposed state after the move.
+        """
 
         self.nbh_join_existing, self.nbh_create_new = self._compute_neighborhoods_new_existing_partition(self.current_state)
 
@@ -337,6 +459,16 @@ class PartitionProposal(StructureLearningProposal):
             return self._node_to_new_partition()
 
     def _compute_neighborhoods_new_existing_partition(self, state):
+        """
+        Computes neighborhoods for new and existing partitions.
+
+        Args:
+            state (OrderedPartition): The state for which neighborhoods are computed.
+
+        Returns:
+            tuple: A tuple containing the number of existing and new neighborhoods.
+        """
+
         party, _, posy = state.to_party_permy_posy()
         num_nodes = sum(party)
 
@@ -346,6 +478,18 @@ class PartitionProposal(StructureLearningProposal):
         return existing, new
 
     def _calculate_join_possibilities(self, n, party, posy):
+        """
+        Calculates join possibilities for nodes.
+
+        Args:
+            n (int): Total number of nodes.
+            party (list): List of partition sizes.
+            posy (list): List of node positions.
+
+        Returns:
+            list: A list of join possibilities for each node.
+        """
+
         m = len(party)
         join_possibs = [0] * n
         for k in range(n):
@@ -358,6 +502,18 @@ class PartitionProposal(StructureLearningProposal):
         return join_possibs
     
     def _calculate_partition_transitions(self, n, party, posy):
+        """
+        Calculates partition transition possibilities.
+
+        Args:
+            n (int): Total number of nodes.
+            party (list): List of partition sizes.
+            posy (list): List of node positions.
+
+        Returns:
+            list: A list of transition possibilities for each node.
+        """
+
         m = len(party)
         hole_possibs = [0] * n
         for k in range(n):
@@ -374,6 +530,17 @@ class PartitionProposal(StructureLearningProposal):
         return hole_possibs
     
     def _possible_splits_joins(self, n, party):
+        """
+        Calculates possible splits and joins.
+
+        Args:
+            n (int): Total number of nodes.
+            party (list): List of partition sizes.
+
+        Returns:
+            list: A list of possible splits and joins.
+        """
+
         partypossibs = [0] * n
         kbot = 0
         m = len(party)
@@ -386,6 +553,17 @@ class PartitionProposal(StructureLearningProposal):
         return partypossibs
 
     def _possible_permutations_neighbors(self, n, party):
+        """
+        Calculates permutations for neighboring partitions.
+
+        Args:
+            n (int): Total number of nodes.
+            party (list): List of partition sizes.
+
+        Returns:
+            list: A list of permutations for neighboring partitions.
+        """
+
         m = len(party)
         possibs = [0] * (m-1)
         if m > 1:
@@ -394,6 +572,17 @@ class PartitionProposal(StructureLearningProposal):
         return possibs
     
     def _possible_permutations(self, n, party):
+        """
+        Calculates permutations for all partitions.
+
+        Args:
+            n (int): Total number of nodes.
+            party (list): List of partition sizes.
+
+        Returns:
+            list: A list of permutations for all partitions.
+        """
+
         m = len(party)
         possibs = [0] * (m)
         if m > 1:

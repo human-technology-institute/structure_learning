@@ -1,6 +1,12 @@
 """
+This module implements the MCMC class, which serves as a base class for Markov Chain Monte Carlo (MCMC) simulations.
 
+The MCMC class provides methods for initializing simulations, running iterations, updating results, and converting results into different formats such as distributions or OPAD objects. It is designed to be extended by subclasses that implement specific MCMC behaviors.
+
+Classes:
+    MCMC: Abstract base class for MCMC simulations.
 """
+
 from abc import ABC, abstractmethod
 from typing import TypeVar, Union, Tuple
 import time
@@ -20,9 +26,9 @@ State = TypeVar('State')
 
 class MCMC(ABC):
     """
-    Base class for MCMC.
-    Inheriting classes must implement the following methods:
-        step()
+    Base class for Markov Chain Monte Carlo (MCMC) simulations.
+    Inheriting classes must implement the `step` method to define the behavior of a single MCMC iteration.
+    
     """
 
     RESULT_TYPE_DIST = 'distribution'
@@ -35,25 +41,23 @@ class MCMC(ABC):
                  blacklist: np.ndarray = None, whitelist: np.ndarray = None, plus1: bool = False, seed: int = 32, 
                  result_type: str = RESULT_TYPE_DIST, graph_type='dag'):
         """
-        Initilialise MCMC instance.
+        Initialize the MCMC instance.
 
         Parameters:
-            data (pd.DataFrame):                            Dataset. Optional if score_object is given.
-            initial_state (State):                          Initial state for the MCMC simulation.
-                                                            If None, simulation starts with a random graph or a graph
-                                                            constructed from PC algorithm.
-            max_iter (int):                                 The number of MCMC iterations to run. Default: 30000.
-            score_object (Score):                           A score object implementing compute(). If None, BGeScore is used
-                                                            (data must be provided). Default: None.
-            proposal_object (StructureLearningProposal):    A proposal object. If None, a GraphProposal instance is used.
-                                                            Default: None.
-            pc_init (bool):                                 If True and initial_graph is not given, PC algorithm will be used
-                                                            to generate initial graph.
-            blacklist (numpy.ndarray):                      Mask for edges to ignore in the proposal
-            whitelist (numpy.ndarray):                      Mask for edges to include
-            plus1 (bool):                                   Use plus1 neighborhood
-            result_type (str):                              Options: iterates | distribution (default) | opad | opad+
-            graph_type (str):                               Options: dag (default) | cpdag
+            data (pd.DataFrame):                                        Dataset for the MCMC simulation.
+            initial_state (State):                                      Initial state for the simulation.
+            max_iter (int):                                             Maximum number of iterations. Default is 30000.
+            score_object (Union[str, Score]):                           Scoring object or type. Default is None.
+            proposal_object (Union[str, StructureLearningProposal]):    Proposal object or type. Default is None.
+            pc_init (bool):                                             Whether to initialize using the PC algorithm. Default is True.
+            pc_significance_level (float):                              Significance level for the PC algorithm. Default is 0.01.
+            pc_ci_test (str):                                           Conditional independence test for the PC algorithm. Default is 'pearsonr'.
+            blacklist (np.ndarray):                                     Mask for edges to ignore in the proposal.
+            whitelist (np.ndarray):                                     Mask for edges to include in the proposal.
+            plus1 (bool):                                               Whether to use plus1 neighborhood. Default is False.
+            seed (int):                                                 Random seed for reproducibility. Default is 32.
+            result_type (str):                                          Type of result to generate. Default is 'distribution'.
+            graph_type (str):                                           Type of graph ('dag' or 'cpdag'). Default is 'dag'.
         """
 
         if data is None or not isinstance(data, (Data, pd.DataFrame)):
@@ -108,10 +112,10 @@ class MCMC(ABC):
 
     def run(self) -> Tuple[dict, float]:
         """
-        Run MCMC simulation.
+        Execute the MCMC simulation.
 
         Returns:
-            (dict): dictionary (iteration number as keys) of MCMC state chain information
+            Tuple[dict, float]: Results of the simulation and acceptance ratio.
         """
         for iter in range(self.max_iter):
             result = self.step()
@@ -123,11 +127,21 @@ class MCMC(ABC):
     @abstractmethod
     def step(self) -> dict:
         """
-        Perform one MCMC iteration
+        Perform one iteration of the MCMC simulation.
+
+        Returns:
+            dict: Information about the current iteration.
         """
         pass
 
     def update_results(self, iteration, info):
+        """
+        Update the results of the MCMC simulation with information from the current iteration.
+
+        Parameters:
+            iteration (int): Current iteration number.
+            info (dict): Information about the current iteration.
+        """
         info['graph'] = info['graph'] if self.graph_type=='dag' else info['graph'].to_cpdag()
         key = info['graph'].to_key()
         if self.graph_type=='cpdag':
@@ -144,17 +158,27 @@ class MCMC(ABC):
 
     def get_graphs(self, results):
         """
-        Returns list of sampled graphs from MCMC simulation results.
+        Retrieve a list of sampled graphs from the MCMC results.
 
         Parameters:
-            results (dict): MCMC simulation results.
+            results (dict): Results of the MCMC simulation.
 
         Returns:
-            (list): sampled graphs
+            list: Sampled graphs.
         """
         return self.get_chain_info(results)
 
     def get_chain_info(self, results, key='graph'):
+        """
+        Extract chain information from the MCMC results.
+
+        Parameters:
+            results (dict): Results of the MCMC simulation.
+            key (str): Key to extract information for. Default is 'graph'.
+
+        Returns:
+            list: Chain information.
+        """
         if self.result_type == 'distribution':
             return results.prop(key)
         else:
@@ -168,6 +192,15 @@ class MCMC(ABC):
         return self._trace
     
     def traceplot(self, ax=None):
+        """
+        Generate a trace plot of the MCMC simulation.
+
+        Parameters:
+            ax (matplotlib.axes.Axes): Matplotlib axis to plot on. Default is None.
+
+        Returns:
+            list: Plot object.
+        """
         if ax is None:
             fig = plt.figure()
             ax = fig.subplots(1,1)
@@ -179,9 +212,24 @@ class MCMC(ABC):
         return plot
     
     def to_distribution(self):
+        """
+        Convert the MCMC results to a distribution.
+
+        Returns:
+            MCMCDistribution: Distribution object.
+        """
         return MCMCDistribution.from_iterates(self.results) if self.result_type == self.RESULT_TYPE_ITER else self.results
     
     def to_opad(self, plus=False):
+        """
+        Convert the MCMC results to an OPAD object.
+
+        Parameters:
+            plus (bool): Whether to use the plus1 neighborhood. Default is False.
+
+        Returns:
+            OPAD: OPAD object.
+        """
         if self.result_type == self.RESULT_TYPE_ITER:
             return MCMCDistribution.from_iterates(self.results).to_opad(plus=plus)
         elif self.result_type == self.RESULT_TYPE_DIST :

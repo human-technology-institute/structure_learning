@@ -1,6 +1,20 @@
 """
+This module implements the StructureMCMC class, which is a specialized Markov Chain Monte Carlo (MCMC) sampler for structure learning in graphical models.
 
+The StructureMCMC class extends the base MCMC class and provides functionality for sampling graph structures based on a given dataset, scoring function, and proposal mechanism. It supports initialization with a predefined graph or a graph generated using the PC algorithm, and allows for the inclusion of edge constraints through blacklists and whitelists.
+
+Classes:
+    StructureMCMC: A class for performing Structure MCMC simulations.
+
+Dependencies:
+    - numpy
+    - pandas
+    - structure_learning.proposals
+    - structure_learning.data_structures
+    - structure_learning.scores
+    - structure_learning.samplers
 """
+
 from typing import Union
 import time
 import numpy as np

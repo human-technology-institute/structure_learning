@@ -1,3 +1,11 @@
+"""
+This module provides the Graph class and associated methods for representing and manipulating graph structures.
+
+The Graph class supports operations such as adding/removing nodes and edges, finding parent nodes, converting between different graph representations (numpy, pandas, networkx), and visualizing graphs.
+
+It also includes utility methods for checking graph properties like cycles and performing edge operations.
+"""
+
 from typing import Union, List, Tuple, Set, Type, TypeVar
 from math import comb, factorial
 import re
@@ -17,8 +25,9 @@ class Graph:
         Initialise a graph instance.
 
         Parameters:
-            incidence (np.ndarray | pd.DataFrame):      adjacency matrix
-            nodes (list | tuple):                       node labels. If incidence is a dataframe, this parameter is ignored.
+            incidence (np.ndarray | pd.DataFrame): Adjacency matrix representing the graph structure.
+            nodes (list | tuple): Node labels. If incidence is a DataFrame, this parameter is ignored.
+            weights (np.ndarray | pd.DataFrame): Edge weights. Defaults to the adjacency matrix if not provided.
         """
         self.incidence, self.nodes = None, None
         if incidence is not None:
@@ -34,18 +43,30 @@ class Graph:
     @property
     def dim(self):
         """
-        Returns the number of nodes in the Graph object
+        Returns the number of nodes in the Graph object.
+
+        Returns:
+            int: Number of nodes.
         """
         return len(self.nodes)
     
     @property
     def shape(self):
+        """
+        Returns the shape of the adjacency matrix.
+
+        Returns:
+            tuple: Shape of the adjacency matrix (rows, columns).
+        """
         return (len(self.nodes),len(self.nodes))
 
     @property
     def edges(self):
         """
-        Returns list of edges
+        Returns the list of edges in the graph.
+
+        Returns:
+            set: Set of edges represented as tuples (node1, node2).
         """
         rows, columns = np.nonzero(self.incidence > 0)
         self._edges = set()
@@ -54,6 +75,12 @@ class Graph:
         return self._edges
     
     def v_structures(self):
+        """
+        Identifies v-structures in the graph.
+
+        Returns:
+            set: Set of v-structures represented as tuples (node1, node2, node3).
+        """
         v = set()
         incidence = self.incidence
         for i in range(self.dim):
@@ -67,14 +94,20 @@ class Graph:
     
     def _update_node_index(self):
         """
-        Update node-index dictionary
+        Updates the internal mapping of node names to indices.
         """
 
         self._node_to_index_dict = {} if self.nodes is None else {node:idx for idx,node in enumerate(self.nodes)}
 
     def _node_to_index(self, nodes):
         """
-        Map node names to index in list
+        Maps node names to their indices in the adjacency matrix.
+
+        Parameters:
+            nodes (str | list | tuple): Node names to map.
+
+        Returns:
+            int | list: Index or list of indices corresponding to the nodes.
         """
         if self._node_to_index_dict is None:
             self._update_node_index()
@@ -85,6 +118,16 @@ class Graph:
         return idx if len(idx) > 1 or not unwrap else idx[0]
     
     def find_parents(self, node, return_index=False):
+        """
+        Finds the parent nodes of a given node.
+
+        Parameters:
+            node (str): The node for which to find parents.
+            return_index (bool): If True, return indices of parent nodes along with their labels.
+
+        Returns:
+            list | tuple: List of parent node labels, or a tuple containing parent node labels and their indices if return_index is True.
+        """
         node_idx = self._node_to_index(node)
         if node_idx is None:
             return []
@@ -93,8 +136,16 @@ class Graph:
         return (parents, parent_indices) if return_index else parents
     
     @classmethod
-    def find_parent_nodes(self, incidence):
-        """Find parent nodes (nodes with no incoming edges)."""
+    def find_parent_nodes(cls, incidence):
+        """
+        Finds parent nodes (nodes with no incoming edges).
+
+        Parameters:
+            incidence (np.ndarray): Adjacency matrix.
+
+        Returns:
+            set: Set of parent node indices.
+        """
         n = len(incidence)
         parent_nodes = set(range(n))
         exist_edge = set([True, 1, 1.0])
@@ -107,13 +158,19 @@ class Graph:
     # modifiers
     def add_node(self, node: str):
         """
-        Add node to graph.
+        Adds a single node to the graph.
+
+        Parameters:
+            node (str): Node label.
         """
         self.add_nodes([node])
 
     def add_nodes(self, nodes: Union[List[str], Tuple[str]]):
         """
-        Add nodes to graph.
+        Adds multiple nodes to the graph.
+
+        Parameters:
+            nodes (list | tuple): List or tuple of node labels.
         """
         nodes = set(nodes) - set(self.nodes)
         if len(nodes) == 0:
@@ -126,13 +183,19 @@ class Graph:
 
     def remove_node(self, node: str):
         """
-        Remove node from graph.
+        Removes a single node from the graph.
+
+        Parameters:
+            node (str): Node label.
         """
         self.remove_nodes([node])
 
     def remove_nodes(self, nodes: Union[List[str], Tuple[str]]):
         """
-        Remove nodes from graph.
+        Removes multiple nodes from the graph.
+
+        Parameters:
+            nodes (list | tuple): List or tuple of node labels.
         """
         idx = [i for i in self._node_to_index(nodes) if i is not None]
         new_incidence = np.delete(self.incidence, idx, axis=0)
@@ -143,13 +206,19 @@ class Graph:
 
     def add_edge(self, edge: Union[List[str], Tuple[str]]):
         """
-        Add an edge to graph.
+        Adds a single edge to the graph.
+
+        Parameters:
+            edge (list | tuple): Edge represented as a tuple (node1, node2).
         """
         self.add_edges([edge])
 
     def add_edges(self, edges: Union[List[Tuple], Tuple[Tuple]]):
         """
-        Add edges to graph.
+        Adds multiple edges to the graph.
+
+        Parameters:
+            edges (list | tuple): List or tuple of edges, each represented as a tuple (node1, node2).
         """
         nodes = set([node for edge in edges for node in edge])
         self.add_nodes(nodes)
@@ -160,13 +229,19 @@ class Graph:
 
     def remove_edge(self, edge: Union[List, Tuple]):
         """
-        Remove an edge from graph.
+        Removes a single edge from the graph.
+
+        Parameters:
+            edge (list | tuple): Edge represented as a tuple (node1, node2).
         """
         self.remove_edges([edge])
 
     def remove_edges(self, edges: Union[List[Tuple], Tuple[Tuple]]):
         """
-        Remove edges from graph.
+        Removes multiple edges from the graph.
+
+        Parameters:
+            edges (list | tuple): List or tuple of edges, each represented as a tuple (node1, node2).
         """
         for edge in edges:
             node1, node2 = self._node_to_index(edge)
@@ -174,9 +249,16 @@ class Graph:
 
     # converters
     @classmethod
-    def from_numpy(cls, incidence: np.ndarray, nodes: Union[List, Tuple, np.ndarray]) -> Type[G]:
+    def from_numpy(cls, incidence: np.ndarray, nodes: Union[List, Tuple, np.ndarray] ) -> Type[G]:
         """
-        Create Graph object from numpy array.
+        Creates a Graph object from a numpy array.
+
+        Parameters:
+            incidence (np.ndarray): Adjacency matrix.
+            nodes (list | tuple | np.ndarray): Node labels.
+
+        Returns:
+            Graph: Graph object.
         """
         if len(incidence) != len(nodes):
             raise Exception("The number of node labels must match the dimensions of the graph")
@@ -186,7 +268,13 @@ class Graph:
     @classmethod
     def from_pandas(cls, graph: pd.DataFrame) -> Type[G]:
         """
-        Create Graph object from Pandas DataFrame.
+        Creates a Graph object from a Pandas DataFrame.
+
+        Parameters:
+            graph (pd.DataFrame): DataFrame representing the adjacency matrix.
+
+        Returns:
+            Graph: Graph object.
         """
         nodes = list(graph.columns)
         if set(nodes) != set(graph.index):
@@ -196,7 +284,13 @@ class Graph:
     @classmethod
     def from_nx(cls, graph: nx.DiGraph) -> Type[G]:
         """
-        Create Graph object from networkx graph.
+        Creates a Graph object from a networkx graph.
+
+        Parameters:
+            graph (nx.DiGraph): networkx DiGraph object.
+
+        Returns:
+            Graph: Graph object.
         """
         incidence = graph.to_numpy_array()
         nodes = list(graph.nodes)
@@ -204,19 +298,31 @@ class Graph:
     
     def to_numpy(self, return_node_labels=False):
         """
-        Convert Graph object to numpy array.
+        Converts the Graph object to a numpy array.
+
+        Parameters:
+            return_node_labels (bool): If True, return node labels along with the adjacency matrix.
+
+        Returns:
+            np.ndarray | tuple: Adjacency matrix, or a tuple containing the adjacency matrix and node labels.
         """
         return self.incidence if not return_node_labels else (self.incidence, self.nodes)
 
     def to_pandas(self):
         """
-        Convert Graph object to Pandas Dataframe.
+        Converts the Graph object to a Pandas DataFrame.
+
+        Returns:
+            pd.DataFrame: DataFrame representing the adjacency matrix.
         """
         return pd.DataFrame(self.incidence, index=self.nodes, columns=self.nodes)
     
     def to_nx(self):
         """
-        Convert Graph object to networkx DiGraph.
+        Converts the Graph object to a networkx DiGraph.
+
+        Returns:
+            nx.DiGraph: networkx DiGraph object.
         """
         G =  nx.from_numpy_array(self.incidence, create_using=nx.DiGraph)
         mapping = {old_label: new_label for old_label, new_label in zip(G.nodes(), self.nodes)}
@@ -226,16 +332,22 @@ class Graph:
     
     def __str__(self):
         """
-        Convert Graph object to string.
+        Converts the Graph object to a string representation.
+
+        Returns:
+            str: String representation of the graph.
         """
         return self.to_key()
 
-    def to_key(self, type:str = 'default'):
+    def to_key(self, type: str = 'default'):
         """
-        Create key for Graph object.
+        Creates a key for the Graph object.
 
         Parameters:
-            type (str): type of key to use
+            type (str): Type of key to use. Defaults to 'default'.
+
+        Returns:
+            str: Key representing the graph.
         """
         key = ''
         if self.incidence is not None:
@@ -248,16 +360,17 @@ class Graph:
                 raise Exception("Unsupported key type")
         return key
 
-    def from_key(key: str, type:str = 'default', nodes: Union[List, Tuple, np.ndarray] = None) -> Type[G]:
+    def from_key(key: str, type: str = 'default', nodes: Union[List, Tuple, np.ndarray] = None) -> Type[G]:
         """
-        Create graph from key.
+        Creates a Graph object from a key.
 
         Parameters:
-            key (str): string representation of the graph
-            type:
-            nodes (list | tuple | np.ndarray): list of nodes
+            key (str): String representation of the graph.
+            type (str): Type of key. Defaults to 'default'.
+            nodes (list | tuple | np.ndarray): Node labels.
+
         Returns:
-            (numpy.ndarray)
+            Graph: Graph object.
         """
         num_nodes = len(nodes)
         if type == 'default':
@@ -276,41 +389,83 @@ class Graph:
 
     # arithmetic
     def __mul__(self, g: Type['G']):
+        """
+        Multiplies two Graph objects element-wise.
+
+        Parameters:
+            g (Graph): Another Graph object.
+
+        Returns:
+            Graph: Resulting Graph object.
+        """
         if self.nodes != g.nodes:
             raise Exception("Graph do not have matching nodes")
         product = self.incidence * g.incidence
         return Graph(product, self.nodes)
 
     def __rmul__(self, g: Type['G']):
+        """
+        Multiplies two Graph objects element-wise (reverse operation).
+
+        Parameters:
+            g (Graph): Another Graph object.
+
+        Returns:
+            Graph: Resulting Graph object.
+        """
         if self.nodes != g.nodes:
             raise Exception("Graph do not have matching nodes")
         product = g.incidence * self.incidence
         return Graph(product, self.nodes)
     
     def __eq__(self, g: Type['G']):
+        """
+        Checks equality of two Graph objects.
+
+        Parameters:
+            g (Graph): Another Graph object.
+
+        Returns:
+            bool: True if the graphs are equal, False otherwise.
+        """
         if self.nodes != g.nodes:
             raise Exception("Graph do not have matching nodes")
         return (self.incidence == g.incidence).all()
 
     # I/O
     def to_csv(self, filename):
+        """
+        Saves the Graph object to a CSV file.
+
+        Parameters:
+            filename (str): Path to the output CSV file.
+        """
         self.to_pandas().to_csv(filename)
 
     @classmethod
     def from_csv(cls, filename):
+        """
+        Creates a Graph object from a CSV file.
+
+        Parameters:
+            filename (str): Path to the input CSV file.
+
+        Returns:
+            Graph: Graph object.
+        """
         return cls.from_pandas(pd.read_csv(filename))
 
     # visualisation
-    def plot(self, title="Graph", figsize = (5,3), node_size=2000, node_color="skyblue", k=5):
+    def plot(self, title="Graph", figsize=(5, 3), node_size=2000, node_color="skyblue", k=5):
         """
         Plot a networkx graph.
 
         Parameters:
-            title (str): figure title
-            figsize (tuple (int)): figure size
-            node_size (int): node size
-            node_color (matplotlib.colors): node color
-            k (int): distance between nodes
+            title (str): Title of the plot.
+            figsize (tuple): Size of the figure.
+            node_size (int): Size of the nodes.
+            node_color (str): Color of the nodes.
+            k (int): Distance between nodes in the layout.
         """
         G = self.to_nx()
         pos = nx.spring_layout(G, k=k)
@@ -325,16 +480,14 @@ class Graph:
     # utils
     def compare(self, other: Type[G], operation: str):
         """
-        Checks edge operation on two adjacency matrices.
+        Compares two Graph objects based on edge operations.
 
         Parameters:
-            other (Graph): graph to compare with
-            operation (str): edge operation [add_edge, delete_edge, reverse_edge]
+            other (Graph): Another Graph object.
+            operation (str): Edge operation ('add_edge', 'delete_edge', 'reverse_edge').
 
         Returns:
-            (str)|(list (str)): label(s) of node(s) connected to relevant edge(s)
-                                under specified operation, or error message
-
+            str | list: Labels of nodes connected to relevant edges under the specified operation, or an error message.
         """
         g1, g2 = self.incidence, other.incidence
         if set(self.nodes) != set(other.nodes):
@@ -373,13 +526,13 @@ class Graph:
     @classmethod
     def has_cycle(cls, graph: Union[np.ndarray, Type[G]]) -> bool:
         """
-        Check if the graph represented by the adjacency matrix has a cycle.
+        Checks if the graph has a cycle.
 
         Parameters:
-            graph (numpy.ndarray): adjacency matrix of the graph
+            graph (np.ndarray | Graph): Adjacency matrix or Graph object.
 
         Returns:
-            (bool): True if the graph has a cycle, False otherwise
+            bool: True if the graph has a cycle, False otherwise.
         """
         adj_matrix = graph if isinstance(graph, np.ndarray) else graph.incidence
         def is_cyclic_util(v, visited, rec_stack, adj_matrix):

@@ -1,3 +1,29 @@
+"""
+This module provides various metrics for evaluating distributions and graphs.
+
+It includes implementations of metrics such as KL Divergence, Jensen-Shannon Divergence,
+Mean Squared Error, Mean Absolute Error, Expected Structural Hamming Distance, and RHat.
+These metrics are used to compare distributions or evaluate the similarity between graphs.
+
+Classes:
+    Metric: Abstract base class for metrics.
+    KLD: Computes the KL Divergence between two distributions.
+    JSD: Computes the Jensen-Shannon Divergence between two distributions.
+    MSE: Computes the Mean Squared Error between two distributions.
+    MAE: Computes the Mean Absolute Error between two distributions.
+    SHD: Computes the Expected Structural Hamming Distance between graphs.
+    RHat: Computes the RHat metric for multiple distributions.
+
+Functions:
+    entropy: Computes the entropy between two distributions.
+    kl_divergence: Computes the KL divergence between two distributions.
+    jensen_shannon_divergence: Computes the Jensen-Shannon divergence between two distributions.
+    mean_squared_error: Computes the mean squared error between two distributions.
+    mean_absolute_error: Computes the mean absolute error between two distributions.
+    expected_shd: Computes the Expected Structural Hamming Distance.
+    rhat: Computes the RHat metric for the provided distributions and measurements.
+"""
+
 from abc import abstractmethod
 from typing import Union, List
 import numpy as np
@@ -5,8 +31,12 @@ from structure_learning.data_structures import DAG
 from structure_learning.distributions import Distribution
 
 class Metric:
-    def __init__(self):
-        pass
+    """
+    Abstract base class for metrics.
+
+    This class serves as a blueprint for all metric implementations. It defines
+    the structure and behavior that all derived metric classes must follow.
+    """
 
     @abstractmethod
     def compute(self, dist1: Distribution, dist2: Distribution):
@@ -33,8 +63,13 @@ def kl_divergence(P : list, Q : list, epsilon: float = 1e-10):
 
 class KLD(Metric):
 
-    def __init__(self):
-        super().__init__()
+    """
+    Computes the KL Divergence (KLD) between two distributions.
+
+    This class implements the KLD metric, which measures the difference between
+    two probability distributions. It inherits from the Metric base class and
+    provides a concrete implementation of the compute method.
+    """
 
     def compute(self, dist1: Distribution, dist2: Distribution):
         
@@ -77,9 +112,13 @@ def jensen_shannon_divergence(P : list, Q : list, epsilon: float = 1e-10):
     return jsd
 
 class JSD(Metric):
+    """
+    Computes the Jensen-Shannon Divergence (JSD) between two distributions.
 
-    def __init__(self):
-        super().__init__()
+    This class implements the JSD metric, which measures the similarity between
+    two probability distributions. It inherits from the Metric base class and
+    provides a concrete implementation of the compute method.
+    """
 
     def compute(self, dist1: Distribution, dist2: Distribution):
         
@@ -107,9 +146,13 @@ def mean_squared_error(P : list, Q : list):
     return np.mean((P - Q)**2)
 
 class MSE(Metric):
+    """
+    Computes the Mean Squared Error (MSE) between two distributions.
 
-    def __init__(self):
-        super().__init__()
+    This class implements the MSE metric, which measures the average squared difference
+    between two probability distributions. It inherits from the Metric base class and
+    provides a concrete implementation of the compute method.
+    """
 
     def compute(self, dist1: Distribution, dist2: Distribution):
         
@@ -137,9 +180,13 @@ def mean_absolute_error(P : list, Q : list):
     return np.mean(np.abs(P - Q))
 
 class MAE(Metric):
+    """
+    Computes the Mean Absolute Error (MAE) between two distributions.
 
-    def __init__(self):
-        super().__init__()
+    This class implements the MAE metric, which measures the average absolute difference
+    between two probability distributions. It inherits from the Metric base class and
+    provides a concrete implementation of the compute method.
+    """
 
     def compute(self, dist1: Distribution, dist2: Distribution):
         
@@ -189,9 +236,13 @@ def expected_shd(chain_list : List[np.ndarray], true_DAG : np.ndarray, p: List =
     return np.mean(shds) if p is None else np.mean(shds*np.array(p))
 
 class SHD(Metric):
+    """
+    Computes the Expected Structural Hamming Distance (SHD) between graphs.
 
-    def __init__(self):
-        super().__init__()
+    This class implements the SHD metric, which measures the expected structural
+    difference between a posterior approximation and a ground-truth graph. It inherits
+    from the Metric base class and provides a concrete implementation of the compute method.
+    """
 
     def compute(self, dags: Union[Distribution, DAG], true_DAG: DAG):
         p = None
@@ -226,10 +277,13 @@ def rhat(P: list, th: list):
     return Rhat
 
 class RHat(Metric):
+    """
+    Computes the RHat metric for multiple distributions.
 
-    def __init__(self):
-        super().__init__()
-
+    This class implements the RHat metric, which is used to assess the convergence
+    of multiple distributions. It inherits from the Metric base class and provides
+    a concrete implementation of the compute method.
+    """
     def compute(self, dists: List[Distribution], prop='logp'):
         if len(dists) < 2:
             raise Exception("There must be at least 2 distributions.")

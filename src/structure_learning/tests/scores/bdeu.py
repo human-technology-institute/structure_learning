@@ -1,3 +1,11 @@
+"""
+This module contains unit tests for the BDeu score implementation.
+
+The tests validate the correctness of the BDeu score computation by comparing
+it with the reference implementation from the pgmpy library. Synthetic data
+is used to ensure consistency and accuracy of the implemented methods.
+"""
+
 import unittest
 from pgmpy.estimators.StructureScore import BDeu as target_bdeu
 import numpy as np
@@ -6,8 +14,16 @@ from structure_learning.scores import BDeuScore as implemented_bdeu
 from structure_learning.samplers import PartitionMCMC
 
 class TestBDeu(unittest.TestCase):
+    """
+    Unit tests for the BDeu score implementation.
+    """
 
     def test_compute(self):
+        """
+        Test the computation of BDeu scores by comparing the implemented BDeuScore
+        with the pgmpy BDeu implementation. Ensures that the scores match within
+        a small delta for synthetic data.
+        """
 
         # create synthetic data
         N = 1000

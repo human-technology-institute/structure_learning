@@ -26,7 +26,34 @@
 <tr class="heading-text decor">
 <td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.proposals.html" class="white">proposals</a>.<a href="structure_learning.proposals.partition.html" class="white">partition</a>.partition_proposal</strong></td>
 <td class="extra"><a href=".">index</a><br><a href="file:/Users/165421/Documents/code/structure_learning/src/structure_learning/proposals/partition/partition_proposal.py">/Users/165421/Documents/code/structure_learning/src/structure_learning/proposals/partition/partition_proposal.py</a></td></tr></table>
-    <p></p>
+    <p><span class="code">This&nbsp;module&nbsp;defines&nbsp;the&nbsp;<a href="#PartitionProposal">PartitionProposal</a>&nbsp;class,&nbsp;which&nbsp;implements&nbsp;various&nbsp;operations<br>
+for&nbsp;proposing&nbsp;modifications&nbsp;to&nbsp;partitions&nbsp;in&nbsp;a&nbsp;structure&nbsp;learning&nbsp;context.<br>
+&nbsp;<br>
+Classes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#PartitionProposal">PartitionProposal</a>:&nbsp;Implements&nbsp;operations&nbsp;such&nbsp;as&nbsp;swapping,&nbsp;splitting,&nbsp;merging,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;moving&nbsp;nodes&nbsp;between&nbsp;partitions.<br>
+&nbsp;<br>
+Methods:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;propose:&nbsp;Proposes&nbsp;a&nbsp;new&nbsp;state&nbsp;by&nbsp;applying&nbsp;one&nbsp;of&nbsp;the&nbsp;defined&nbsp;operations.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;compute_acceptance_ratio:&nbsp;Computes&nbsp;the&nbsp;acceptance&nbsp;ratio&nbsp;for&nbsp;the&nbsp;proposed&nbsp;state.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;get_nodes_to_rescore:&nbsp;Returns&nbsp;the&nbsp;nodes&nbsp;that&nbsp;need&nbsp;to&nbsp;be&nbsp;rescored.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;accept:&nbsp;Accepts&nbsp;the&nbsp;proposed&nbsp;state&nbsp;and&nbsp;updates&nbsp;the&nbsp;current&nbsp;state.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;compute_neighborhoods:&nbsp;Computes&nbsp;the&nbsp;number&nbsp;of&nbsp;neighborhoods&nbsp;for&nbsp;a&nbsp;given&nbsp;state.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_calculate_move_probs:&nbsp;Calculates&nbsp;probabilities&nbsp;for&nbsp;different&nbsp;moves.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_swap_adjacent:&nbsp;Swaps&nbsp;nodes&nbsp;between&nbsp;adjacent&nbsp;partitions.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_swap_global:&nbsp;Swaps&nbsp;nodes&nbsp;between&nbsp;non-adjacent&nbsp;partitions.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_split_or_merge_move:&nbsp;Performs&nbsp;either&nbsp;a&nbsp;split&nbsp;or&nbsp;merge&nbsp;operation.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_split_move:&nbsp;Splits&nbsp;a&nbsp;partition&nbsp;into&nbsp;two.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_join_move:&nbsp;Merges&nbsp;two&nbsp;adjacent&nbsp;partitions.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_node_to_existing_partition:&nbsp;Moves&nbsp;a&nbsp;node&nbsp;to&nbsp;an&nbsp;existing&nbsp;partition.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_node_to_new_partition:&nbsp;Moves&nbsp;a&nbsp;node&nbsp;to&nbsp;a&nbsp;new&nbsp;partition.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_move_node_to_existing_or_new_partition:&nbsp;Moves&nbsp;a&nbsp;node&nbsp;to&nbsp;either&nbsp;an&nbsp;existing&nbsp;or&nbsp;new&nbsp;partition.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_compute_neighborhoods_new_existing_partition:&nbsp;Computes&nbsp;neighborhoods&nbsp;for&nbsp;new&nbsp;and&nbsp;existing&nbsp;partitions.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_calculate_join_possibilities:&nbsp;Calculates&nbsp;join&nbsp;possibilities&nbsp;for&nbsp;nodes.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_calculate_partition_transitions:&nbsp;Calculates&nbsp;partition&nbsp;transition&nbsp;possibilities.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_possible_splits_joins:&nbsp;Calculates&nbsp;possible&nbsp;splits&nbsp;and&nbsp;joins.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_possible_permutations_neighbors:&nbsp;Calculates&nbsp;permutations&nbsp;for&nbsp;neighboring&nbsp;partitions.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;_possible_permutations:&nbsp;Calculates&nbsp;permutations&nbsp;for&nbsp;all&nbsp;partitions.</span></p>
 <p>
 <table class="section">
 <tr class="decor pkg-content-decor heading-text">
@@ -77,16 +104,35 @@ Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;blacklist&nbsp;(numpy.ndarray):&nbsp;mask&nbsp;for&nbsp;edges&nbsp;to&nbsp;ignore&nbsp;in&nbsp;the&nbsp;proposal<br>
 &nbsp;&nbsp;&nbsp;&nbsp;whitelist&nbsp;(numpy.ndarray):&nbsp;mask&nbsp;for&nbsp;edges&nbsp;to&nbsp;include&nbsp;in&nbsp;the&nbsp;proposal</span></dd></dl>
 
-<dl><dt><a name="PartitionProposal-accept"><strong>accept</strong></a>(self)</dt></dl>
+<dl><dt><a name="PartitionProposal-accept"><strong>accept</strong></a>(self)</dt><dd><span class="code">Accepts&nbsp;the&nbsp;proposed&nbsp;state&nbsp;and&nbsp;updates&nbsp;the&nbsp;current&nbsp;state.</span></dd></dl>
 
-<dl><dt><a name="PartitionProposal-compute_acceptance_ratio"><strong>compute_acceptance_ratio</strong></a>(self, current_state_score, proposed_state_score)</dt></dl>
+<dl><dt><a name="PartitionProposal-compute_acceptance_ratio"><strong>compute_acceptance_ratio</strong></a>(self, current_state_score, proposed_state_score)</dt><dd><span class="code">Computes&nbsp;the&nbsp;acceptance&nbsp;ratio&nbsp;for&nbsp;the&nbsp;proposed&nbsp;state.<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;current_state_score&nbsp;(float):&nbsp;The&nbsp;score&nbsp;of&nbsp;the&nbsp;current&nbsp;state.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;proposed_state_score&nbsp;(float):&nbsp;The&nbsp;score&nbsp;of&nbsp;the&nbsp;proposed&nbsp;state.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;float:&nbsp;The&nbsp;acceptance&nbsp;ratio,&nbsp;capped&nbsp;at&nbsp;0.</span></dd></dl>
 
-<dl><dt><a name="PartitionProposal-compute_neighborhoods"><strong>compute_neighborhoods</strong></a>(self, state)</dt><dd><span class="code">Compute&nbsp;the&nbsp;number&nbsp;of&nbsp;neighborhoods&nbsp;of&nbsp;an&nbsp;ordered&nbsp;partiion&nbsp;by&nbsp;using&nbsp;the&nbsp;equation<br>
-sum_{i=1}^{m}&nbsp;(&nbsp;sum_{c=1}^{k_i-1}&nbsp;(&nbsp;comb(&nbsp;k_i,&nbsp;c)&nbsp;)&nbsp;)&nbsp;+&nbsp;m&nbsp;-&nbsp;1</span></dd></dl>
+<dl><dt><a name="PartitionProposal-compute_neighborhoods"><strong>compute_neighborhoods</strong></a>(self, state)</dt><dd><span class="code">Computes&nbsp;the&nbsp;number&nbsp;of&nbsp;neighborhoods&nbsp;of&nbsp;an&nbsp;ordered&nbsp;partiion&nbsp;by&nbsp;using&nbsp;the&nbsp;equation<br>
+sum_{i=1}^{m}&nbsp;(&nbsp;sum_{c=1}^{k_i-1}&nbsp;(&nbsp;comb(&nbsp;k_i,&nbsp;c)&nbsp;)&nbsp;)&nbsp;+&nbsp;m&nbsp;-&nbsp;1<br>
+&nbsp;<br>
+Args:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;state&nbsp;(OrderedPartition):&nbsp;The&nbsp;state&nbsp;for&nbsp;which&nbsp;neighborhoods&nbsp;are&nbsp;computed.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tuple:&nbsp;A&nbsp;tuple&nbsp;containing&nbsp;the&nbsp;total&nbsp;number&nbsp;of&nbsp;neighborhoods&nbsp;and&nbsp;a&nbsp;list&nbsp;of&nbsp;combinations.</span></dd></dl>
 
-<dl><dt><a name="PartitionProposal-get_nodes_to_rescore"><strong>get_nodes_to_rescore</strong></a>(self)</dt></dl>
+<dl><dt><a name="PartitionProposal-get_nodes_to_rescore"><strong>get_nodes_to_rescore</strong></a>(self)</dt><dd><span class="code">Returns&nbsp;the&nbsp;nodes&nbsp;that&nbsp;need&nbsp;to&nbsp;be&nbsp;rescored.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set:&nbsp;A&nbsp;set&nbsp;of&nbsp;nodes&nbsp;to&nbsp;be&nbsp;rescored.</span></dd></dl>
 
-<dl><dt><a name="PartitionProposal-propose"><strong>propose</strong></a>(self)</dt><dd><span class="code">Propose&nbsp;a&nbsp;DAG</span></dd></dl>
+<dl><dt><a name="PartitionProposal-propose"><strong>propose</strong></a>(self)</dt><dd><span class="code">Proposes&nbsp;a&nbsp;new&nbsp;state&nbsp;by&nbsp;applying&nbsp;one&nbsp;of&nbsp;the&nbsp;defined&nbsp;operations.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tuple:&nbsp;A&nbsp;tuple&nbsp;containing&nbsp;the&nbsp;proposed&nbsp;state&nbsp;and&nbsp;the&nbsp;operation&nbsp;applied.</span></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>

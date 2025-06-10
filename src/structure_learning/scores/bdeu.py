@@ -1,3 +1,12 @@
+"""
+This module implements the BDeuScore class, which calculates the Bayesian Dirichlet equivalent uniform (BDeu) score for a given graph structure.
+
+The BDeu score is used in Bayesian network structure learning to evaluate the fit of a graph to a dataset. It considers the conditional probabilities of nodes given their parents and incorporates a prior distribution controlled by the alpha parameter.
+
+Classes:
+    BDeuScore: Computes the BDeu score for a graph structure based on the provided data.
+"""
+
 from typing import Union
 from functools import cache
 import networkx as nx

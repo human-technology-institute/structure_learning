@@ -34,21 +34,21 @@
           class DAG {
             compute_ancestor_matrix(adj_matrix)
             count_dags(n: int) int
-            generate_all_dags(n_nodes: int, node_labels: List[str]) List[Type[D]]
-            generate_random(nodes: Union[List[str], Tuple[str]], prob, seed)
+            generate_all_dags(n_nodes, node_labels)
+            generate_random(nodes, prob, seed)
             to_cpdag()
           }
           class Data {
             BINARY_TYPE : str
+            CATEGORICAL_TYPE : str
             CONTINUOUS_TYPE : str
-            MULTINOMIAL_TYPE : str
             ORDINAL_TYPE : str
             columns
             shape
             values : DataFrame
             variable_types
             variables : NoneType, list
-            k_fold(k)*
+            k_fold(k, shuffle, seed)
             normalise(variables: List)
           }
           class Distribution {

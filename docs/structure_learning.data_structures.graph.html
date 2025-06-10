@@ -26,7 +26,11 @@
 <tr class="heading-text decor">
 <td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.data_structures.html" class="white">data_structures</a>.graph</strong></td>
 <td class="extra"><a href=".">index</a><br><a href="file:/Users/165421/Documents/code/structure_learning/src/structure_learning/data_structures/graph.py">/Users/165421/Documents/code/structure_learning/src/structure_learning/data_structures/graph.py</a></td></tr></table>
-    <p></p>
+    <p><span class="code">This&nbsp;module&nbsp;provides&nbsp;the&nbsp;<a href="#Graph">Graph</a>&nbsp;class&nbsp;and&nbsp;associated&nbsp;methods&nbsp;for&nbsp;representing&nbsp;and&nbsp;manipulating&nbsp;graph&nbsp;structures.<br>
+&nbsp;<br>
+The&nbsp;<a href="#Graph">Graph</a>&nbsp;class&nbsp;supports&nbsp;operations&nbsp;such&nbsp;as&nbsp;adding/removing&nbsp;nodes&nbsp;and&nbsp;edges,&nbsp;finding&nbsp;parent&nbsp;nodes,&nbsp;converting&nbsp;between&nbsp;different&nbsp;graph&nbsp;representations&nbsp;(numpy,&nbsp;pandas,&nbsp;networkx),&nbsp;and&nbsp;visualizing&nbsp;graphs.<br>
+&nbsp;<br>
+It&nbsp;also&nbsp;includes&nbsp;utility&nbsp;methods&nbsp;for&nbsp;checking&nbsp;graph&nbsp;properties&nbsp;like&nbsp;cycles&nbsp;and&nbsp;performing&nbsp;edge&nbsp;operations.</span></p>
 <p>
 <table class="section">
 <tr class="decor pkg-content-decor heading-text">
@@ -64,110 +68,225 @@
 Class&nbsp;wrapper&nbsp;for&nbsp;graphs.<br>&nbsp;</span></td></tr>
 <tr><td>&nbsp;</td>
 <td class="singlecolumn">Methods defined here:<br>
-<dl><dt><a name="Graph-__eq__"><strong>__eq__</strong></a>(self, g: Type[ForwardRef('G')])</dt><dd><span class="code">Return&nbsp;self==value.</span></dd></dl>
+<dl><dt><a name="Graph-__eq__"><strong>__eq__</strong></a>(self, g: Type[ForwardRef('G')])</dt><dd><span class="code">Checks&nbsp;equality&nbsp;of&nbsp;two&nbsp;<a href="#Graph">Graph</a>&nbsp;objects.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;g&nbsp;(<a href="#Graph">Graph</a>):&nbsp;Another&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;if&nbsp;the&nbsp;graphs&nbsp;are&nbsp;equal,&nbsp;False&nbsp;otherwise.</span></dd></dl>
 
 <dl><dt><a name="Graph-__init__"><strong>__init__</strong></a>(self, incidence: Union[numpy.ndarray, pandas.core.frame.DataFrame] = None, nodes: Union[List, Tuple] = None, weights: Union[numpy.ndarray, pandas.core.frame.DataFrame] = None)</dt><dd><span class="code">Initialise&nbsp;a&nbsp;graph&nbsp;instance.<br>
 &nbsp;<br>
 Parameters:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;incidence&nbsp;(np.ndarray&nbsp;|&nbsp;pd.DataFrame):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;adjacency&nbsp;matrix<br>
-&nbsp;&nbsp;&nbsp;&nbsp;nodes&nbsp;(list&nbsp;|&nbsp;tuple):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;node&nbsp;labels.&nbsp;If&nbsp;incidence&nbsp;is&nbsp;a&nbsp;dataframe,&nbsp;this&nbsp;parameter&nbsp;is&nbsp;ignored.</span></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;incidence&nbsp;(np.ndarray&nbsp;|&nbsp;pd.DataFrame):&nbsp;Adjacency&nbsp;matrix&nbsp;representing&nbsp;the&nbsp;graph&nbsp;structure.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nodes&nbsp;(list&nbsp;|&nbsp;tuple):&nbsp;Node&nbsp;labels.&nbsp;If&nbsp;incidence&nbsp;is&nbsp;a&nbsp;DataFrame,&nbsp;this&nbsp;parameter&nbsp;is&nbsp;ignored.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;weights&nbsp;(np.ndarray&nbsp;|&nbsp;pd.DataFrame):&nbsp;Edge&nbsp;weights.&nbsp;Defaults&nbsp;to&nbsp;the&nbsp;adjacency&nbsp;matrix&nbsp;if&nbsp;not&nbsp;provided.</span></dd></dl>
 
-<dl><dt><a name="Graph-__mul__"><strong>__mul__</strong></a>(self, g: Type[ForwardRef('G')])</dt><dd><span class="code">#&nbsp;arithmetic</span></dd></dl>
-
-<dl><dt><a name="Graph-__rmul__"><strong>__rmul__</strong></a>(self, g: Type[ForwardRef('G')])</dt></dl>
-
-<dl><dt><a name="Graph-__str__"><strong>__str__</strong></a>(self)</dt><dd><span class="code">Convert&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;string.</span></dd></dl>
-
-<dl><dt><a name="Graph-add_edge"><strong>add_edge</strong></a>(self, edge: Union[List[str], Tuple[str]])</dt><dd><span class="code">Add&nbsp;an&nbsp;edge&nbsp;to&nbsp;graph.</span></dd></dl>
-
-<dl><dt><a name="Graph-add_edges"><strong>add_edges</strong></a>(self, edges: Union[List[Tuple], Tuple[Tuple]])</dt><dd><span class="code">Add&nbsp;edges&nbsp;to&nbsp;graph.</span></dd></dl>
-
-<dl><dt><a name="Graph-add_node"><strong>add_node</strong></a>(self, node: str)</dt><dd><span class="code">Add&nbsp;node&nbsp;to&nbsp;graph.</span></dd></dl>
-
-<dl><dt><a name="Graph-add_nodes"><strong>add_nodes</strong></a>(self, nodes: Union[List[str], Tuple[str]])</dt><dd><span class="code">Add&nbsp;nodes&nbsp;to&nbsp;graph.</span></dd></dl>
-
-<dl><dt><a name="Graph-compare"><strong>compare</strong></a>(self, other: Type[~Graph], operation: str)</dt><dd><span class="code">Checks&nbsp;edge&nbsp;operation&nbsp;on&nbsp;two&nbsp;adjacency&nbsp;matrices.<br>
+<dl><dt><a name="Graph-__mul__"><strong>__mul__</strong></a>(self, g: Type[ForwardRef('G')])</dt><dd><span class="code">Multiplies&nbsp;two&nbsp;<a href="#Graph">Graph</a>&nbsp;objects&nbsp;element-wise.<br>
 &nbsp;<br>
 Parameters:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;other&nbsp;(<a href="#Graph">Graph</a>):&nbsp;graph&nbsp;to&nbsp;compare&nbsp;with<br>
-&nbsp;&nbsp;&nbsp;&nbsp;operation&nbsp;(str):&nbsp;edge&nbsp;operation&nbsp;[add_edge,&nbsp;delete_edge,&nbsp;reverse_edge]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;g&nbsp;(<a href="#Graph">Graph</a>):&nbsp;Another&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(str)|(list&nbsp;(str)):&nbsp;label(s)&nbsp;of&nbsp;node(s)&nbsp;connected&nbsp;to&nbsp;relevant&nbsp;edge(s)<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;under&nbsp;specified&nbsp;operation,&nbsp;or&nbsp;error&nbsp;message</span></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Graph">Graph</a>:&nbsp;Resulting&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.</span></dd></dl>
 
-<dl><dt><a name="Graph-find_parents"><strong>find_parents</strong></a>(self, node, return_index=False)</dt></dl>
-
-<dl><dt><a name="Graph-from_key"><strong>from_key</strong></a>(key: str, type: str = 'default', nodes: Union[List, Tuple, numpy.ndarray] = None) -&gt; Type[~Graph]</dt><dd><span class="code">Create&nbsp;graph&nbsp;from&nbsp;key.<br>
+<dl><dt><a name="Graph-__rmul__"><strong>__rmul__</strong></a>(self, g: Type[ForwardRef('G')])</dt><dd><span class="code">Multiplies&nbsp;two&nbsp;<a href="#Graph">Graph</a>&nbsp;objects&nbsp;element-wise&nbsp;(reverse&nbsp;operation).<br>
 &nbsp;<br>
 Parameters:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;key&nbsp;(str):&nbsp;string&nbsp;representation&nbsp;of&nbsp;the&nbsp;graph<br>
-&nbsp;&nbsp;&nbsp;&nbsp;type:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;nodes&nbsp;(list&nbsp;|&nbsp;tuple&nbsp;|&nbsp;np.ndarray):&nbsp;list&nbsp;of&nbsp;nodes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;g&nbsp;(<a href="#Graph">Graph</a>):&nbsp;Another&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.<br>
+&nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray)</span></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Graph">Graph</a>:&nbsp;Resulting&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.</span></dd></dl>
+
+<dl><dt><a name="Graph-__str__"><strong>__str__</strong></a>(self)</dt><dd><span class="code">Converts&nbsp;the&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;a&nbsp;string&nbsp;representation.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;String&nbsp;representation&nbsp;of&nbsp;the&nbsp;graph.</span></dd></dl>
+
+<dl><dt><a name="Graph-add_edge"><strong>add_edge</strong></a>(self, edge: Union[List[str], Tuple[str]])</dt><dd><span class="code">Adds&nbsp;a&nbsp;single&nbsp;edge&nbsp;to&nbsp;the&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;edge&nbsp;(list&nbsp;|&nbsp;tuple):&nbsp;Edge&nbsp;represented&nbsp;as&nbsp;a&nbsp;tuple&nbsp;(node1,&nbsp;node2).</span></dd></dl>
+
+<dl><dt><a name="Graph-add_edges"><strong>add_edges</strong></a>(self, edges: Union[List[Tuple], Tuple[Tuple]])</dt><dd><span class="code">Adds&nbsp;multiple&nbsp;edges&nbsp;to&nbsp;the&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;edges&nbsp;(list&nbsp;|&nbsp;tuple):&nbsp;List&nbsp;or&nbsp;tuple&nbsp;of&nbsp;edges,&nbsp;each&nbsp;represented&nbsp;as&nbsp;a&nbsp;tuple&nbsp;(node1,&nbsp;node2).</span></dd></dl>
+
+<dl><dt><a name="Graph-add_node"><strong>add_node</strong></a>(self, node: str)</dt><dd><span class="code">Adds&nbsp;a&nbsp;single&nbsp;node&nbsp;to&nbsp;the&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node&nbsp;(str):&nbsp;Node&nbsp;label.</span></dd></dl>
+
+<dl><dt><a name="Graph-add_nodes"><strong>add_nodes</strong></a>(self, nodes: Union[List[str], Tuple[str]])</dt><dd><span class="code">Adds&nbsp;multiple&nbsp;nodes&nbsp;to&nbsp;the&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nodes&nbsp;(list&nbsp;|&nbsp;tuple):&nbsp;List&nbsp;or&nbsp;tuple&nbsp;of&nbsp;node&nbsp;labels.</span></dd></dl>
+
+<dl><dt><a name="Graph-compare"><strong>compare</strong></a>(self, other: Type[~Graph], operation: str)</dt><dd><span class="code">Compares&nbsp;two&nbsp;<a href="#Graph">Graph</a>&nbsp;objects&nbsp;based&nbsp;on&nbsp;edge&nbsp;operations.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;other&nbsp;(<a href="#Graph">Graph</a>):&nbsp;Another&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;operation&nbsp;(str):&nbsp;Edge&nbsp;operation&nbsp;('add_edge',&nbsp;'delete_edge',&nbsp;'reverse_edge').<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;str&nbsp;|&nbsp;list:&nbsp;Labels&nbsp;of&nbsp;nodes&nbsp;connected&nbsp;to&nbsp;relevant&nbsp;edges&nbsp;under&nbsp;the&nbsp;specified&nbsp;operation,&nbsp;or&nbsp;an&nbsp;error&nbsp;message.</span></dd></dl>
+
+<dl><dt><a name="Graph-find_parents"><strong>find_parents</strong></a>(self, node, return_index=False)</dt><dd><span class="code">Finds&nbsp;the&nbsp;parent&nbsp;nodes&nbsp;of&nbsp;a&nbsp;given&nbsp;node.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node&nbsp;(str):&nbsp;The&nbsp;node&nbsp;for&nbsp;which&nbsp;to&nbsp;find&nbsp;parents.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return_index&nbsp;(bool):&nbsp;If&nbsp;True,&nbsp;return&nbsp;indices&nbsp;of&nbsp;parent&nbsp;nodes&nbsp;along&nbsp;with&nbsp;their&nbsp;labels.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;list&nbsp;|&nbsp;tuple:&nbsp;List&nbsp;of&nbsp;parent&nbsp;node&nbsp;labels,&nbsp;or&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;parent&nbsp;node&nbsp;labels&nbsp;and&nbsp;their&nbsp;indices&nbsp;if&nbsp;return_index&nbsp;is&nbsp;True.</span></dd></dl>
+
+<dl><dt><a name="Graph-from_key"><strong>from_key</strong></a>(key: str, type: str = 'default', nodes: Union[List, Tuple, numpy.ndarray] = None) -&gt; Type[~Graph]</dt><dd><span class="code">Creates&nbsp;a&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;from&nbsp;a&nbsp;key.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;key&nbsp;(str):&nbsp;String&nbsp;representation&nbsp;of&nbsp;the&nbsp;graph.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;type&nbsp;(str):&nbsp;Type&nbsp;of&nbsp;key.&nbsp;Defaults&nbsp;to&nbsp;'default'.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nodes&nbsp;(list&nbsp;|&nbsp;tuple&nbsp;|&nbsp;np.ndarray):&nbsp;Node&nbsp;labels.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Graph">Graph</a>:&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.</span></dd></dl>
 
 <dl><dt><a name="Graph-plot"><strong>plot</strong></a>(self, title='Graph', figsize=(5, 3), node_size=2000, node_color='skyblue', k=5)</dt><dd><span class="code">Plot&nbsp;a&nbsp;networkx&nbsp;graph.<br>
 &nbsp;<br>
 Parameters:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;(str):&nbsp;figure&nbsp;title<br>
-&nbsp;&nbsp;&nbsp;&nbsp;figsize&nbsp;(tuple&nbsp;(int)):&nbsp;figure&nbsp;size<br>
-&nbsp;&nbsp;&nbsp;&nbsp;node_size&nbsp;(int):&nbsp;node&nbsp;size<br>
-&nbsp;&nbsp;&nbsp;&nbsp;node_color&nbsp;(matplotlib.colors):&nbsp;node&nbsp;color<br>
-&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(int):&nbsp;distance&nbsp;between&nbsp;nodes</span></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;(str):&nbsp;Title&nbsp;of&nbsp;the&nbsp;plot.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;figsize&nbsp;(tuple):&nbsp;Size&nbsp;of&nbsp;the&nbsp;figure.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_size&nbsp;(int):&nbsp;Size&nbsp;of&nbsp;the&nbsp;nodes.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_color&nbsp;(str):&nbsp;Color&nbsp;of&nbsp;the&nbsp;nodes.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(int):&nbsp;Distance&nbsp;between&nbsp;nodes&nbsp;in&nbsp;the&nbsp;layout.</span></dd></dl>
 
-<dl><dt><a name="Graph-remove_edge"><strong>remove_edge</strong></a>(self, edge: Union[List, Tuple])</dt><dd><span class="code">Remove&nbsp;an&nbsp;edge&nbsp;from&nbsp;graph.</span></dd></dl>
-
-<dl><dt><a name="Graph-remove_edges"><strong>remove_edges</strong></a>(self, edges: Union[List[Tuple], Tuple[Tuple]])</dt><dd><span class="code">Remove&nbsp;edges&nbsp;from&nbsp;graph.</span></dd></dl>
-
-<dl><dt><a name="Graph-remove_node"><strong>remove_node</strong></a>(self, node: str)</dt><dd><span class="code">Remove&nbsp;node&nbsp;from&nbsp;graph.</span></dd></dl>
-
-<dl><dt><a name="Graph-remove_nodes"><strong>remove_nodes</strong></a>(self, nodes: Union[List[str], Tuple[str]])</dt><dd><span class="code">Remove&nbsp;nodes&nbsp;from&nbsp;graph.</span></dd></dl>
-
-<dl><dt><a name="Graph-to_csv"><strong>to_csv</strong></a>(self, filename)</dt><dd><span class="code">#&nbsp;I/O</span></dd></dl>
-
-<dl><dt><a name="Graph-to_key"><strong>to_key</strong></a>(self, type: str = 'default')</dt><dd><span class="code">Create&nbsp;key&nbsp;for&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.<br>
+<dl><dt><a name="Graph-remove_edge"><strong>remove_edge</strong></a>(self, edge: Union[List, Tuple])</dt><dd><span class="code">Removes&nbsp;a&nbsp;single&nbsp;edge&nbsp;from&nbsp;the&nbsp;graph.<br>
 &nbsp;<br>
 Parameters:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;type&nbsp;(str):&nbsp;type&nbsp;of&nbsp;key&nbsp;to&nbsp;use</span></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;edge&nbsp;(list&nbsp;|&nbsp;tuple):&nbsp;Edge&nbsp;represented&nbsp;as&nbsp;a&nbsp;tuple&nbsp;(node1,&nbsp;node2).</span></dd></dl>
 
-<dl><dt><a name="Graph-to_numpy"><strong>to_numpy</strong></a>(self, return_node_labels=False)</dt><dd><span class="code">Convert&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;numpy&nbsp;array.</span></dd></dl>
+<dl><dt><a name="Graph-remove_edges"><strong>remove_edges</strong></a>(self, edges: Union[List[Tuple], Tuple[Tuple]])</dt><dd><span class="code">Removes&nbsp;multiple&nbsp;edges&nbsp;from&nbsp;the&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;edges&nbsp;(list&nbsp;|&nbsp;tuple):&nbsp;List&nbsp;or&nbsp;tuple&nbsp;of&nbsp;edges,&nbsp;each&nbsp;represented&nbsp;as&nbsp;a&nbsp;tuple&nbsp;(node1,&nbsp;node2).</span></dd></dl>
 
-<dl><dt><a name="Graph-to_nx"><strong>to_nx</strong></a>(self)</dt><dd><span class="code">Convert&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;networkx&nbsp;DiGraph.</span></dd></dl>
+<dl><dt><a name="Graph-remove_node"><strong>remove_node</strong></a>(self, node: str)</dt><dd><span class="code">Removes&nbsp;a&nbsp;single&nbsp;node&nbsp;from&nbsp;the&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node&nbsp;(str):&nbsp;Node&nbsp;label.</span></dd></dl>
 
-<dl><dt><a name="Graph-to_pandas"><strong>to_pandas</strong></a>(self)</dt><dd><span class="code">Convert&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;Pandas&nbsp;Dataframe.</span></dd></dl>
+<dl><dt><a name="Graph-remove_nodes"><strong>remove_nodes</strong></a>(self, nodes: Union[List[str], Tuple[str]])</dt><dd><span class="code">Removes&nbsp;multiple&nbsp;nodes&nbsp;from&nbsp;the&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nodes&nbsp;(list&nbsp;|&nbsp;tuple):&nbsp;List&nbsp;or&nbsp;tuple&nbsp;of&nbsp;node&nbsp;labels.</span></dd></dl>
 
-<dl><dt><a name="Graph-v_structures"><strong>v_structures</strong></a>(self)</dt></dl>
+<dl><dt><a name="Graph-to_csv"><strong>to_csv</strong></a>(self, filename)</dt><dd><span class="code">Saves&nbsp;the&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;a&nbsp;CSV&nbsp;file.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(str):&nbsp;Path&nbsp;to&nbsp;the&nbsp;output&nbsp;CSV&nbsp;file.</span></dd></dl>
+
+<dl><dt><a name="Graph-to_key"><strong>to_key</strong></a>(self, type: str = 'default')</dt><dd><span class="code">Creates&nbsp;a&nbsp;key&nbsp;for&nbsp;the&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;type&nbsp;(str):&nbsp;Type&nbsp;of&nbsp;key&nbsp;to&nbsp;use.&nbsp;Defaults&nbsp;to&nbsp;'default'.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;str:&nbsp;Key&nbsp;representing&nbsp;the&nbsp;graph.</span></dd></dl>
+
+<dl><dt><a name="Graph-to_numpy"><strong>to_numpy</strong></a>(self, return_node_labels=False)</dt><dd><span class="code">Converts&nbsp;the&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;a&nbsp;numpy&nbsp;array.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return_node_labels&nbsp;(bool):&nbsp;If&nbsp;True,&nbsp;return&nbsp;node&nbsp;labels&nbsp;along&nbsp;with&nbsp;the&nbsp;adjacency&nbsp;matrix.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;np.ndarray&nbsp;|&nbsp;tuple:&nbsp;Adjacency&nbsp;matrix,&nbsp;or&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;the&nbsp;adjacency&nbsp;matrix&nbsp;and&nbsp;node&nbsp;labels.</span></dd></dl>
+
+<dl><dt><a name="Graph-to_nx"><strong>to_nx</strong></a>(self)</dt><dd><span class="code">Converts&nbsp;the&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;a&nbsp;networkx&nbsp;DiGraph.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nx.DiGraph:&nbsp;networkx&nbsp;DiGraph&nbsp;<a href="builtins.html#object">object</a>.</span></dd></dl>
+
+<dl><dt><a name="Graph-to_pandas"><strong>to_pandas</strong></a>(self)</dt><dd><span class="code">Converts&nbsp;the&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;a&nbsp;Pandas&nbsp;DataFrame.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pd.DataFrame:&nbsp;DataFrame&nbsp;representing&nbsp;the&nbsp;adjacency&nbsp;matrix.</span></dd></dl>
+
+<dl><dt><a name="Graph-v_structures"><strong>v_structures</strong></a>(self)</dt><dd><span class="code">Identifies&nbsp;v-structures&nbsp;in&nbsp;the&nbsp;graph.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set:&nbsp;Set&nbsp;of&nbsp;v-structures&nbsp;represented&nbsp;as&nbsp;tuples&nbsp;(node1,&nbsp;node2,&nbsp;node3).</span></dd></dl>
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="Graph-find_parent_nodes"><strong>find_parent_nodes</strong></a>(incidence)</dt><dd><span class="code">Find&nbsp;parent&nbsp;nodes&nbsp;(nodes&nbsp;with&nbsp;no&nbsp;incoming&nbsp;edges).</span></dd></dl>
-
-<dl><dt><a name="Graph-from_csv"><strong>from_csv</strong></a>(filename)</dt></dl>
-
-<dl><dt><a name="Graph-from_numpy"><strong>from_numpy</strong></a>(incidence: numpy.ndarray, nodes: Union[List, Tuple, numpy.ndarray]) -&gt; Type[~Graph]</dt><dd><span class="code">Create&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;from&nbsp;numpy&nbsp;array.</span></dd></dl>
-
-<dl><dt><a name="Graph-from_nx"><strong>from_nx</strong></a>(graph: networkx.classes.digraph.DiGraph) -&gt; Type[~Graph]</dt><dd><span class="code">Create&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;from&nbsp;networkx&nbsp;graph.</span></dd></dl>
-
-<dl><dt><a name="Graph-from_pandas"><strong>from_pandas</strong></a>(graph: pandas.core.frame.DataFrame) -&gt; Type[~Graph]</dt><dd><span class="code">Create&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;from&nbsp;Pandas&nbsp;DataFrame.</span></dd></dl>
-
-<dl><dt><a name="Graph-has_cycle"><strong>has_cycle</strong></a>(graph: Union[numpy.ndarray, Type[~Graph]]) -&gt; bool</dt><dd><span class="code">Check&nbsp;if&nbsp;the&nbsp;graph&nbsp;represented&nbsp;by&nbsp;the&nbsp;adjacency&nbsp;matrix&nbsp;has&nbsp;a&nbsp;cycle.<br>
+<dl><dt><a name="Graph-find_parent_nodes"><strong>find_parent_nodes</strong></a>(incidence)</dt><dd><span class="code">Finds&nbsp;parent&nbsp;nodes&nbsp;(nodes&nbsp;with&nbsp;no&nbsp;incoming&nbsp;edges).<br>
 &nbsp;<br>
 Parameters:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;graph&nbsp;(numpy.ndarray):&nbsp;adjacency&nbsp;matrix&nbsp;of&nbsp;the&nbsp;graph<br>
+&nbsp;&nbsp;&nbsp;&nbsp;incidence&nbsp;(np.ndarray):&nbsp;Adjacency&nbsp;matrix.<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;(bool):&nbsp;True&nbsp;if&nbsp;the&nbsp;graph&nbsp;has&nbsp;a&nbsp;cycle,&nbsp;False&nbsp;otherwise</span></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;set:&nbsp;Set&nbsp;of&nbsp;parent&nbsp;node&nbsp;indices.</span></dd></dl>
+
+<dl><dt><a name="Graph-from_csv"><strong>from_csv</strong></a>(filename)</dt><dd><span class="code">Creates&nbsp;a&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;from&nbsp;a&nbsp;CSV&nbsp;file.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(str):&nbsp;Path&nbsp;to&nbsp;the&nbsp;input&nbsp;CSV&nbsp;file.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Graph">Graph</a>:&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.</span></dd></dl>
+
+<dl><dt><a name="Graph-from_numpy"><strong>from_numpy</strong></a>(incidence: numpy.ndarray, nodes: Union[List, Tuple, numpy.ndarray]) -&gt; Type[~Graph]</dt><dd><span class="code">Creates&nbsp;a&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;from&nbsp;a&nbsp;numpy&nbsp;array.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;incidence&nbsp;(np.ndarray):&nbsp;Adjacency&nbsp;matrix.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nodes&nbsp;(list&nbsp;|&nbsp;tuple&nbsp;|&nbsp;np.ndarray):&nbsp;Node&nbsp;labels.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Graph">Graph</a>:&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.</span></dd></dl>
+
+<dl><dt><a name="Graph-from_nx"><strong>from_nx</strong></a>(graph: networkx.classes.digraph.DiGraph) -&gt; Type[~Graph]</dt><dd><span class="code">Creates&nbsp;a&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;from&nbsp;a&nbsp;networkx&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;graph&nbsp;(nx.DiGraph):&nbsp;networkx&nbsp;DiGraph&nbsp;<a href="builtins.html#object">object</a>.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Graph">Graph</a>:&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.</span></dd></dl>
+
+<dl><dt><a name="Graph-from_pandas"><strong>from_pandas</strong></a>(graph: pandas.core.frame.DataFrame) -&gt; Type[~Graph]</dt><dd><span class="code">Creates&nbsp;a&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;from&nbsp;a&nbsp;Pandas&nbsp;DataFrame.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;graph&nbsp;(pd.DataFrame):&nbsp;DataFrame&nbsp;representing&nbsp;the&nbsp;adjacency&nbsp;matrix.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Graph">Graph</a>:&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.</span></dd></dl>
+
+<dl><dt><a name="Graph-has_cycle"><strong>has_cycle</strong></a>(graph: Union[numpy.ndarray, Type[~Graph]]) -&gt; bool</dt><dd><span class="code">Checks&nbsp;if&nbsp;the&nbsp;graph&nbsp;has&nbsp;a&nbsp;cycle.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;graph&nbsp;(np.ndarray&nbsp;|&nbsp;<a href="#Graph">Graph</a>):&nbsp;Adjacency&nbsp;matrix&nbsp;or&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;if&nbsp;the&nbsp;graph&nbsp;has&nbsp;a&nbsp;cycle,&nbsp;False&nbsp;otherwise.</span></dd></dl>
 
 <hr>
 Readonly properties defined here:<br>
 <dl><dt><strong>dim</strong></dt>
-<dd><span class="code">Returns&nbsp;the&nbsp;number&nbsp;of&nbsp;nodes&nbsp;in&nbsp;the&nbsp;Graph&nbsp;object</span></dd>
+<dd><span class="code">Returns&nbsp;the&nbsp;number&nbsp;of&nbsp;nodes&nbsp;in&nbsp;the&nbsp;Graph&nbsp;object.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;int:&nbsp;Number&nbsp;of&nbsp;nodes.</span></dd>
 </dl>
 <dl><dt><strong>edges</strong></dt>
-<dd><span class="code">Returns&nbsp;list&nbsp;of&nbsp;edges</span></dd>
+<dd><span class="code">Returns&nbsp;the&nbsp;list&nbsp;of&nbsp;edges&nbsp;in&nbsp;the&nbsp;graph.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set:&nbsp;Set&nbsp;of&nbsp;edges&nbsp;represented&nbsp;as&nbsp;tuples&nbsp;(node1,&nbsp;node2).</span></dd>
 </dl>
 <dl><dt><strong>shape</strong></dt>
+<dd><span class="code">Returns&nbsp;the&nbsp;shape&nbsp;of&nbsp;the&nbsp;adjacency&nbsp;matrix.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tuple:&nbsp;Shape&nbsp;of&nbsp;the&nbsp;adjacency&nbsp;matrix&nbsp;(rows,&nbsp;columns).</span></dd>
 </dl>
 <hr>
 Data descriptors defined here:<br>

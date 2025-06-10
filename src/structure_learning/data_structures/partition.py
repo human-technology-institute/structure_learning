@@ -1,3 +1,9 @@
+"""
+partition.py
+
+This module defines the Partition and OrderedPartition classes for representing and manipulating partitions of nodes, including visualization and conversion utilities. It provides methods for creating, modifying, and visualizing partitions, as well as constructing partitions from graphs, numpy arrays, and string representations.
+"""
+
 from typing import List
 import seaborn as sns
 import numpy as np
@@ -6,67 +12,128 @@ import matplotlib.patches as patches
 from .graph import Graph
 
 class Partition:
-
+    """
+    Represents a single partition of nodes.
+    """
     def __init__(self, ID : int, nodes : set ):
+        """
+        Initialize a Partition with an ID and a set of nodes.
+        Args:
+            ID (int): Partition identifier.
+            nodes (set): Set of node labels.
+        """
         self.ID = ID
         self._nodes = nodes
 
     @property
     def size(self):
+        """
+        Returns the number of nodes in the partition.
+        """
         return len(self.nodes)
 
     @property
     def nodes(self):
+        """
+        Returns the set of nodes in the partition.
+        """
         return self._nodes
 
     @nodes.setter
     def nodes(self, n):
+        """
+        Set the nodes of the partition.
+        Args:
+            n (set): New set of nodes.
+        """
         self._nodes = n
 
     def copy(self):
+        """
+        Return a deep copy of the partition.
+        """
         return Partition(self.ID, self.nodes.copy())
 
     def remove_single_node(self, node : str):
+        """
+        Remove a single node from the partition.
+        Args:
+            node (str): Node label to remove.
+        """
         self.nodes.remove(node)
 
     def remove_nodes(self, nodes : set):
+        """
+        Remove multiple nodes from the partition.
+        Args:
+            nodes (set): Set of node labels to remove.
+        """
         self.nodes = self.nodes.difference(nodes)
 
     def add_single_node(self, node : str):
+        """
+        Add a single node to the partition.
+        Args:
+            node (str): Node label to add.
+        """
         self.nodes.add(node)
 
     def add_nodes(self, nodes : set):
+        """
+        Add multiple nodes to the partition.
+        Args:
+            nodes (set): Set of node labels to add.
+        """
         self.nodes = self.nodes.union(nodes)
 
     def replace_partition(self, new_partition):
+        """
+        Replace the current partition with another partition.
+        Args:
+            new_partition (Partition): Partition to copy from.
+        """
         self.nodes = new_partition.nodes
         self.ID = new_partition.get_ID()
 
     def get_ID(self):
+        """
+        Return the partition's ID.
+        """
         return self.ID
 
     def set_ID(self, ID):
+        """
+        Set the partition's ID.
+        Args:
+            ID (int): New partition ID.
+        """
         self.ID = ID
 
     def set_ID(self, ID):
+        """
+        Set the partition's ID.
+        Args:
+            ID (int): New partition ID.
+        """
         self.ID = ID
 
     def __str__(self):
+        """
+        Return a string representation of the partition.
+        """
         return f"{self.nodes}"
 
     def info(self):
+        """
+        Print information about the partition.
+        """
         print(f"Partition ID {self.get_ID()}: {self.nodes} | Size: {self.size} " )
 
     def plot(self, fig_size=(2.7, 6)):
         """
-        Visualizes the given partition with an optimized layout, reducing the plot area outside the rectangle.
-        The nodes are plotted as circles vertically aligned inside a slimmer rectangle.
-        The partition ID and size are displayed at the top of the rectangle.
-        Allows control over the figure size through the fig_size parameter.
-
-        Parameters:
-            partition: An instance of the Partition class.
-            fig_size: A tuple (width, height) specifying the size of the figure.
+        Visualize the partition as a rectangle with nodes as circles.
+        Args:
+            fig_size (tuple): Figure size for matplotlib.
         """
         nodes = list(self.nodes)
         partition_id = self.get_ID()
@@ -107,44 +174,101 @@ class Partition:
         plt.show()
 
 class OrderedPartition:
+    """
+    Represents an ordered collection of Partition objects.
+    """
     def __init__(self, partitions: List[Partition]):
+        """
+        Initialize with a list of Partition objects.
+        Args:
+            partitions (list): List of Partition objects.
+        """
         self._partitions = partitions
 
     @property
     def size(self) -> int:
+        """
+        Return the number of partitions.
+        """
         return len(self.partitions)
 
     @property
     def all_nodes(self):
+        """
+        Return a set of all nodes in all partitions.
+        """
         return set.union(*(partition.nodes for partition in self.partitions))
 
     @property
     def partitions(self) -> List[Partition]:
+        """
+        Return the list of Partition objects.
+        """
         return self._partitions
 
     @partitions.setter
     def partitions(self, parts: list):
+        """
+        Set the list of Partition objects.
+        Args:
+            parts (list): List of Partition objects.
+        """
         self._partitions = parts
 
     def get_all_nodes_from_right(self, indx):
+        """
+        Return all nodes from partition at index `indx` to the end.
+        Args:
+            indx (int): Start index.
+        """
         return set.union(*(partition.nodes for partition in self.partitions[indx:]))
 
     def get_all_nodes_adj_right(self, indx):
+        """
+        Return all nodes in the partition at index `indx`.
+        Args:
+            indx (int): Index.
+        """
         return set.union(*(partition.nodes for partition in self.partitions[indx:indx+1]))
 
     def get_all_nodes_adj_left(self, indx):
+        """
+        Return all nodes in the partition at index `indx-1`.
+        Args:
+            indx (int): Index.
+        """
         return set.union(*(partition.nodes for partition in self.partitions[indx-1:indx]))
 
     def get_all_nodes_from_left(self, indx):
+        """
+        Return all nodes from the start up to (but not including) index `indx`.
+        Args:
+            indx (int): End index.
+        """
         return set.union(*(partition.nodes for partition in self.partitions[:indx]))
 
     def copy(self):
+        """
+        Return a deep copy of the OrderedPartition.
+        """
         return OrderedPartition([partition.copy() for partition in self.partitions])
 
     def replace_partition(self, new_partition : Partition, index : int):
+        """
+        Replace the partition at `index` with `new_partition`.
+        Args:
+            new_partition (Partition): Replacement partition.
+            index (int): Index to replace.
+        """
         self.partitions[index].replace_partition(new_partition)
 
     def add_node_to_partition(self, part_indx : int, node : str):
+        """
+        Add a node to the partition at `part_indx`.
+        Args:
+            part_indx (int): Partition index.
+            node (str): Node label.
+        """
 
         if part_indx < 0 or part_indx >= len(self.partitions):
             #print(f"Error: Attempt to access invalid partition index {part_indx} | {len(self.partitions)}.")
@@ -153,15 +277,29 @@ class OrderedPartition:
         self.partitions[part_indx].add_nodes(node)
 
     def remove_node_from_partition(self, part_id : int, node : str):
+        """
+        Remove a node from the partition at `part_id`.
+        Args:
+            part_id (int): Partition index.
+            node (str): Node label.
+        """
 
         self.partitions[part_id].remove_nodes(node)
         #if the partition is empty, delete it
         self.remove_partition(part_id) if self.partitions[part_id].size == 0 else self.partitions
 
     def remove_empty_partitions(self):
+        """
+        Remove all empty partitions from the collection.
+        """
         self.partitions = [partition for partition in self.partitions if partition.size > 0]
 
     def join_partition(self, part_id : int):
+        """
+        Join the partition at `part_id` with its left neighbor.
+        Args:
+            part_id (int): Partition index.
+        """
         # we always join to the left of the sampled partition id
         try:
             current_partition = self.get_partitions()[part_id]
@@ -178,6 +316,12 @@ class OrderedPartition:
         self.update_IDs()
 
     def insert_partition(self, part_id : int, nodes : set):
+        """
+        Insert a new partition at `part_id` with the given nodes.
+        Args:
+            part_id (int): Index to insert at.
+            nodes (set): Nodes for the new partition.
+        """
         new_partition = Partition(part_id, nodes)
         self.partitions.insert(part_id, new_partition)
         for new_id, partition in enumerate(self.get_partitions(), start=part_id):
@@ -185,46 +329,89 @@ class OrderedPartition:
         self.update_IDs()
 
     def remove_partition(self, part_id):
+        """
+        Remove the partition at `part_id`.
+        Args:
+            part_id (int): Partition index.
+        """
         self.partitions.remove(self.partitions[part_id])
         self.update_IDs()
 
     def find_node(self, node_label):
+        """
+        Return the index of the partition containing `node_label`, or None if not found.
+        Args:
+            node_label (str): Node label to search for.
+        """
         for index, partition in enumerate(self.partitions):
             if node_label in partition.nodes:
                 return index
         return None
 
     def get_all_nodes(self):
+        """
+        Return a set of all nodes in all partitions.
+        """
         return self.all_nodes
 
     def get_partition_by_indx(self, index):
+        """
+        Return the partition at the given index.
+        Args:
+            index (int): Partition index.
+        """
         return self.partitions[index]
 
     def get_partitions(self):
+        """
+        Return the list of Partition objects.
+        """
         return self.partitions
 
     def update_IDs (self):
+        """
+        Update the IDs of all partitions to be consecutive starting from 0.
+        """
         for new_id, partition in enumerate(self.get_partitions(), start=0):
             partition.set_ID(new_id)
 
     def __str__(self):
+        """
+        Return a string representation of the OrderedPartition.
+        """
         return ' '.join(str(partition) for partition in self.partitions)
 
     def print_partitions(self):
+        """
+        Return a string with all partitions.
+        """
         res = ' '.join(str(self.get_partitions()[i]) for i in range(len(self.get_partitions())))
         return res
 
     def info(self):
+        """
+        Print information about all partitions.
+        """
         for i in range(len(self.get_partitions())):
             print(f"Partition ID {self.get_partitions()[i].get_ID()}: {self.get_partitions()[i].nodes} | Size: {self.get_partitions()[i].size} | Partition Indx : {i}" )
 
     @classmethod
     def from_graph(cls, g: Graph):
-       return cls.from_numpy(g.incidence, g.nodes)
+        """
+        Create an OrderedPartition from a Graph object.
+        Args:
+            g (Graph): Graph instance.
+        """
+        return cls.from_numpy(g.incidence, g.nodes)
 
     @classmethod
     def from_numpy(cls, incidence: np.ndarray , node_labels : list):
-        """Partition the graph based on the connectivity."""
+        """
+        Create an OrderedPartition from an incidence matrix and node labels.
+        Args:
+            incidence (np.ndarray): Incidence matrix.
+            node_labels (list): List of node labels.
+        """
          
         partitions = []
 
@@ -255,6 +442,11 @@ class OrderedPartition:
     
     @classmethod
     def from_string(cls, string:str):
+        """
+        Create an OrderedPartition from a string representation.
+        Args:
+            string (str): String representation.
+        """
         tokens = string.split("} {")
         tokens = [ token.replace("{", "").replace("}", "") for token in tokens ]
         id = 0
@@ -265,7 +457,9 @@ class OrderedPartition:
         return OrderedPartition(partitions)
     
     def to_party_permy_posy(self):
-
+        """
+        Return the party, permy, and posy representations of the partition.
+        """
         num_partitions =  len(self.get_partitions())
 
         party = []
@@ -285,14 +479,10 @@ class OrderedPartition:
     
     def plot(self, fig_size=(2.7, 6), title = "Ordered Partition"):
         """
-        Visualizes a set of partition objects side by side with an optimized layout.
-        Each partition's nodes are plotted as circles vertically aligned inside a slimmer rectangle.
-        The partition ID and size are displayed at the top of each rectangle.
-        Allows control over the figure size through the fig_size parameter for each individual partition visualization.
-
+        Visualize all partitions side by side.
         Args:
-        - partitions: A list of Partition class instances to be visualized.
-        - fig_size: A tuple (width, height) specifying the size of the figure for each partition.
+            fig_size (tuple): Figure size for matplotlib.
+            title (str): Title for the plot.
         """
         partitions = self.get_partitions()
 
