@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 import igraph
-import pcalg
 from conditional_independence import partial_correlation_suffstat, partial_correlation_test
 import matplotlib.pyplot as plt
 
@@ -1044,57 +1043,3 @@ def indep_test_func(data, i, j, k):
     """
     suffstat = partial_correlation_suffstat(data)
     return partial_correlation_test(suffstat, i, j, k)['p_value']
-
-def cpdag_to_dag(cpdag):
-    """
-    Returns a DAG from a CPDAG
-    """
-    nodes = np.arange(cpdag.shape[0])
-    num_parents = cpdag.sum(axis=0)
-    idx = np.argsort(num_parents)
-    nodes = nodes[idx]
-
-    dag = cpdag.copy()
-    for i,node in enumerate(nodes):
-        for j,node2 in enumerate(nodes[i+1:]):
-            if cpdag[node,node2] == 1:
-                dag[node2,node] = 0
-
-    return dag
-
-def initial_graph_pc_old(data: pd.DataFrame, return_cpdag=False):
-    """
-    Runs PC Algorithm and returns a DAG
-    """
-    (g, sep_set) = pcalg.estimate_skeleton(indep_test_func=indep_test_func, data_matrix=data.values, alpha=0.01)
-    g = pcalg.estimate_cpdag(skel_graph=g, sep_set=sep_set)
-    cpdag = nx.to_numpy_array(g)
-    dag = cpdag_to_dag(cpdag)
-    return (dag, cpdag) if return_cpdag else dag
-
-def initial_graph_pc(data: pd.DataFrame, return_cpdag=False):
-    """
-    Runs PC Algorithm and returns a DAG
-    """
-    import graphical_models
-
-    (g, sep_set) = pcalg.estimate_skeleton(indep_test_func=indep_test_func, data_matrix=data.values, alpha=0.01)
-    g = pcalg.estimate_cpdag(skel_graph=g, sep_set=sep_set)
-    cpdag = nx.to_numpy_array(g)
-    
-    pdag = graphical_models.PDAG.from_amat(cpdag)
-    dag = pdag.to_dag().to_amat()
-    return (dag, cpdag) if return_cpdag else dag
-
-# def dag_to_cpdag(DAG, node_labels, blocklist=None):
-#     import graphical_models
-
-#     nodes = node_labels
-#     dag = graphical_models.DAG.from_amat(DAG)
-#     v_structures = dag.vstructures()
-#     known_arcs = dag.arcs
-#     arcs = v_structures | known_arcs
-#     edges = edges - arcs
-#     PDAG = graphical_models.PDAG(nodes=nodes, arcs=arcs, edges=edges)
-#     PDAG.to_complete_pdag()
-#     return PDAG.to_amat()

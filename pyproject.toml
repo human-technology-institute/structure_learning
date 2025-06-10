@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "structure_learning"
-version = "0.4.0"
-description = "MCMC for graph structure learning in Bayesian networks."
-requires-python = ">= 3.8"
+version = "1.0.0"
+description = "Structure learning algorithms for Bayesian networks."
+requires-python = ">= 3.10"
 dependencies = [
   "numpy",
   "pandas",
@@ -18,9 +18,9 @@ dependencies = [
   "igraph",
   "seaborn",
   "torch",
-  "pcalg",
   "conditional_independence",
-  "xlrd"
+  "graphical_models",
+  "pgmpy"
 ]
 readme = "README.md"
 license = {file = "LICENSE"}

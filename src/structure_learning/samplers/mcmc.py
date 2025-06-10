@@ -20,7 +20,6 @@ from structure_learning.data_structures import OrderedPartition, DAG
 from structure_learning.data import Data
 from structure_learning.distributions import MCMCDistribution, OPAD
 from .pc import PC
-from structure_learning.utils.graph_utils import initial_graph_pc
 
 State = TypeVar('State')
 
@@ -88,7 +87,6 @@ class MCMC(ABC):
             print('Running PC algorithm')
             pc = PC(data=score_object.data, significance_level=pc_significance_level, ci_test=pc_ci_test)
             self._pc_state, self.pc_graph = pc.run()
-            # self._pc_state, self.pc_graph = initial_graph_pc(score_object.data, True)
         
         self.initial_state = initial_state
         self.proposal_object = proposal_object

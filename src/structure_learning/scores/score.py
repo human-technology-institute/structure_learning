@@ -7,7 +7,6 @@ import pandas as pd
 import numpy as np
 from structure_learning.data_structures import Graph
 from structure_learning.data import Data
-from structure_learning.utils.graph_utils import node_label_to_index, find_parents
 
 class Score(ABC):
     """
