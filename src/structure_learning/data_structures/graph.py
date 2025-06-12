@@ -12,6 +12,7 @@ import networkx as nx
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
+import pygraphviz as pgv
 
 G = TypeVar('Graph')
 class Graph:
@@ -475,7 +476,7 @@ class Graph:
         return cls.from_pandas(pd.read_csv(filename))
 
     # visualisation
-    def plot(self, title="Graph", figsize=(5, 3), node_size=2000, node_color="skyblue", k=5, layout=None):
+    def plot(self, filename=None, text=None):
         """
         Plot a networkx graph.
 
@@ -487,16 +488,13 @@ class Graph:
             k (int): Distance between nodes in the layout.
         """
         G = self.to_nx()
-
-        plt.figure(figsize=figsize)
-        pos = None
-        if layout is None:
-            pos = nx.nx_pydot.graphviz_layout(G, prog="dot")
-        nx.draw(G, with_labels=True, arrowsize=20, arrows=True, node_size=node_size,
-                node_color=node_color, pos=pos)
-        plt.gca().margins(0.20)
-        plt.title(title)
-        plt.axis("off")
+        G_gvz = nx.nx_agraph.to_agraph(G)
+        if text is not None:
+            G_gvz.add_node('info',label=text, shape='note', style='filled', fillcolor='lightgrey')
+        G_gvz.layout('dot')
+        if filename is not None:
+            G_gvz.draw(filename, format='png')
+        return G_gvz
 
     # utils
     def compare(self, other: Type[G], operation: str):
