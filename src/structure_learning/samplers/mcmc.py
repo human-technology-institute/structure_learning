@@ -15,8 +15,7 @@ import networkx as nx
 import numpy as np
 from matplotlib import pyplot as plt
 from structure_learning.scores import Score, BGeScore, BDeuScore
-from structure_learning.proposals import StructureLearningProposal, GraphProposal, PartitionProposal
-from structure_learning.data_structures import OrderedPartition, DAG
+from structure_learning.proposals import StructureLearningProposal
 from structure_learning.data import Data
 from structure_learning.distributions import MCMCDistribution, OPAD
 from .pc import PC

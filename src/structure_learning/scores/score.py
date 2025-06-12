@@ -4,7 +4,6 @@
 from abc import ABC, abstractmethod
 from typing import Union
 import pandas as pd
-import numpy as np
 from structure_learning.data_structures import Graph
 from structure_learning.data import Data
 

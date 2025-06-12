@@ -2,8 +2,7 @@
 
 """
 from abc import ABC, abstractmethod
-from typing import Any, TypeVar, Tuple, List
-import networkx as nx
+from typing import TypeVar, Tuple, List
 import numpy as np
 
 State = TypeVar("State")

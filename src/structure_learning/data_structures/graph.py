@@ -6,12 +6,10 @@ The Graph class supports operations such as adding/removing nodes and edges, fin
 It also includes utility methods for checking graph properties like cycles and performing edge operations.
 """
 
-from typing import Union, List, Tuple, Set, Type, TypeVar
-from math import comb, factorial
+from typing import Union, List, Tuple, Type, TypeVar
 import re
 import networkx as nx
 from matplotlib import pyplot as plt
-import seaborn as sns
 import numpy as np
 import pandas as pd
 
@@ -91,6 +89,27 @@ class Graph:
                     if incidence[i,k] and incidence[j,k] and not (incidence[i,j] or incidence[j,i]):
                         v.add((i,k,j))
         return v
+    
+    def has_edge(self, node1, node2, undirected=False) -> bool:
+        """
+        Checks if an edge exists in the graph.
+
+        Parameters:
+            node1 (str): First node label.
+            node2 (str): Second node label.
+            undirected (bool): If True, checks for an undirected edge (i.e., edge exists in either direction).
+
+        Returns:
+            bool: True if the edge exists, False otherwise.
+        """
+        if self._node_to_index_dict is None:
+            self._update_node_index()
+        node1, node2 = self._node_to_index([node1, node2])
+        directed_edge = self.incidence[node1, node2] if node1 is not None and node2 is not None else False
+        if undirected:  # Check for undirected edge
+            undirected_edge = self.incidence[node1, node2] or self.incidence[node2, node1] if node1 is not None and node2 is not None else False
+            return undirected_edge
+        return directed_edge
     
     def _update_node_index(self):
         """
@@ -456,7 +475,7 @@ class Graph:
         return cls.from_pandas(pd.read_csv(filename))
 
     # visualisation
-    def plot(self, title="Graph", figsize=(5, 3), node_size=2000, node_color="skyblue", k=5):
+    def plot(self, title="Graph", figsize=(5, 3), node_size=2000, node_color="skyblue", k=5, layout=None):
         """
         Plot a networkx graph.
 
@@ -468,9 +487,11 @@ class Graph:
             k (int): Distance between nodes in the layout.
         """
         G = self.to_nx()
-        pos = nx.spring_layout(G, k=k)
 
         plt.figure(figsize=figsize)
+        pos = None
+        if layout is None:
+            pos = nx.nx_pydot.graphviz_layout(G, prog="dot")
         nx.draw(G, with_labels=True, arrowsize=20, arrows=True, node_size=node_size,
                 node_color=node_color, pos=pos)
         plt.gca().margins(0.20)

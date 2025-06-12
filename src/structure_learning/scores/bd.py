@@ -1,11 +1,9 @@
 """
 
 """
-from typing import Union
 import pandas as pd
 import numpy as np
 from scipy.stats import gamma
-import networkx as nx
 from structure_learning.scores import Score
 from structure_learning.data_structures import Graph
 

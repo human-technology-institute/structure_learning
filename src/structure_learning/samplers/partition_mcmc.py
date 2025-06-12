@@ -33,7 +33,7 @@ from torch.distributions.categorical import Categorical
 from structure_learning.proposals import StructureLearningProposal
 from structure_learning.proposals import PartitionProposal
 from structure_learning.data_structures import OrderedPartition, Graph, DAG
-from structure_learning.scores import Score, BGeScore, BDeuScore
+from structure_learning.scores import Score
 from structure_learning.samplers import MCMC
 
 class PartitionMCMC(MCMC):

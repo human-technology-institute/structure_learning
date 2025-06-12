@@ -7,8 +7,7 @@ Classes:
 
 import itertools
 from math import comb
-from typing import Union, List, Tuple, Type, TypeVar
-import pandas as pd
+from typing import TypeVar
 import networkx as nx
 import numpy as np
 import graphical_models as gm
@@ -49,6 +48,123 @@ class DAG(Graph):
         """
         DAG_gm = gm.DAG.from_amat(self.incidence)
         return CPDAG(incidence=DAG_gm.cpdag().to_amat()[0], nodes=self.nodes)
+    
+    def to_complete_pdag(self, blocklist: np.ndarray = None, verbose=False):
+        """
+        Replace with arcs those edges whose orientations can be determined by Meek rules:
+        =====
+        See Koller & Friedman, Algorithm 3.5
+
+        Adapted from pgmpy (https://github.com/uhlerlab/graphical_models/blob/main/graphical_models/classes/dags/pdag.py)
+        Parameters:
+            verbose (bool): If True, print detailed information about the process.
+        Returns:
+            CPDAG: Completed Partially Directed Acyclic Graph.
+        """
+        PROTECTED = 'P'  # indicates that some configuration definitely exists to protect the edge
+        UNDECIDED = 'U'  # indicates that some configuration exists that could protect the edge
+        NOT_PROTECTED = 'N'  # indicates no possible configuration that could protect the edge
+
+        vstructures = [(self.nodes[i],self.nodes[j]) for i,j,k in self.v_structures()]
+        vstructures += [(self.nodes[k],self.nodes[j]) for i,j,k in self.v_structures()]
+        vstructures = set(vstructures)
+        blocked_edges = {(self.nodes[r],self.nodes[c]) for r,c in zip(*np.nonzero(blocklist)) if self.incidence[c,r]} if blocklist else set()
+        edges1 = {(i, j) for i, j in self.edges if (i, j) not in vstructures and (j, i) not in vstructures and (i,j) not in blocked_edges and (j,i) not in blocked_edges}
+        undecided_arcs = edges1 | {(j, i) for i, j in edges1}
+        arc_flags = {arc: PROTECTED for arc in vstructures}
+        arc_flags.update({(j,i): PROTECTED for i,j in blocked_edges})
+        arc_flags.update({arc: UNDECIDED for arc in undecided_arcs})
+
+        if verbose:
+            print(f'Initial undecided arcs: {(undecided_arcs)}')
+            print(f'Initial v-structures: {(vstructures)}')
+            print(f'Initial blocked edges: {(blocked_edges)}')
+            print(f'Initial flags: {(arc_flags)}')
+
+        incidence = self.incidence.copy()
+        incidence[incidence.T] = True
+        for i,j,k in self.v_structures():
+            incidence[j, k] = False
+            incidence[j, i] = False
+        if blocklist is not None:
+            for i, j in zip(*np.nonzero(blocklist)):
+                incidence[i, j] = False
+        
+        def has_edge(incidence, i, j, undirected=False):
+            """
+            Check if there is an edge between nodes i and j.
+            If undirected is True, check for both directions.
+            """
+            i,j = self._node_to_index((i, j))
+            if undirected:
+                return incidence[i,j] or incidence[j,i]
+            else:
+                return incidence[i,j]
+            
+        while undecided_arcs:
+            for arc in undecided_arcs:
+                i, j = arc
+                flag = NOT_PROTECTED
+
+                # check configuration (a) -- causal chain
+                s = ''
+                for k in self.find_parents(i):
+                    if not has_edge(incidence, k, j, undirected=True):
+                        if arc_flags[(k, i)] == PROTECTED:
+                            flag = PROTECTED
+                            s = f': {k}->{i}-{j}'
+                            break
+                        else:
+                            flag = UNDECIDED
+                if verbose: print(f'{arc} marked {flag} by (a){s}')
+
+                # check configuration (b) -- acyclicity
+                s = ''
+                if flag != PROTECTED:
+                    for k in self.find_parents(j):
+                        if i in self.find_parents(k):
+                            if arc_flags[(i, k)] == PROTECTED and arc_flags[(k, j)] == PROTECTED:
+                                flag = PROTECTED
+                                s = f': {k}->{j}-{i}->{k}'
+                                break
+                            else:
+                                flag = UNDECIDED
+                    if verbose: print(f'{arc} marked {flag} by (b){s}')
+
+                # check configuration (d)
+                s = ''
+                if flag != PROTECTED:
+                    for k1, k2 in itertools.combinations(self.find_parents(j), 2):
+                        if has_edge(incidence, i, k1) and has_edge(incidence,  i, k2) and not has_edge(incidence, k1, k2, undirected=True):
+                            if arc_flags[(k1, j)] == PROTECTED and arc_flags[(k2, j)] == PROTECTED:
+                                flag = PROTECTED
+                                s = f': {i}-{k1}->{j}<-{k2}-{i}'
+                                break
+                            else:
+                                flag = UNDECIDED
+                    if verbose: print(f'{arc} marked {flag} by (c){s}')
+
+                print(arc, arc_flags[arc])
+                arc_flags[arc] = flag
+                print(arc, arc_flags[arc])
+
+            if all(arc_flags[arc] == NOT_PROTECTED for arc in undecided_arcs): break
+
+            undecided_arcs_copy = undecided_arcs.copy()
+            for arc in undecided_arcs.copy():
+                if arc_flags[arc] == PROTECTED:
+                    if verbose: print(f'Orienting {arc} as arc')
+                    undecided_arcs.discard(arc)
+                    undecided_arcs.discard((arc[1], arc[0]))
+                    # self._replace_edge_with_arc(arc)
+                    node1, node2 = self._node_to_index(arc)
+                    incidence[node1, node2] = self.incidence[node1, node2]
+                    incidence[node2, node1] = self.incidence[node2, node1]
+            if undecided_arcs == undecided_arcs_copy:
+                print('No more arcs can be oriented, but undecided arcs remain.')
+                break
+
+        return CPDAG(incidence=incidence, nodes=self.nodes)
 
     @classmethod
     def compute_ancestor_matrix(cls, adj_matrix=None):
@@ -151,3 +267,16 @@ class DAG(Graph):
                     base_dag_lst.append(DAG(incidence=adj_matrix, nodes=node_labels))
 
         return base_dag_lst
+
+    def topological_sort(self):
+        """
+        Perform topological sorting of the nodes in the DAG.
+
+        Returns:
+            List: Nodes sorted in topological order.
+
+        """
+
+        graph = nx.DiGraph(self.incidence)
+        sorted_nodes = list(nx.topological_sort(graph))
+        return [self.nodes[node] for node in sorted_nodes]

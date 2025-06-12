@@ -9,7 +9,6 @@ Classes:
 
 from typing import Union
 from functools import cache
-import networkx as nx
 import numpy as np
 import pandas as pd
 from scipy.special import gammaln

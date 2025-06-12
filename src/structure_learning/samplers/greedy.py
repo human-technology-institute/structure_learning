@@ -1,13 +1,9 @@
-import sys
 import time
 from typing import Union
-from copy import deepcopy
 from collections import defaultdict, OrderedDict
 import heapq
 import numpy as np
 import pandas as pd
-import scipy
-from matplotlib import pyplot as plt
 from structure_learning.proposals import GraphProposal
 from structure_learning.scores import BGeScore, BDeuScore
 from structure_learning.data_structures import DAG
