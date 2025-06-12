@@ -26,7 +26,7 @@ class GraphProposal(StructureLearningProposal):
     REVERSE_EDGE = 'reverse_edge'
     operations = [ADD_EDGE, DELETE_EDGE, REVERSE_EDGE, StructureLearningProposal.STAY_STILL]
 
-    def __init__(self, initial_state : Union[np.ndarray, nx.DiGraph, Graph], blacklist = None, whitelist = None, seed: int = 32):
+    def __init__(self, initial_state : Union[np.ndarray, nx.DiGraph, DAG], blacklist = None, whitelist = None, seed: int = 32):
         """
         Initialise GraphProposal instance.
 
@@ -37,9 +37,9 @@ class GraphProposal(StructureLearningProposal):
         """
         super().__init__(initial_state, blacklist, whitelist, seed) # initialize the parent class
 
-        if not isinstance(initial_state, Graph):
+        if not isinstance(initial_state, DAG):
             initial_state = nx.adjacency_matrix(initial_state).toarray() if isinstance(initial_state, nx.DiGraph) else initial_state
-            self.initial_state = Graph(incidence=initial_state)
+            self.initial_state = DAG(incidence=initial_state)
         else:
             self.initial_state = initial_state
         self.num_nodes = self.initial_state.shape[1]
@@ -91,7 +91,7 @@ class GraphProposal(StructureLearningProposal):
         else:
             raise Exception(f"The operation '{operation}' is not valid!")
         
-        self.proposed_state = Graph(incidence=self.proposed_state, nodes=self.current_state.nodes)
+        self.proposed_state = DAG(incidence=self.proposed_state, nodes=self.current_state.nodes)
 
         self.operation = operation
 

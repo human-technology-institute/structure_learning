@@ -62,9 +62,9 @@ class StructureMCMC(MCMC):
             if self.initial_state is None:
                 self.initial_state = self._pc_state if pc_init else DAG.generate_random(self.node_labels, 0.5, seed)
                 if whitelist is not None:
-                    self.initial_state[whitelist > 0] = True
+                    self.initial_state.incidence[whitelist > 0] = True
                 if blacklist is not None:
-                    self.initial_state[blacklist > 0] = False
+                    self.initial_state.incidence[blacklist > 0] = False
             proposal_object = GraphProposal(initial_state=self.initial_state, blacklist=blacklist, whitelist=whitelist, seed=seed)
         elif not isinstance(proposal_object, StructureLearningProposal):
             raise Exception('Unsupported proposal', proposal_object)
