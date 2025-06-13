@@ -491,6 +491,11 @@ class Graph:
         G_gvz = nx.nx_agraph.to_agraph(G)
         if text is not None:
             G_gvz.add_node('info',label=text, shape='note', style='filled', fillcolor='lightgrey')
+        for r,c in zip(*np.nonzero(self.incidence)):
+            if self.incidence[c,r] and G_gvz.has_edge(self.nodes[c], self.nodes[r]) and G_gvz.has_edge(self.nodes[r], self.nodes[c]):
+                G_gvz.remove_edge(self.nodes[c], self.nodes[r])
+                edge = G_gvz.get_edge(self.nodes[r], self.nodes[c])
+                edge.attr['dir'] = 'none'
         G_gvz.layout('dot')
         if filename is not None:
             G_gvz.draw(filename, format='png')
