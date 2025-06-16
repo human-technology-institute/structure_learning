@@ -6,6 +6,7 @@ Classes:
 """
 
 import numpy as np
+import pandas as pd
 from .graph import Graph 
 
 class CPDAG(Graph):
@@ -30,7 +31,7 @@ class CPDAG(Graph):
         super().__init__(incidence, nodes)
         self.undirected_edges = list()
         self._undirected_edges_idx = list()
-        rows, cols = np.nonzero(np.tril(incidence + incidence.T, 0) == 2)
+        rows, cols = np.nonzero(np.tril(incidence & incidence.T, 0))
         for r, c in zip(rows, cols):
             self._undirected_edges_idx.append((r, c))
             self.undirected_edges.append((nodes[r], nodes[c]))
@@ -75,24 +76,6 @@ class CPDAG(Graph):
         """
         return (self.incidence == other.incidence).all()
 
-    def __iter__(self):
-        """
-        Return an iterator for the CPDAG.
-
-        Returns:
-            CPDAG: Iterator for the CPDAG.
-        """
-        return self
-
-    def __next__(self):
-        """
-        Return the next DAG in the enumeration.
-
-        Raises:
-            StopIteration: If no more DAGs are available.
-        """
-        pass
-
     def enumerate_dags(self, generate=True):
         """
         Enumerate all DAGs represented by the CPDAG.
@@ -103,10 +86,11 @@ class CPDAG(Graph):
         Yields:
             Graph: DAG instances represented by the CPDAG.
         """
+        from .dag import DAG 
         dim = len(self.undirected_edges)
         if dim == 0:
             self._n_dags = 1
-            yield Graph(incidence=self.incidence, nodes=self.nodes)
+            yield DAG(incidence=self.incidence, nodes=self.nodes)
         else:
             if self.dags is None:
                 self._n_dags = 0
@@ -124,7 +108,7 @@ class CPDAG(Graph):
                     if not Graph.has_cycle(incidence):
                         self._n_dags += 1
                         if generate:
-                            g = Graph(incidence=incidence, nodes=self.nodes)
+                            g = DAG(incidence=incidence, nodes=self.nodes)
                             self.dags.append(g)
                             yield g
 
@@ -137,3 +121,12 @@ class CPDAG(Graph):
         """
         [g for g in self.enumerate_dags(generate=True)]
         return self._n_dags
+
+    def plot(self, filename=None, text=None, data: pd.DataFrame=None):
+
+        if data is None:
+            return super().plot(filename=filename, text=text)
+        else:
+            dags = [dag for dag in self.enumerate_dags(generate=True)]
+            _, colors = dags[0].fit(data=data)
+            return super().plot(filename=filename, text=text, edge_colors=colors)

@@ -10,9 +10,9 @@ from math import comb
 from typing import TypeVar
 import networkx as nx
 import numpy as np
+import pandas as pd
 import graphical_models as gm
 from .graph import Graph
-from .cpdag import CPDAG
 
 D = TypeVar('DAG')
 class DAG(Graph):
@@ -38,18 +38,36 @@ class DAG(Graph):
         super().__init__(incidence, nodes)
         if self.has_cycle(self.incidence):
             raise Exception('Cycle found in adjacency matrix')
+        
+    def fit(self, data: pd.DataFrame):  
+        from pgmpy.models import LinearGaussianBayesianNetwork
+        colors = {}
+        model = LinearGaussianBayesianNetwork(list(self.edges))
+        model.fit(data.values)
+        weights = {(var, cpd.variable):cpd.beta[idx+1] for cpd in model.get_cpds() for idx,var in enumerate(cpd.evidence)}
+        for edge,weight in weights.items():
+            colors[(edge[0], edge[1])] = 'red' if weight < 0 else 'blue'
+        return weights, colors
+        
+    def plot(self, filename=None, text=None, data: pd.DataFrame=None):
+        
+        colors = None
+        if data is not None:
+            _, colors = self.fit(data)
+        return super().plot(filename=filename, text=text, edge_colors=colors)
 
-    def to_cpdag(self):
+    def to_cpdag_old(self):
         """
         Convert the DAG to a CPDAG.
 
         Returns:
             CPDAG: Completed Partially Directed Acyclic Graph.
         """
+        from .cpdag import CPDAG
         DAG_gm = gm.DAG.from_amat(self.incidence)
         return CPDAG(incidence=DAG_gm.cpdag().to_amat()[0], nodes=self.nodes)
     
-    def to_complete_pdag(self, blocklist: np.ndarray = None, verbose=False):
+    def to_cpdag(self, blocklist: np.ndarray = None, verbose=False):
         """
         Replace with arcs those edges whose orientations can be determined by Meek rules:
         =====
@@ -61,6 +79,7 @@ class DAG(Graph):
         Returns:
             CPDAG: Completed Partially Directed Acyclic Graph.
         """
+        from .cpdag import CPDAG
         PROTECTED = 'P'  # indicates that some configuration definitely exists to protect the edge
         UNDECIDED = 'U'  # indicates that some configuration exists that could protect the edge
         NOT_PROTECTED = 'N'  # indicates no possible configuration that could protect the edge
@@ -144,9 +163,7 @@ class DAG(Graph):
                                 flag = UNDECIDED
                     if verbose: print(f'{arc} marked {flag} by (c){s}')
 
-                print(arc, arc_flags[arc])
                 arc_flags[arc] = flag
-                print(arc, arc_flags[arc])
 
             if all(arc_flags[arc] == NOT_PROTECTED for arc in undecided_arcs): break
 
@@ -161,7 +178,7 @@ class DAG(Graph):
                     incidence[node1, node2] = self.incidence[node1, node2]
                     incidence[node2, node1] = self.incidence[node2, node1]
             if undecided_arcs == undecided_arcs_copy:
-                print('No more arcs can be oriented, but undecided arcs remain.')
+                if verbose: print('No more arcs can be oriented, but undecided arcs remain.')
                 break
 
         return CPDAG(incidence=incidence, nodes=self.nodes)
