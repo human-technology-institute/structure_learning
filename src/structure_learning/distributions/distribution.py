@@ -14,6 +14,7 @@ from copy import deepcopy, copy
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
+import seaborn as sns
 from structure_learning.scores import Score
 from structure_learning.data_structures import DAG
 
@@ -68,7 +69,7 @@ class Distribution:
         
         keys = list(self.particles.keys())
         weights = np.array([(1. if 'weight' not in self.particles[particle] else self.particles[particle]['weight']) for particle in keys])
-        self.p = self.p*weights
+        self.p = (self.p*weights).astype(float)
         Z = np.sum(self.p)
         self.p /= Z
         for particle, _p in zip(keys, self.p):
@@ -159,11 +160,55 @@ class Distribution:
             ax = fig.subplots(1,1)
             ax.grid(alpha=0.5)
             ax.set_axisbelow(True)
-        bars = ax.bar(particles[-limit:], count[-limit:])
+        bars = sns.barplot(x=particles[-limit:], y=count[-limit:], dodge=True, ax=ax)
         ax.set_xlabel('Particles')
         ax.set_ylabel('Proportion')
         ax.set_xticklabels(particles[-limit:], rotation=90)
         return bars, particles[-limit:], count[-limit:]
+    
+    @classmethod
+    def plot_multiple(cls, dists: List[Type['D']], prop='freq', normalise=False, limit=-1, ax=None, labels=None):
+        """
+        Plot multiple distributions on the same axes.
+
+        Parameters:
+            dists (List[Distribution]): List of distributions to plot.
+            prop (str): The property to plot (default is 'freq').
+            sort (bool): Whether to sort the particles by the property values.
+            normalise (bool): Whether to normalise the property values.
+            limit (int): The maximum number of particles to display (default is -1, which shows all).
+            ax (matplotlib.axes.Axes): The axes to plot on (default is None).
+
+        Returns:
+            list: List of bar containers for each distribution.
+        """
+        if ax is None:
+            fig = plt.figure()
+            ax = fig.subplots(1,1)
+            ax.grid(alpha=0.5)
+            ax.set_axisbelow(True)
+        
+        all_particles = {}
+        for idx,dist in enumerate(dists):
+            dist_name = idx if labels is None else labels[idx]
+            particles, count = dist.hist(prop=prop, normalise=normalise)
+            sort_idx = np.argsort(count)
+            limit = limit if limit > 0 else len(particles)
+            particles, count = np.array(particles)[sort_idx][-limit:], np.array(count)[sort_idx][-limit:]
+            for particle,cnt in zip(particles,count):
+                if particle not in all_particles:
+                    all_particles[particle] = {}
+                all_particles[particle][dist_name] = cnt
+
+        a = pd.DataFrame.from_dict(all_particles, orient='index').fillna(pd.NA)
+        a['index'] = list(a.index)
+        a_melt = a.melt(id_vars='index', value_vars=set(a.columns) - set(['index']), value_name=prop, var_name='Sampler')
+        bars = sns.barplot(x='index', y=prop, hue='Sampler', data=a_melt, dodge=True, ax=ax)
+        ax.set_xlabel('Particles')
+        ax.set_ylabel('Proportion')
+        ax.set_xticklabels(a_melt['index'], rotation=90)
+        ax.legend(title='Samplers')
+        return bars, a
     
     def top(self, prop='freq', n=1):
         """

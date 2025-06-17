@@ -19,10 +19,10 @@ class PC:
             
             cpdag = self._estimator.estimate(ci_test=self.ci_test, significance_level=self.significance_level)
 
-            dag = nx.to_numpy_array(cpdag.to_dag())
+            dag = nx.to_numpy_array(cpdag.to_dag()).astype(bool)
 
             self.dag = DAG(incidence=dag, nodes=list(self.data.columns))
-            self.cpdag = CPDAG(incidence=nx.to_numpy_array(cpdag), nodes=list(self.data.columns))
+            self.cpdag = CPDAG(incidence=nx.to_numpy_array(cpdag).astype(bool), nodes=list(self.data.columns))
 
             self.results = {'DAG': self.dag, 'CPDAG': self.cpdag}
         return self.dag, self.cpdag
