@@ -34,9 +34,11 @@ import numpy as np
 import networkx as nx
 from scipy.stats import truncnorm, norm
 import matplotlib.pyplot as plt
+import seaborn as sns
 import sumu
 from structure_learning.data_structures import DAG
 from structure_learning.data import Data
+from structure_learning.distributions import MCMCDistribution
 
 # --- Gibbs samplers for parameter estimation --- #
 def gibbs_linear(X, y, n_iter=2000, burn_in=500):
@@ -245,7 +247,7 @@ def simulate_do_effects(adj_matrix, intervention, est_params, domains, data, do_
     return effects
     
 class CausalEffects:
-    def __init__(self, graphs: Union[DAG, List[DAG]], data: Data):
+    def __init__(self, graphs: Union[DAG, List[DAG], MCMCDistribution], data: Data):
         """
         Initialize the CausalEffects object with a graph and data.
 
@@ -257,18 +259,28 @@ class CausalEffects:
         self.data = data
         self.domains = data.variable_types
 
-    def beeps(self):
+    def beeps(self, edges: List[tuple] = None, plot: bool = False):
         """
         Compute pairwise causal effects using the BEEPS algorithm.
 
         Returns:
             List[np.ndarray]: A list of pairwise causal effect matrices for each graph.
         """
-        effects = []
-        for g in self.graphs:
-            e = sumu.Beeps(dags=[g.incidence], data=self.data.values).sample_pairwise()[0]
-            effects.append(e)
-        return effects
+        if self.graphs is None:
+            raise ValueError("No graph provided for causal effects computation.")
+        graphs = self.graphs if isinstance(self.graphs, list) else ([self.graphs] if isinstance(self.graphs, DAG) else [DAG.from_key(key=g, nodes=list(self.data.columns)) for g in self.graphs.particles])
+        weights = 1. if not isinstance(self.graphs, MCMCDistribution) else np.expand_dims(self.graphs.prop('p'), (1,2))
+        effects = sumu.Beeps(dags=[g.incidence for g in graphs], data=self.data.values.values).sample_pairwise()*weights
+        node_to_index = {node:idx for idx,node in enumerate(self.data.columns)}
+        if plot:
+            if edges is None:
+                edges = [(node1, node2) for node1 in self.data.columns for node2 in self.data.columns if node1 != node2]
+            sns.kdeplot(data=[effects[:, node_to_index[edge[0]], node_to_index[edge[1]]] for edge in edges], fill=True, common_norm=False)
+            plt.xlabel('Causal Effect')
+            plt.ylabel('Density')
+            plt.title('Pairwise Causal Effects')
+            plt.legend([f"{edge[0]} -> {edge[1]}" for edge in edges])
+        return effects*weights
 
     def do(self, intervention: List[Union[int, str]], do_value: float = 1.0, multiply: bool = False) -> np.ndarray:
         """
