@@ -49,7 +49,7 @@ class Experiment:
             yaml.safe_dump(config, file)
 
     def _to_dict(self): 
-        pass
+        config = {}
 
     def _load_config(self, config):
         # check required keys

@@ -106,6 +106,7 @@ class MCMC(ABC):
         self._start_time = time.time()
         self._cpdag_sizes = {}
         self._to_string = f"MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
+        self.iteration = 0
 
     def run(self) -> Tuple[dict, float]:
         """
@@ -114,9 +115,10 @@ class MCMC(ABC):
         Returns:
             Tuple[dict, float]: Results of the simulation and acceptance ratio.
         """
-        for iter in range(self.max_iter):
+        while self.iteration < self.max_iter:
             result = self.step()
-            self.update_results(iter, result)
+            self.update_results(self.iteration, result)
+            self.iteration += 1
         if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD):
             self.results.normalise()
         return self.results, self.n_accepted/self.max_iter
