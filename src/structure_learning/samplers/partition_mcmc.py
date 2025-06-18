@@ -42,7 +42,7 @@ class PartitionMCMC(MCMC):
     """
     def __init__(self, data : pd.DataFrame = None, initial_state : Union[OrderedPartition, np.ndarray] = None, max_iter : int = 30000,
                  proposal_object : StructureLearningProposal = None, score_object : Union[str, Score] = None,
-                 pc_init: bool = True, blacklist = None, whitelist = None, searchspace = None, plus1: bool = False, seed : int  = 32, 
+                 pc_init: bool = True, blacklist = None, whitelist = None, searchspace = None, plus1: bool = False, seed : int  = None, 
                  result_type='iterations', graph_type='dag', concise=True):
         """
         Initilialise Partition MCMC instance.

@@ -30,7 +30,7 @@ class StructureMCMC(MCMC):
     """
     def __init__(self, data: pd.DataFrame = None, initial_graph : np.ndarray = None, max_iter : int = 30000,
                  score_object : Union[str, Score] = None, proposal_object : StructureLearningProposal = None, pc_init = True,
-                 blacklist: np.ndarray = None, whitelist: np.ndarray = None, seed: int = 32, sparse=True,
+                 blacklist: np.ndarray = None, whitelist: np.ndarray = None, seed: int = None, sparse=True,
                  result_type: str = 'distribution', graph_type='dag'):
         """
         Initilialise Structure MCMC instance.

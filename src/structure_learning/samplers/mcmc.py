@@ -19,10 +19,11 @@ from structure_learning.proposals import StructureLearningProposal
 from structure_learning.data import Data
 from structure_learning.distributions import MCMCDistribution, OPAD
 from .pc import PC
+from .sampler import Sampler
 
 State = TypeVar('State')
 
-class MCMC(ABC):
+class MCMC(Sampler):
     """
     Base class for Markov Chain Monte Carlo (MCMC) simulations.
     Inheriting classes must implement the `step` method to define the behavior of a single MCMC iteration.
@@ -36,7 +37,7 @@ class MCMC(ABC):
     def __init__(self, data: pd.DataFrame, initial_state: State, max_iter: int = 30000, score_object: Union[str, Score] = None,
                  proposal_object: Union[str, StructureLearningProposal] = None, 
                  pc_init: bool = True, pc_significance_level = 0.01, pc_ci_test = 'pearsonr',
-                 blacklist: np.ndarray = None, whitelist: np.ndarray = None, plus1: bool = False, seed: int = 32, 
+                 blacklist: np.ndarray = None, whitelist: np.ndarray = None, plus1: bool = False, seed: int = None, 
                  result_type: str = RESULT_TYPE_DIST, graph_type='dag'):
         """
         Initialize the MCMC instance.
@@ -60,11 +61,13 @@ class MCMC(ABC):
 
         if data is None or not isinstance(data, (Data, pd.DataFrame)):
             raise Exception("Data (as pandas dataframe or Data) must be provided")
-        self.data  = data
+        super().__init__(data)
         self.node_labels = list(data.columns)
         self._node_label_to_idx = {node:idx for idx,node in enumerate(self.node_labels)}
         self.num_nodes = len(self.node_labels)
         self.pc_graph = None
+        if seed is None:
+            seed = np.random.randint(100000)
         self._rng = np.random.default_rng(seed=seed)
         self._trace = []
 
@@ -107,6 +110,20 @@ class MCMC(ABC):
         self._cpdag_sizes = {}
         self._to_string = f"MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
         self.iteration = 0
+
+        self.config_dict = {
+            'initial_state': initial_state,
+            'max_iter': max_iter,
+            'score_object': type(score_object).__name__,
+            'proposal_object': type(proposal_object).__name__ if isinstance(proposal_object, StructureLearningProposal) else proposal_object,
+            'pc_init': pc_init,
+            'pc_significance_level': pc_significance_level,
+            'pc_ci_test': pc_ci_test,
+            'plus1': plus1,
+            'seed': seed,
+            'result_type': result_type,
+            'graph_type': graph_type
+        }
 
     def run(self) -> Tuple[dict, float]:
         """
@@ -235,3 +252,12 @@ class MCMC(ABC):
             return self.results.to_opad(plus=plus)
         else:
             return self.results
+        
+    def config(self):
+        """
+        Get the configuration of the MCMC instance.
+
+        Returns:
+            dict: Configuration dictionary.
+        """
+        return self.config_dict

@@ -4,6 +4,7 @@ from .partition_mcmc import PartitionMCMC
 from .pc import PC
 from .hillclimb import HillClimb
 from .greedy import GreedySearch
+from .sampler import Sampler
 
 samplers = {
     'StructureMCMC': StructureMCMC,

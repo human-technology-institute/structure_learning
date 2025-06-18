@@ -1,14 +1,17 @@
+from typing import Union
 import pgmpy
 import graphical_models as gm
 import networkx as nx
 import pandas as pd
+from .sampler import Sampler
+from structure_learning.data import Data
 from structure_learning.data_structures.dag import DAG
 from structure_learning.data_structures.cpdag import CPDAG
 
-class PC:
+class PC(Sampler):
     
-    def __init__(self, data: pd.DataFrame, significance_level=0.01, ci_test='pearsonr'):
-        self.data = data
+    def __init__(self, data: Union[Data,pd.DataFrame], significance_level=0.01, ci_test='pearsonr'):
+        super().__init__(data)
         self.significance_level = significance_level
         self.ci_test = ci_test
         self.results = None
@@ -26,4 +29,10 @@ class PC:
 
             self.results = {'DAG': self.dag, 'CPDAG': self.cpdag}
         return self.dag, self.cpdag
+    
+    def config(self):
+        return {
+            'significance_level': self.significance_level,
+            'ci_test': self.ci_test
+        }
         

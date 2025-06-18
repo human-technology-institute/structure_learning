@@ -3,7 +3,7 @@ import yaml
 import numpy as np
 import pandas as pd
 from multiprocessing import Pool
-from structure_learning.samplers import get_sampler
+from structure_learning.samplers import get_sampler, Sampler
 
 class Experiment:
 
@@ -14,7 +14,7 @@ class Experiment:
         with Pool(processes=self.n_threads) as pool:
             return pool.map(self.run_sampler, self.samplers)
 
-    def run_sampler(self, sampler):
+    def run_sampler(self, sampler: Sampler):
         """
         Run a specific sampler.
 
@@ -45,11 +45,31 @@ class Experiment:
             yaml_file (str): Path to the YAML file where the configuration will be saved.
         """
         config = self._to_dict()
-        with open(yaml_file, 'w') as file:
-            yaml.safe_dump(config, file)
+        if yaml_file is not None:
+            with open(yaml_file, 'w') as file:
+                yaml.safe_dump(config, file)
+        else:
+            return config
 
     def _to_dict(self): 
         config = {}
+        # required keys
+        required_keys = ['experiment_name', 'samplers']
+        for key in required_keys:
+            config[key] = self.__getattribute__(key)
+
+        # data 
+        config['data'] = self.data_str
+
+        # optional keys
+        optional_keys = ['n_threads', 'seed']
+        for key in optional_keys:
+            if hasattr(self, key):
+                config[key] = self.__getattribute__(key)
+
+        # samplers
+        config['samplers'] = [sampler.config() for sampler in self.samplers]
+        return config
 
     def _load_config(self, config):
         # check required keys
@@ -69,6 +89,7 @@ class Experiment:
         np.random.seed(config.get('seed', 42))
 
         # load data
+        self.data_str = self.data if isinstance(self.data, str) else ""
         self.data = pd.read_csv(self.data) if isinstance(self.data, str) else self.data
         self.variables = list(self.data.columns) if 'variables' not in config else config['variables']
         self.variable_types = [] if 'variable_types' not in config else config['variable_types']
