@@ -298,3 +298,18 @@ class RHat(Metric):
 
         return rhat(P, th)
 
+_metrics = {
+    'kl': KLD,
+    'kld': KLD,
+    'js': JSD,
+    'jsd': JSD, 
+    'mse': MSE,
+    'mae': MAE,
+    'shd': SHD,
+    'rhat': RHat
+}
+
+def get_metric(metric: str):
+    if metric not in _metrics:
+        raise Exception('Metric not found,', metric)
+    return _metrics[metric]()

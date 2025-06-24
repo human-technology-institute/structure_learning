@@ -68,6 +68,7 @@ class MCMC(Sampler):
         self.pc_graph = None
         if seed is None:
             seed = np.random.randint(100000)
+        self.seed = seed
         self._rng = np.random.default_rng(seed=seed)
         self._trace = []
 
@@ -125,20 +126,30 @@ class MCMC(Sampler):
             'graph_type': graph_type
         }
 
-    def run(self) -> Tuple[dict, float]:
+    def run(self, intervals=-1) -> Tuple[dict, float]:
         """
         Execute the MCMC simulation.
 
         Returns:
             Tuple[dict, float]: Results of the simulation and acceptance ratio.
         """
-        while self.iteration < self.max_iter:
+        results = []
+        while True:
+            if self.iteration > self.max_iter:
+                break
+
+            if self.iteration>0 and self.iteration%intervals==0 and intervals > 0:
+                if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS):
+                    self.results.normalise()
+                results.append((self.results.copy(), self.n_accepted/self.max_iter))
+
             result = self.step()
             self.update_results(self.iteration, result)
             self.iteration += 1
-        if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD):
+
+        if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS):
             self.results.normalise()
-        return self.results, self.n_accepted/self.max_iter
+        return self.results if intervals < 0 else results, self.n_accepted/self.max_iter
 
     @abstractmethod
     def step(self) -> dict:
@@ -164,8 +175,10 @@ class MCMC(Sampler):
             if key not in self._cpdag_sizes:
                 self._cpdag_sizes[key] = len(info['graph'])
             info['weight'] = self._cpdag_sizes[key]
-        if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS):
+        if self.result_type in (self.RESULT_TYPE_DIST,):
             self.results.update(particle=key, iteration=iteration, data=info.copy())
+        elif self.result_type in (self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS):
+            self.results.update(particle=key, iteration=iteration, data=info.copy(), normalise=False)
         elif self.result_type == 'iterates':
             self.results[iteration] = info
         else:

@@ -58,6 +58,8 @@ class GraphProposal(StructureLearningProposal):
         if whitelist is None:
             self.whitelist = np.zeros((self.num_nodes, self.num_nodes))
 
+        self._rescore_nodes = []
+
     def propose(self):
         """
         Propose a DAG.

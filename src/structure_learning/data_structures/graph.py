@@ -499,7 +499,7 @@ class Graph:
                     edge = G_gvz.get_edge(self.nodes[r], self.nodes[c])
                     edge.attr['dir'] = 'none'
                 else:
-                    if edge_colors is not None and (self.nodes[r], self.nodes[c]) in edge_colors:
+                    if edge_colors is not None and ((self.nodes[r], self.nodes[c]) in edge_colors and (self.nodes[c], self.nodes[r]) not in edge_colors):
                         edge.attr['color'] = edge_colors[(self.nodes[r], self.nodes[c])]
         G_gvz.layout('dot')
         if filename is not None:

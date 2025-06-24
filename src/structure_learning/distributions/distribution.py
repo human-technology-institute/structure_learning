@@ -236,6 +236,9 @@ class Distribution:
         dclone = Distribution()
         dclone.particles = deepcopy(self.particles)
         return dclone
+    
+    def copy(self):
+        return self.__copy__()
 
     def __add__(self, other: Type['D']) -> Type['D']:
         """
@@ -300,10 +303,20 @@ class Distribution:
             else:
                 particle_weights[particle]['weight'] += 1
 
-        dist = Distribution(particles=list(particles.keys()), logp=particles.values(), theta=particle_weights.values()).normalise(prop='logp', log=True)
-        dist.normalise = lambda: dist
+        dist = TrueDistribution(particles=list(particles.keys()), logp=particles.values(), theta=particle_weights.values())
+        
         return dist
+
+class TrueDistribution(Distribution):
+
+    def __init__(self, particles = [], logp = [], theta = None):
+        super().__init__(particles, logp, theta)
+        super().normalise(prop='logp', log=True)
     
+    def normalise(self):
+        return self
+    
+
 class MCMCDistribution(Distribution):
 
     def __init__(self, particles: Iterable = [], logp: Iterable = [], theta: Dict = None, keep_rejected: bool = True):
@@ -333,10 +346,11 @@ class MCMCDistribution(Distribution):
         data.update({'iteration': iteration, 'logp': data['score_current'] if 'logp' not in data else data['logp']})
         super().update(particle, data)
             
-        if self.rejected is not None and (not data['accepted'] and data['operation'] != 'initial'):
-            particle = data['proposed_state'].to_key()
-            self.rejected.update(particle, {'logp': data['score_proposed'], 'iteration': iteration, 
-                                            'operation': data['operation'], 'timestamp': data['timestamp']})
+        if self.rejected is not None and not data['accepted']:
+            if data['proposed_state'] is not None:
+                particle = data['proposed_state'].to_key()
+                self.rejected.update(particle, {'logp': data['score_proposed'], 'iteration': iteration, 
+                                                'operation': data['operation'], 'timestamp': data['timestamp']})
             
     def to_opad(self, plus=False):
         """
@@ -372,6 +386,19 @@ class MCMCDistribution(Distribution):
             dist.update(particle=particle, iteration=iteration, data=data)
         dist.normalise()
         return dist
+    
+    def __copy__(self):
+        """
+        Create a shallow copy of the current distribution.
+
+        Returns:
+            Distribution: A shallow copy of the distribution.
+        """
+        dclone = MCMCDistribution()
+        dclone.particles = deepcopy(self.particles)
+        dclone.rejected = copy(self.rejected)
+        dclone.normalise()
+        return dclone
 
 class OPAD(MCMCDistribution):
     """
@@ -466,3 +493,16 @@ class OPAD(MCMCDistribution):
         Z = diff.sum()
         p = diff/Z
         return p if not return_constants else (p, np.log(Z), max_logp)
+
+    def __copy__(self):
+        """
+        Create a shallow copy of the current distribution.
+
+        Returns:
+            Distribution: A shallow copy of the distribution.
+        """
+        dclone = OPAD(plus=self.plus)
+        dclone.particles = deepcopy(self.particles)
+        dclone.rejected = copy(self.rejected)
+        dclone.normalise()
+        return dclone

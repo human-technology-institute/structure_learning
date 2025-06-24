@@ -42,7 +42,8 @@ class PartitionMCMC(MCMC):
     """
     def __init__(self, data : pd.DataFrame = None, initial_state : Union[OrderedPartition, np.ndarray] = None, max_iter : int = 30000,
                  proposal_object : StructureLearningProposal = None, score_object : Union[str, Score] = None,
-                 pc_init: bool = True, blacklist = None, whitelist = None, searchspace = None, plus1: bool = False, seed : int  = None, 
+                 blacklist = None, whitelist = None, searchspace = None, plus1: bool = False, seed : int  = None, 
+                 pc_significance_level = 0.01, pc_ci_test = 'pearsonr',
                  result_type='iterations', graph_type='dag', concise=True):
         """
         Initilialise Partition MCMC instance.
@@ -67,7 +68,7 @@ class PartitionMCMC(MCMC):
         # elif not isinstance(initial_state, OrderedPartition):
         #     raise Exception("Initial state must be of type Graph, numpy array, or an OrderedPartition")
 
-        super().__init__(data=data, initial_state=initial_state, max_iter=max_iter, proposal_object=proposal_object,
+        super().__init__(data=data, initial_state=initial_state, max_iter=max_iter, proposal_object=proposal_object, pc_significance_level=pc_significance_level, pc_ci_test=pc_ci_test,
                          score_object=score_object, pc_init=(searchspace=="PC"), blacklist=blacklist, whitelist=whitelist, plus1=plus1, seed=seed, result_type=result_type, graph_type=graph_type)
         self._to_string = f"Partition_MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
         self.concise = concise
@@ -89,7 +90,7 @@ class PartitionMCMC(MCMC):
                 self.initial_state = OrderedPartition.from_graph(self.initial_state)
             else:
                 raise Exception("Unsupported initial state type")
-            proposal_object = PartitionProposal(self.initial_state, whitelist=whitelist, blacklist=blacklist, seed=seed)
+            proposal_object = PartitionProposal(self.initial_state, whitelist=whitelist, blacklist=blacklist, seed=self.seed)
         elif not isinstance(proposal_object, StructureLearningProposal):
             raise Exception('Unsupported proposal', proposal_object)
 
@@ -108,9 +109,9 @@ class PartitionMCMC(MCMC):
         self.parent_table = self._list_possible_parents(self._max_parents, self.node_labels, whitelist=whitelist,
                                                   blacklist=blacklist, plus1=plus1, searchspace=searchspace)
         self.score_table = self._score_possible_parents(self.parent_table, self.node_labels, self.score_object)
-        self._rng = np.random.default_rng(seed=seed)
-        random.seed(42)
-        torch.random.manual_seed(seed)
+        
+        random.seed(self.seed)
+        torch.random.manual_seed(self.seed)
 
         # compute the scores of the current partition
         current_state = self.proposal_object.current_state
@@ -157,6 +158,7 @@ class PartitionMCMC(MCMC):
             G, DAG_score = DAG(incidence=sample['incidence'], nodes=self.node_labels), sample['logscore']
             result = self.current_step.copy()
             result['score_current'] = DAG_score
+            result['proposed_state'] = None
             result['operation'] = operation
             result['accepted'] = False
             result['graph'] = G
