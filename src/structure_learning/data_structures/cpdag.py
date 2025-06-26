@@ -128,5 +128,5 @@ class CPDAG(Graph):
             return super().plot(filename=filename, text=text)
         else:
             dags = [dag for dag in self.enumerate_dags(generate=True)]
-            _, colors = dags[0].fit(data=data)
-            return super().plot(filename=filename, text=text, edge_colors=colors)
+            weights, colors = dags[0].fit(data=data)
+            return super().plot(filename=filename, text=text, edge_colors=colors, edge_weights=weights)

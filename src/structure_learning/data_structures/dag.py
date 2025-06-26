@@ -46,15 +46,15 @@ class DAG(Graph):
         model.fit(data.values)
         weights = {(var, cpd.variable):cpd.beta[idx+1] for cpd in model.get_cpds() for idx,var in enumerate(cpd.evidence)}
         for edge,weight in weights.items():
-            colors[(edge[0], edge[1])] = 'red' if weight < 0 else 'blue'
+            colors[(edge[0], edge[1])] = "#FE5600" if weight < 0 else "#5984FF"
         return weights, colors
         
     def plot(self, filename=None, text=None, data: pd.DataFrame=None):
         
-        colors = None
+        weights, colors = None, None
         if data is not None:
-            _, colors = self.fit(data)
-        return super().plot(filename=filename, text=text, edge_colors=colors)
+            weights, colors = self.fit(data)
+        return super().plot(filename=filename, text=text, edge_colors=colors, edge_weights=weights)
 
     def to_cpdag_old(self):
         """
@@ -87,7 +87,7 @@ class DAG(Graph):
         vstructures = [(self.nodes[i],self.nodes[j]) for i,j,k in self.v_structures()]
         vstructures += [(self.nodes[k],self.nodes[j]) for i,j,k in self.v_structures()]
         vstructures = set(vstructures)
-        blocked_edges = {(self.nodes[r],self.nodes[c]) for r,c in zip(*np.nonzero(blocklist)) if self.incidence[c,r]} if blocklist else set()
+        blocked_edges = {(self.nodes[r],self.nodes[c]) for r,c in zip(*np.nonzero(blocklist)) if self.incidence[c,r]} if blocklist is not None else set()
         edges1 = {(i, j) for i, j in self.edges if (i, j) not in vstructures and (j, i) not in vstructures and (i,j) not in blocked_edges and (j,i) not in blocked_edges}
         undecided_arcs = edges1 | {(j, i) for i, j in edges1}
         arc_flags = {arc: PROTECTED for arc in vstructures}

@@ -380,7 +380,8 @@ class Graph:
                 raise Exception("Unsupported key type")
         return key
 
-    def from_key(key: str, type: str = 'default', nodes: Union[List, Tuple, np.ndarray] = None) -> Type[G]:
+    @classmethod
+    def from_key(cls, key: str, type: str = 'default', nodes: Union[List, Tuple, np.ndarray] = None) -> Type[G]:
         """
         Creates a Graph object from a key.
 
@@ -402,7 +403,7 @@ class Graph:
 
             # Convert the list of lists to a numpy array
             array = np.array(int_list)
-            return Graph(incidence=array.reshape(num_nodes, num_nodes), nodes=nodes)
+            return cls(incidence=array.reshape(num_nodes, num_nodes), nodes=nodes)
         else:
             raise Exception("Unsupported key type")
         return None
@@ -476,7 +477,7 @@ class Graph:
         return cls.from_pandas(pd.read_csv(filename))
 
     # visualisation
-    def plot(self, filename=None, text=None, edge_colors: dict = None):
+    def plot(self, filename=None, text=None, edge_colors: dict = None, edge_weights: dict = None):
         """
         Plot a networkx graph.
 
@@ -501,6 +502,9 @@ class Graph:
                 else:
                     if edge_colors is not None and ((self.nodes[r], self.nodes[c]) in edge_colors and (self.nodes[c], self.nodes[r]) not in edge_colors):
                         edge.attr['color'] = edge_colors[(self.nodes[r], self.nodes[c])]
+                        edge.attr['arrowhead'] = 'tee' if edge_colors[(self.nodes[r], self.nodes[c])]=="#FE5600" else 'vee'
+                    if edge_weights is not None:
+                        edge.attr['penwidth'] = 5*np.abs(edge_weights[(self.nodes[r], self.nodes[c])] if (self.nodes[r], self.nodes[c]) in edge_weights else edge_weights[(self.nodes[c], self.nodes[r])])
         G_gvz.layout('dot')
         if filename is not None:
             G_gvz.draw(filename, format='png')
