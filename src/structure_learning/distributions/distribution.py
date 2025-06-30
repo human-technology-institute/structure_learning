@@ -115,6 +115,8 @@ class Distribution:
             for k,v in data.items():    
                 if k in ('freq', 'logp', 'weight'):
                     continue
+                if k not in self.particles[particle]:
+                    continue
                 self.particles[particle][k].append(v)
                 
             self.particles[particle]['freq'] += (1 if 'freq' not in data else data['freq'])

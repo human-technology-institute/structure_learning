@@ -90,7 +90,9 @@ class CPDAG(Graph):
         dim = len(self.undirected_edges)
         if dim == 0:
             self._n_dags = 1
-            yield DAG(incidence=self.incidence, nodes=self.nodes)
+            g = DAG(incidence=self.incidence, nodes=self.nodes)
+            self.dags = [g]
+            yield g
         else:
             if self.dags is None:
                 self._n_dags = 0
@@ -127,6 +129,6 @@ class CPDAG(Graph):
         if data is None:
             return super().plot(filename=filename, text=text)
         else:
-            dags = [dag for dag in self.enumerate_dags(generate=True)]
-            weights, colors = dags[0].fit(data=data)
+            [dag for dag in self.enumerate_dags(generate=True)]
+            weights, colors = self.dags[0].fit(data=data)
             return super().plot(filename=filename, text=text, edge_colors=colors, edge_weights=weights)

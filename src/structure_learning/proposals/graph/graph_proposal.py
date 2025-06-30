@@ -229,7 +229,7 @@ class GraphProposal(StructureLearningProposal):
             (int): number of neighboring graphs obtainable by edge addition
             (int): number of neighboring graphs obtainable by edge reversal
         """
-        ancestor = DAG.compute_ancestor_matrix(incidence)
+        ancestor = DAG.compute_ancestor_matrix(adj_matrix=incidence)
 
         # 1.) Number of neighbour graphs obtained by edge deletions
         deletion = incidence.copy() - self.whitelist

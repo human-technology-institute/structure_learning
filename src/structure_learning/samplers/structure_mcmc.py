@@ -28,8 +28,9 @@ class StructureMCMC(MCMC):
     """
     Implementation of Structure MCMC.
     """
-    def __init__(self, data: pd.DataFrame = None, initial_graph : np.ndarray = None, max_iter : int = 30000,
-                 score_object : Union[str, Score] = None, proposal_object : StructureLearningProposal = None, pc_init = True,
+    def __init__(self, data: pd.DataFrame = None, initial_state : np.ndarray = None, max_iter : int = 30000,
+                 score_object : Union[str, Score] = None, proposal_object : StructureLearningProposal = None, 
+                 pc_init = True, pc_significance_level = 0.01, pc_ci_test = 'pearsonr',
                  blacklist: np.ndarray = None, whitelist: np.ndarray = None, seed: int = None, sparse=True,
                  result_type: str = 'distribution', graph_type='dag'):
         """
@@ -37,7 +38,7 @@ class StructureMCMC(MCMC):
 
         Parameters:
             data (pd.DataFrame):                            Dataset. Optional if score_object is given.
-            initial_graph (numpy.ndarray | None):           Initial graph for the MCMC simulation.
+            initial_state (numpy.ndarray | DAG | None):           Initial graph for the MCMC simulation.
                                                             If None, simulation starts with a random graph or a graph
                                                             constructed from PC algorithm.
             max_iter (int):                                 The number of MCMC iterations to run. Default: 30000.
@@ -51,14 +52,15 @@ class StructureMCMC(MCMC):
             whitelist (numpy.ndarray):                      Mask for edges to include in the proposal
         """
 
-        super().__init__(data=data, initial_state=initial_graph, max_iter=max_iter, score_object=score_object,
-                         proposal_object='graph' if proposal_object is None else proposal_object, pc_init=pc_init,
+        super().__init__(data=data, initial_state=initial_state, max_iter=max_iter, score_object=score_object,
+                         proposal_object='graph' if proposal_object is None else proposal_object, 
+                         pc_init=pc_init,  pc_significance_level=pc_significance_level, pc_ci_test=pc_ci_test,
                          blacklist=blacklist, whitelist=whitelist, seed=seed, result_type=result_type, graph_type=graph_type)
 
         self._to_string = f"Structure_MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
         self.sparse = sparse
 
-        if proposal_object is None:
+        if proposal_object is None or proposal_object=='graph':
             if self.initial_state is None:
                 self.initial_state = self._pc_state if pc_init else DAG.generate_random(self.node_labels, 0.5, seed)
                 if whitelist is not None:
@@ -76,6 +78,8 @@ class StructureMCMC(MCMC):
                   'operation': 'initial', 'accepted': False, 'acceptance_prob': 0, 'score_proposed': state_score['score'], 'timestamp': 0}
         self.update_results(0, result)
         self._rng = np.random.default_rng(seed=seed)
+
+        self.config_dict.update({'pc_init': pc_init, 'sparse': sparse})
 
     def step(self):
         """

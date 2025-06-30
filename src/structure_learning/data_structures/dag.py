@@ -184,7 +184,7 @@ class DAG(Graph):
         return CPDAG(incidence=incidence, nodes=self.nodes)
 
     @classmethod
-    def compute_ancestor_matrix(cls, adj_matrix=None):
+    def compute_ancestor_matrix(cls, adj_matrix):
         """
         Compute the ancestor matrix from an adjacency matrix.
 
@@ -194,7 +194,12 @@ class DAG(Graph):
         Returns:
             numpy.ndarray: Ancestor matrix.
         """
-        adj_matrix = cls.incidence if adj_matrix is None else adj_matrix
+        if adj_matrix is None:
+            raise Exception("Adjacency matrix not provided")
+        
+        if not isinstance(adj_matrix, np.ndarray):
+            adj_matrix = adj_matrix.incidence
+        
         num_nodes = adj_matrix.shape[0]
 
         # Initialize the ancestor matrix as the adjacency matrix

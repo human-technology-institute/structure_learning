@@ -63,13 +63,9 @@ class PartitionMCMC(MCMC):
             searchspace (str | numpy.ndarray):                      Graph search space. "FULL" | "PC" | np.ndarray | None. If none, full search space is used.
             plus1 (bool):                                           Use plus1 neighborhood
         """
-        # elif isinstance(initial_state, Graph):
-        #     initial_state = OrderedPartition.from_graph(initial_state, list(score_object.data.columns if score_object else data.columns))
-        # elif not isinstance(initial_state, OrderedPartition):
-        #     raise Exception("Initial state must be of type Graph, numpy array, or an OrderedPartition")
-
         super().__init__(data=data, initial_state=initial_state, max_iter=max_iter, proposal_object=proposal_object, pc_significance_level=pc_significance_level, pc_ci_test=pc_ci_test,
-                         score_object=score_object, pc_init=(searchspace=="PC"), blacklist=blacklist, whitelist=whitelist, plus1=plus1, seed=seed, result_type=result_type, graph_type=graph_type)
+                         score_object=score_object, pc_init=(searchspace=="PC"), blacklist=blacklist, whitelist=whitelist, seed=seed, result_type=result_type, graph_type=graph_type)
+        self.config_dict.update({'searchspace': searchspace, 'plus1': plus1, 'concise': concise})
         self._to_string = f"Partition_MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
         self.concise = concise
 

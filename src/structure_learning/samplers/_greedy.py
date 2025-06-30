@@ -8,9 +8,8 @@ from structure_learning.proposals import GraphProposal
 from structure_learning.scores import BGeScore, BDeuScore
 from structure_learning.data_structures import DAG
 from structure_learning.data import Data
-from .sampler import Sampler
 
-class GreedySearch(Sampler):
+class GreedySearch:
 
     DETERMINISTIC_STRATEGY = 'deterministic'
     PROBABILISTIC_STRATEGY = 'probabilistic'
@@ -21,44 +20,25 @@ class GreedySearch(Sampler):
                  strategy=DETERMINISTIC_STRATEGY, include_reversal=False, max_unexplored=2000, retain_size=1000):
         
         self.proposal = GraphProposal(initial_state=incidence, blacklist=blacklist, whitelist=whitelist, seed=seed)
-        super().__init__(data)
-
         self.n_particles = n_particles
         self.particles = OrderedDict()
+        self.data = data
         self.n_nodes = len(self.data.columns)
         self.initial_state = incidence
-        self.strategy = strategy
-        self.max_evaluations = max_evaluations
-
-        # list/heap of states to explore
         self.unexplored = []
-
-        # states to explore as list, only used in PROBABILISTIC_STRATEGY as there is no need to maintain heap
         self.unexplored_keys = []
         self.unexplored_scores = []
         self.unexplored_timestamp = []
-
-        # neighbours as dict, used in PROBABILISTIC_PARTIAL_EXPLORATION_STRATEGY to store running score prediction for unexplored states
+        self.strategy = strategy
+        self.include_reversal = include_reversal
         self.neighbour_count = defaultdict(int)
         self.neighbour_score = defaultdict(float)
         self.state_score = {}
-
-        # used to keep the number of states in memory manageable
+        self.max_evaluations = max_evaluations
         self.max_unexplored = max_unexplored
         self.retain_size = retain_size
-        
-        self.include_reversal = include_reversal
         self.scorer = BDeuScore(data=data, incidence=incidence) if score_type=='bdeu' else BGeScore(data=data, incidence=incidence)
-        
-        self.config_dict = dict(seed=seed, n_particles=n_particles, max_evaluations=max_evaluations, score_type=score_type,
-                 strategy=strategy, include_reversal=include_reversal, max_unexplored=max_unexplored, retain_size=retain_size)
 
-    def config(self):
-        """
-        Returns the configuration of the HillClimb algorithm.
-        """
-        return {'sampler_type': self.__class__.__name__, 'config': self.config_dict}
-    
     def get_state_to_explore(self):
         if self.strategy == self.DETERMINISTIC_STRATEGY:
             return heapq.heappop(self.unexplored)
@@ -100,14 +80,14 @@ class GreedySearch(Sampler):
             self.unexplored_timestamp.extend([n[2] for n in neighbours])
         else:
             raise Exception('Unimplemented strategy', self.strategy)
-        
-    def run(self, increment=None):
+
+    def run(self):
         n_particles = self.n_particles
         max_evaluations = self.max_evaluations
 
         self.scorer.incidence = self.initial_state
         start_time = time.time()
-        score = self.scorer.compute()['score']*-1
+        score = self.scorer.compute()['score']*-1#(-1 if self.strategy == GreedySearch.DETERMINISTIC_STRATEGY else 1)
          # multiply -1 to use min-heap if strategy is not probabilistic (requires fixed sized heap)
         current_state_key = self.initial_state.to_key()
         heapq.heappush(self.unexplored, (score.item(), current_state_key, 0) if self.strategy!=GreedySearch.PROBABILISTIC_PARTIAL_EXPLORATION_STRATEGY else current_state_key)
@@ -118,29 +98,28 @@ class GreedySearch(Sampler):
         self.neighbour_score[current_state_key] = score
 
         n_evaluations = 1
-        self.iterations = 0
-        ctr = 0
+        iterations = 0
         while True:
             
             # stopping criteria
-            if increment is not None and ctr >= increment:
-                break
-
             if self.strategy == GreedySearch.DETERMINISTIC_STRATEGY:
+                print(iterations, len(self.particles) + len(self.unexplored))
                 if len(self.unexplored) == 0 or n_evaluations >= max_evaluations:
                     self.particles.update({key: {'score': -score, 'timestamp': ts} for score,key,ts in self.unexplored})
                     break
 
             if self.strategy == GreedySearch.PROBABILISTIC_STRATEGY:
+                print(iterations, len(self.particles) + len(self.unexplored_scores))
                 if len(self.unexplored_scores) == 0 or n_evaluations >= max_evaluations:
                     self.particles.update({state: {'score': -self.unexplored_scores[idx], 'timestamp': self.unexplored_timestamp[idx]} for idx,state in enumerate(self.unexplored_keys)})
                     break
 
             if self.strategy == GreedySearch.PROBABILISTIC_PARTIAL_EXPLORATION_STRATEGY:
+                print(iterations, len(self.particles))
                 if len(self.neighbour_score) == 0 or len(self.unexplored) == 0:
                     break
 
-            if len(self.particles) >= max_evaluations or len(self.particles) >= n_particles:
+            if len(self.particles) >= max_evaluations:
                 break
             
             # get next particle to explore
@@ -164,7 +143,7 @@ class GreedySearch(Sampler):
                 print(l, n_evaluations)
 
             # get neighbours
-            _, del_indx_mat, add_indx_mat, rev_indx_mat, _, _, _ = self.proposal._compute_nbhood(current_state)
+            _, del_indx_mat, add_indx_mat, rev_indx_mat, num_deletion, num_addition, num_reversal = self.proposal._compute_nbhood(current_state)
             neighbours = []
 
             # evaluate all neighbors from edge deletion
@@ -231,7 +210,6 @@ class GreedySearch(Sampler):
                 self.add_neighbours(neighbours)
 
             n_evaluations += len(neighbours) 
-            self.iterations += 1
-            ctr += 1
+            iterations += 1
 
         return self.particles

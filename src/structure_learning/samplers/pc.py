@@ -31,8 +31,8 @@ class PC(Sampler):
         return self.dag, self.cpdag
     
     def config(self):
-        return {
+        return {'sampler_type': self.__class__.__name__, 'config': {
             'significance_level': self.significance_level,
             'ci_test': self.ci_test
-        }
+        }}
         

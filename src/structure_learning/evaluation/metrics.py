@@ -301,12 +301,18 @@ class RHat(Metric):
 _metrics = {
     'kl': KLD,
     'kld': KLD,
+    'KLD': KLD,
     'js': JSD,
-    'jsd': JSD, 
+    'jsd': JSD,
+    'JSD': JSD, 
     'mse': MSE,
+    'MSE': MSE,
     'mae': MAE,
+    'MAE': MAE,
     'shd': SHD,
-    'rhat': RHat
+    'SHD': SHD,
+    'rhat': RHat,
+    'RHat': RHat
 }
 
 def get_metric(metric: str):

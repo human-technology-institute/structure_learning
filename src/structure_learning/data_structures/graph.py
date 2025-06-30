@@ -463,6 +463,16 @@ class Graph:
         """
         self.to_pandas().to_csv(filename)
 
+    def __copy__(self):
+        g = Graph()
+        g.incidence = self.incidence.copy()
+        g.nodes = self.nodes.copy()
+        g.weights = self.weights.copy() if self.weights is not None else None
+        return g 
+    
+    def copy(self):
+        return self.__copy__()
+
     @classmethod
     def from_csv(cls, filename):
         """

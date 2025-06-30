@@ -37,7 +37,7 @@ class MCMC(Sampler):
     def __init__(self, data: pd.DataFrame, initial_state: State, max_iter: int = 30000, score_object: Union[str, Score] = None,
                  proposal_object: Union[str, StructureLearningProposal] = None, 
                  pc_init: bool = True, pc_significance_level = 0.01, pc_ci_test = 'pearsonr',
-                 blacklist: np.ndarray = None, whitelist: np.ndarray = None, plus1: bool = False, seed: int = None, 
+                 blacklist: np.ndarray = None, whitelist: np.ndarray = None, seed: int = None, 
                  result_type: str = RESULT_TYPE_DIST, graph_type='dag'):
         """
         Initialize the MCMC instance.
@@ -76,9 +76,9 @@ class MCMC(Sampler):
             print('Using default BGe score')
             score_object = BGeScore(data=data)
         elif isinstance(score_object, str):
-            if score_object.lower() == 'bge':
+            if score_object=='BGeScore' or score_object.lower() == 'bge':
                 score_object = BGeScore(data=data)
-            elif score_object.lower() in ['bde', 'bdeu']:
+            elif score_object=='BDeuScore' or score_object.lower() in ['bde', 'bdeu']:
                 score_object = BDeuScore(data=data)
             else:
                 raise Exception(f"Unsupported score {score_object}")
@@ -117,10 +117,8 @@ class MCMC(Sampler):
             'max_iter': max_iter,
             'score_object': type(score_object).__name__,
             'proposal_object': type(proposal_object).__name__ if isinstance(proposal_object, StructureLearningProposal) else proposal_object,
-            'pc_init': pc_init,
             'pc_significance_level': pc_significance_level,
             'pc_ci_test': pc_ci_test,
-            'plus1': plus1,
             'seed': seed,
             'result_type': result_type,
             'graph_type': graph_type
@@ -209,7 +207,7 @@ class MCMC(Sampler):
             list: Chain information.
         """
         if self.result_type == 'distribution':
-            return results.prop(key)
+            return list(results.particles.keys()) if key=='graph' else results.prop(key)
         else:
             return [result[key] for _,(i,result) in enumerate(results.items())]
 
@@ -273,4 +271,4 @@ class MCMC(Sampler):
         Returns:
             dict: Configuration dictionary.
         """
-        return self.config_dict
+        return {'sampler_type': self.__class__.__name__, 'config': self.config_dict}
