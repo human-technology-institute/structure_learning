@@ -106,6 +106,38 @@ mcmc_results, acceptance = M.run()
 graphs = M.get_graphs(mcmc_results)
 ```
 
+# Streamlined experiments
+
+Experiments involving different samplers can be configured using the Experiment class.
+```
+samplers = [
+    {
+        "sampler_type": "StructureMCMC",
+        "n_chains": 2,
+        "config": {
+            "max_iter": 5000,
+            "score_object": "bge",
+            "pc_init": False,
+            "result_type": "distribution",
+            "graph_type": "dag",
+        }
+    },
+    {
+        "sampler_type": "PartitionMCMC",
+        "n_chains": 2,
+        "config": {
+            "max_iter": 5000,
+            "score_object": "bge",
+            "result_type": "distribution",
+            "graph_type": "dag",
+            "searchspace": "FULL"
+        }
+    }
+]
+exp = Experiment(experiment_name='test', data=synthetic_data.data, samplers=samplers, ground_truth='true_distribution.npy', metrics=['mae', 'mse', 'rhat', 'kld', 'jsd'], n_threads=4, seed=42)
+res = exp.run()
+metrics = exp.evaluate()
+```
 # Other libraries
 In addition to this Python implementation, similar approaches can be found in the R packages [BiDAG](https://cran.r-project.org/package=BiDAG) and **bnlearn**, which provide tools for structure learning in Bayesian networks, including MCMC methods.
 
