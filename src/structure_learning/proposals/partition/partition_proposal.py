@@ -88,7 +88,7 @@ class PartitionProposal(StructureLearningProposal):
             self.operation = self.STAY_STILL
         return self.proposed_state, self.operation
 
-    def compute_acceptance_ratio(self, current_state_score, proposed_state_score):
+    def compute_acceptance_ratio(self, current_state_score, proposed_state_score, current_state_prior=0, proposed_state_prior=0):
         """
         Computes the acceptance ratio for the proposed state.
 
@@ -111,8 +111,8 @@ class PartitionProposal(StructureLearningProposal):
         else:
             raise Exception("Invalid operation ", self.operation)
 
-        numerator = proposed_state_score + np.log(self._Q_current_proposed)
-        denominator = current_state_score + np.log(self._Q_proposed_current)
+        numerator = proposed_state_score + np.log(self._Q_current_proposed) + proposed_state_prior
+        denominator = current_state_score + np.log(self._Q_proposed_current) + current_state_prior
 
         try:
             acceptance_ratio = numerator - denominator

@@ -43,7 +43,7 @@ class StructureLearningProposal(ABC):
         pass
 
     @abstractmethod
-    def compute_acceptance_ratio(self) -> float:
+    def compute_acceptance_ratio(self, current_state_score, proposed_state_score, current_state_prior=0, proposed_state_prior=0) -> float:
         pass
 
     @abstractmethod

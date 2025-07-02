@@ -103,7 +103,7 @@ class GraphProposal(StructureLearningProposal):
 
         return self.proposed_state, operation
 
-    def compute_acceptance_ratio(self, current_state_score, proposed_state_score):
+    def compute_acceptance_ratio(self, current_state_score, proposed_state_score, current_state_prior=0, proposed_state_prior=0):
         """
         Calculate log acceptance ratio.
 
@@ -112,13 +112,13 @@ class GraphProposal(StructureLearningProposal):
         """
 
         try:
-            numerator = proposed_state_score + np.log(self._prob_Gcurr_Gprop)
+            numerator = proposed_state_score + np.log(self._prob_Gcurr_Gprop) + proposed_state_prior
         except Exception as e:
             print(e)
             return -np.inf
 
         try:
-            denominator = current_state_score + np.log(self._prob_Gprop_Gcurr)
+            denominator = current_state_score + np.log(self._prob_Gprop_Gcurr) + current_state_prior
         except Exception as e:
             print(e)
             return -np.inf
