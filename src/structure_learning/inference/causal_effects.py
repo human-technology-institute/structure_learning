@@ -276,16 +276,19 @@ class CausalEffects:
         if plot:
             if edges is None:
                 edges = [(node1, node2) for node1 in self.data.columns for node2 in self.data.columns if node1 != node2]
-            effects_reshaped = pd.DataFrame(np.reshape(effects, (-1, np.product(effects.shape[1:]))), columns=[(node1, node2) for node1 in self.data.columns for node2 in self.data.columns])
-            effects_reshaped['weights'] = weights.flatten()
-            effects_melt = pd.melt(effects_reshaped, value_vars=edges, value_name='param', var_name='edge', id_vars='weights')
-            print(effects_melt)
-            sns.kdeplot(data=effects_melt, x='param', weights='weights', hue='edge', fill=True, common_norm=False)
-            plt.xlabel('Causal Effect')
-            plt.ylabel('Density')
-            plt.title('Pairwise Causal Effects')
-            plt.legend([f"{edge[0]} -> {edge[1]}" for edge in edges])
+            self.plot(effects, weights, edges)
+
         return effects, weights
+    
+    def plot(self, effects, weights, edges):
+        effects_reshaped = pd.DataFrame(np.reshape(effects, (-1, np.product(effects.shape[1:]))), columns=[(node1, node2) for node1 in self.data.columns for node2 in self.data.columns])
+        effects_reshaped['weights'] = weights.flatten()
+        effects_melt = pd.melt(effects_reshaped, value_vars=edges, value_name='param', var_name='edge', id_vars='weights')
+        sns.kdeplot(data=effects_melt, x='param', weights='weights', hue='edge', fill=True, common_norm=False)
+        plt.xlabel('Causal Effect')
+        plt.ylabel('Density')
+        plt.title('Pairwise Causal Effects')
+        plt.legend([f"{edge[0]} -> {edge[1]}" for edge in edges])
 
     def do(self, intervention: List[Union[int, str]], do_value: float = 1.0, multiply: bool = False) -> np.ndarray:
         """
@@ -320,15 +323,7 @@ class CausalEffects:
         if plot:
             if edges is None:
                 edges = [(node1, node2) for node1 in intervention for node2 in self.data.columns if node1 != node2]
-            effects_reshaped = pd.DataFrame(np.reshape(effects, (-1, np.product(effects.shape[1:]))), columns=[(node1, node2) for node1 in self.data.columns for node2 in self.data.columns])
-            effects_reshaped['weights'] = weights.flatten()
-            effects_melt = pd.melt(effects_reshaped, value_vars=edges, value_name='param', var_name='edge', id_vars='weights')
-            print(effects_melt)
-            sns.kdeplot(data=effects_melt, x='param', weights='weights', hue='edge', fill=True, common_norm=False)
-            plt.xlabel('Causal Effect')
-            plt.ylabel('Density')
-            plt.title('Pairwise Causal Effects')
-            plt.legend([f"{edge[0]} -> {edge[1]}" for edge in edges])
+            self.plot(effects, weights, edges)
         return effects, weights
     
     def estimate_effects(self, n_iter=2000, burn_in=500):
