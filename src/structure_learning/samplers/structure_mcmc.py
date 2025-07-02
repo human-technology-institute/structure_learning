@@ -21,6 +21,7 @@ import numpy as np
 import pandas as pd
 from structure_learning.proposals import StructureLearningProposal, GraphProposal
 from structure_learning.data_structures import DAG
+from structure_learning.priors import Prior, UniformPrior
 from structure_learning.scores import Score
 from structure_learning.samplers import MCMC
 
@@ -29,7 +30,7 @@ class StructureMCMC(MCMC):
     Implementation of Structure MCMC.
     """
     def __init__(self, data: pd.DataFrame = None, initial_state : np.ndarray = None, max_iter : int = 30000,
-                 score_object : Union[str, Score] = None, proposal_object : StructureLearningProposal = None, 
+                 score_object : Union[str, Score] = None, proposal_object : StructureLearningProposal = None, prior: Prior = None,
                  pc_init = True, pc_significance_level = 0.01, pc_ci_test = 'pearsonr',
                  blacklist: np.ndarray = None, whitelist: np.ndarray = None, seed: int = None, sparse=True,
                  result_type: str = 'distribution', graph_type='dag'):
@@ -72,11 +73,18 @@ class StructureMCMC(MCMC):
             raise Exception('Unsupported proposal', proposal_object)
         
         self.proposal_object = proposal_object
+
+        if prior is None:
+            prior = UniformPrior(n=DAG.count_dags(len(data.columns)))
+
+        self.prior = prior
+
         state_score = self.score_object.compute(self.proposal_object.current_state)
         self.scores = {node: info['score'] for node, info in state_score['parameters'].items()}
         result = {'graph': self.proposal_object.current_state, 'current_state': self.proposal_object.current_state, 'proposed_state': None, 'score_current': state_score['score'],
+                  'proposed_state_prior': None, 'current_state_prior': self.prior.compute(self.proposal_object.current_state),
                   'operation': 'initial', 'accepted': False, 'acceptance_prob': 0, 'score_proposed': state_score['score'], 'timestamp': 0}
-        self.update_results(0, result)
+        # self.update_results(0, result)
         self._rng = np.random.default_rng(seed=seed)
 
         self.config_dict.update({'pc_init': pc_init, 'sparse': sparse})
@@ -93,6 +101,7 @@ class StructureMCMC(MCMC):
 
         current_state = self.proposal_object.current_state
         current_state_score = sum(list(self.scores.values()))
+        current_state_prior = self.prior.compute(self.proposal_object.current_state)
 
         if operation != StructureLearningProposal.STAY_STILL:
 
@@ -102,8 +111,9 @@ class StructureMCMC(MCMC):
             for node in nodes_to_rescore:
                 scores_copy[node] = self.score_object.compute_node(proposed_state, node)['score']
             proposed_state_score = sum(list(scores_copy.values()))
+            proposed_state_prior = self.prior.compute(proposed_state)
 
-            acceptance_prob = self.proposal_object.compute_acceptance_ratio(current_state_score, proposed_state_score)
+            acceptance_prob = self.proposal_object.compute_acceptance_ratio(current_state_score, proposed_state_score, current_state_prior, proposed_state_prior)
             u =  np.log(self._rng.uniform(0,1))
             is_accepted = u < acceptance_prob
             if is_accepted:
@@ -112,7 +122,9 @@ class StructureMCMC(MCMC):
                 self.scores = scores_copy
         else:
             is_accepted = False
+            proposed_state_prior = current_state_prior
             acceptance_prob = proposed_state_score = 0
 
         return {'graph': current_state, 'current_state': current_state, 'proposed_state': proposed_state, 'score_current': current_state_score,
+                'proposed_state_prior': proposed_state_prior, 'current_state_prior': current_state_prior,
                 'operation': operation, 'accepted': is_accepted, 'acceptance_prob': acceptance_prob, 'score_proposed': proposed_state_score, 'timestamp': time.time() - self._start_time}

@@ -102,7 +102,7 @@ class Distribution:
             int: The number of particles.
         """
         return len(self.particles)
-    
+   
     def update(self, particle, data):
         """
         Adds particle to distribution. If particle already exists, update its data.
@@ -113,7 +113,7 @@ class Distribution:
         """
         if particle in self:
             for k,v in data.items():    
-                if k in ('freq', 'logp', 'weight'):
+                if k in ('freq', 'logp', 'weight', 'prior', 'score_current'):
                     continue
                 if k not in self.particles[particle]:
                     continue
@@ -123,7 +123,7 @@ class Distribution:
         else:
             self.particles[particle] = {}
             for k,v in data.items():
-                self.particles[particle][k] = [v] if not isinstance(v, list) and k not in ('logp', 'weight') else v
+                self.particles[particle][k] = [v] if not isinstance(v, list) and k not in ('logp', 'weight', 'prior') else v
             self.particles[particle]['freq'] = (1 if 'freq' not in data else data['freq'])
 
     def hist(self, prop='freq', normalise=False):
@@ -345,14 +345,12 @@ class MCMCDistribution(Distribution):
             iteration (int):        Iteration number at which the particle was generated.
             data (dict):            Particle data
         """
-        data.update({'iteration': iteration, 'logp': data['score_current'] if 'logp' not in data else data['logp']})
-        super().update(particle, data)
+        super().update(particle, {'iteration': iteration, 'logp': data['score_current'] if 'logp' not in data else data['logp'], 'prior': data.get('current_state_prior', None), 'timestamp': data['timestamp']})
             
         if self.rejected is not None and not data['accepted']:
             if data['proposed_state'] is not None:
                 particle = data['proposed_state'].to_key()
-                self.rejected.update(particle, {'logp': data['score_proposed'], 'iteration': iteration, 
-                                                'operation': data['operation'], 'timestamp': data['timestamp']})
+                self.rejected.update(particle, {'logp': data['score_proposed'], 'iteration': iteration, 'timestamp': data['timestamp'], 'prior': data.get('proposed_state_prior', None)})
             
     def to_opad(self, plus=False):
         """

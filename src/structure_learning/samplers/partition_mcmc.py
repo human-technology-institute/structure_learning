@@ -128,7 +128,7 @@ class PartitionMCMC(MCMC):
             result.update({'current_partition': self.proposal_object.current_state, 'party': party_curr, 'permy': permy_curr, 'posy': posy_curr, 'proposed_partition': None})
                         
         self.current_step = result
-        self.update_results(0, result)
+        # self.update_results(0, result)
 
     def step(self):
         """

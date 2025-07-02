@@ -31,6 +31,7 @@ Functions:
 
 from typing import Union, List
 import numpy as np
+import pandas as pd
 import networkx as nx
 from scipy.stats import truncnorm, norm
 import matplotlib.pyplot as plt
@@ -231,12 +232,12 @@ def simulate_do_effects(adj_matrix, intervention, est_params, domains, data, do_
                 if j == i:
                     continue
                 parents = list(G.predecessors(j))
-                beta = est_params[idx][j]['beta_mean']
+                beta = est_params[idx][j]['beta'].mean(axis=0)
                 X = data_do[:, parents] if parents else np.zeros((N, 0))
                 mu = beta[0] + (X @ beta[1:])
                 if domains[j] == 'continuous':
                     # add Gaussian noise with estimated sigma
-                    sigma = np.sqrt(est_params[idx][j].get('sigma2_mean', 1.0))
+                    sigma = np.sqrt(est_params[idx][j].get('sigma2', [1.0])).mean()
                     data_do[:, j] = mu + np.random.normal(scale=sigma, size=N)
                 else:
                     # sample latent z ~ N(mu,1) and threshold
@@ -244,7 +245,7 @@ def simulate_do_effects(adj_matrix, intervention, est_params, domains, data, do_
                     data_do[:, j] = (z > 0).astype(int)
             effect_matrix[i, :] = data_do.mean(axis=0) - baseline_means
         effects.append(effect_matrix)
-    return effects
+    return np.array(effects)
     
 class CausalEffects:
     def __init__(self, graphs: Union[DAG, List[DAG], MCMCDistribution], data: Data):
@@ -257,7 +258,7 @@ class CausalEffects:
         """
         self.graphs = graphs
         self.data = data
-        self.domains = data.variable_types
+        self.domains = [data.variable_types[v] for v in data.columns]
 
     def beeps(self, edges: List[tuple] = None, plot: bool = False):
         """
@@ -269,18 +270,22 @@ class CausalEffects:
         if self.graphs is None:
             raise ValueError("No graph provided for causal effects computation.")
         graphs = self.graphs if isinstance(self.graphs, list) else ([self.graphs] if isinstance(self.graphs, DAG) else [DAG.from_key(key=g, nodes=list(self.data.columns)) for g in self.graphs.particles])
-        weights = 1. if not isinstance(self.graphs, MCMCDistribution) else np.expand_dims(self.graphs.prop('p'), (1,2))
-        effects = sumu.Beeps(dags=[g.incidence for g in graphs], data=self.data.values.values).sample_pairwise()*weights
+        weights = 1. if not isinstance(self.graphs, MCMCDistribution) else self.graphs.prop('p')
+        effects = sumu.Beeps(dags=[g.incidence for g in graphs], data=self.data.values.values).sample_pairwise()
         node_to_index = {node:idx for idx,node in enumerate(self.data.columns)}
         if plot:
             if edges is None:
                 edges = [(node1, node2) for node1 in self.data.columns for node2 in self.data.columns if node1 != node2]
-            sns.kdeplot(data=[effects[:, node_to_index[edge[0]], node_to_index[edge[1]]] for edge in edges], fill=True, common_norm=False)
+            effects_reshaped = pd.DataFrame(np.reshape(effects, (-1, np.product(effects.shape[1:]))), columns=[(node1, node2) for node1 in self.data.columns for node2 in self.data.columns])
+            effects_reshaped['weights'] = weights.flatten()
+            effects_melt = pd.melt(effects_reshaped, value_vars=edges, value_name='param', var_name='edge', id_vars='weights')
+            print(effects_melt)
+            sns.kdeplot(data=effects_melt, x='param', weights='weights', hue='edge', fill=True, common_norm=False)
             plt.xlabel('Causal Effect')
             plt.ylabel('Density')
             plt.title('Pairwise Causal Effects')
             plt.legend([f"{edge[0]} -> {edge[1]}" for edge in edges])
-        return effects*weights
+        return effects, weights
 
     def do(self, intervention: List[Union[int, str]], do_value: float = 1.0, multiply: bool = False) -> np.ndarray:
         """
@@ -296,7 +301,7 @@ class CausalEffects:
         """
         return self.simulate(intervention, do_value, multiply)
 
-    def simulate(self, intervention: List[Union[int, str]], do_value: float = 1.0, multiply: bool = False) -> np.ndarray:
+    def simulate(self, intervention: List[Union[int, str]], do_value: float = 1.0, multiply: bool = False, plot=False, edges=None) -> np.ndarray:
         """
         Perform do-intervention on the graph and data.
 
@@ -308,36 +313,23 @@ class CausalEffects:
         Returns:
             np.ndarray: The effect of the intervention on the data.
         """
-        if isinstance(self.graphs, DAG):
-            adj_matrix = [self.graphs.incidence]
-        else:
-            adj_matrix = [g.incidence for g in self.graphs]
-        if len(intervention) > 0 and isinstance(intervention[0], str):
-            intervention = [self.data.variables.index(i) for i in intervention]
-        data_values = self.data.values.values
-        est_params = estimate_hybrid_dag(adj_matrix, data_values, self.domains)
-        return simulate_do_effects(adj_matrix, intervention, est_params, self.domains, data_values, do_value, multiply)
-    
-    def plot_effects(self, intervention: Union[int, str], do_value: float = 1.0, multiply: bool = False):
-        """
-        Plot the effects of the do-intervention.
-        Parameters:
-            intervention (Union[int, str]): The node index or label to intervene on.
-            do_value (float): The value to set for the intervention.
-            multiply (bool): If True, applies the intervention as a multiplier; otherwise, adds it.
-        """
-        effects = self.simulate(intervention, do_value, multiply)
-        plt.figure(figsize=(10, 6))
-        plt.imshow(effects, cmap='coolwarm', aspect='auto')
-        plt.colorbar(label='Effect Size')
-        plt.title(f'Do-Intervention Effects (do_value={do_value}, multiply={multiply})')
-        plt.xlabel('Nodes')
-        plt.ylabel('Intervened Node')
-        plt.xticks(ticks=np.arange(len(self.data.variables)), labels=self.data.variables, rotation=45)
-        plt.yticks(ticks=np.arange(len(self.data.variables)), labels=self.data.variables)
-        plt.tight_layout()
-        plt.show()
-        return effects
+        est_params, adj_matrix, weights = self.estimate_effects()
+        intervention_idx = [self.data.variables.index(i) for i in intervention] if len(intervention) > 0 and isinstance(intervention[0], str) else intervention
+        effects = simulate_do_effects(adj_matrix, intervention_idx, est_params, self.domains, self.data.values.values, do_value, multiply)
+
+        if plot:
+            if edges is None:
+                edges = [(node1, node2) for node1 in intervention for node2 in self.data.columns if node1 != node2]
+            effects_reshaped = pd.DataFrame(np.reshape(effects, (-1, np.product(effects.shape[1:]))), columns=[(node1, node2) for node1 in self.data.columns for node2 in self.data.columns])
+            effects_reshaped['weights'] = weights.flatten()
+            effects_melt = pd.melt(effects_reshaped, value_vars=edges, value_name='param', var_name='edge', id_vars='weights')
+            print(effects_melt)
+            sns.kdeplot(data=effects_melt, x='param', weights='weights', hue='edge', fill=True, common_norm=False)
+            plt.xlabel('Causal Effect')
+            plt.ylabel('Density')
+            plt.title('Pairwise Causal Effects')
+            plt.legend([f"{edge[0]} -> {edge[1]}" for edge in edges])
+        return effects, weights
     
     def estimate_effects(self, n_iter=2000, burn_in=500):
         """
@@ -347,8 +339,15 @@ class CausalEffects:
             burn_in (int): Number of burn-in iterations to discard.
         Returns:
             dict: Estimated parameters for each node.
-        """
-        adj_matrix = [self.graphs.incidence] if isinstance(self.graphs, DAG) else [g.incidence for g in self.graphs]
+        """        
+        if isinstance(self.graphs, DAG):
+            adj_matrix = [self.graphs.incidence]
+            weights = 1.
+        elif isinstance(self.graphs, MCMCDistribution):
+            adj_matrix = [DAG.from_key(key=g, nodes=list(self.data.columns)).incidence for g in self.graphs.particles]
+            weights = np.expand_dims(self.graphs.prop('p'), (1,2))
+        else:
+            adj_matrix = [g.incidence for g in self.graphs]
+            weights = 1.
         data_values = self.data.values.values
-        return estimate_hybrid_dag(adj_matrix, data_values, self.domains, n_iter, burn_in)
-
+        return estimate_hybrid_dag(adj_matrix, data_values, self.domains, n_iter, burn_in), adj_matrix, weights
