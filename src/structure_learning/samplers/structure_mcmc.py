@@ -75,7 +75,7 @@ class StructureMCMC(MCMC):
         self.proposal_object = proposal_object
 
         if prior is None:
-            prior = UniformPrior(n=DAG.count_dags(len(data.columns)))
+            prior = UniformPrior()
 
         self.prior = prior
 

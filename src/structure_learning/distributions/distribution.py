@@ -64,11 +64,18 @@ class Distribution:
         if len(self.particles) == 0:
             return
         self.p = self.prop(prop)
+        prior = self.prop('prior')
+        if len(prior) == 0:
+            prior = 1
         if log:
+            self.p = self.p + prior
             self.p = np.exp(self.p - np.max(self.p))
+        else:
+            self.p = self.p*np.exp(prior)
         
         keys = list(self.particles.keys())
         weights = np.array([(1. if 'weight' not in self.particles[particle] else self.particles[particle]['weight']) for particle in keys])
+        
         self.p = (self.p*weights).astype(float)
         Z = np.sum(self.p)
         self.p /= Z
@@ -86,7 +93,7 @@ class Distribution:
         Returns:
             (list)          particle data
         """
-        return np.array([v[name] for v in self.particles.values()])
+        return np.array([v[name] for v in self.particles.values() if name in v])
     
     def __contains__(self, particle):
         """

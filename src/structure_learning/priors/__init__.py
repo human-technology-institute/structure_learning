@@ -1,1 +1,1 @@
-from .prior import Prior, UniformPrior
+from .prior import Prior, UniformPrior, CategoricalEdgePrior, CategoricalPrior
