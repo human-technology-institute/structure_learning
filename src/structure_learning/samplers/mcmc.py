@@ -39,7 +39,7 @@ class MCMC(Sampler):
                  proposal_object: Union[str, StructureLearningProposal] = None, 
                  pc_init: bool = True, pc_significance_level = 0.01, pc_ci_test = 'pearsonr',
                  blacklist: np.ndarray = None, whitelist: np.ndarray = None, seed: int = None, 
-                 result_type: str = RESULT_TYPE_DIST, graph_type='dag'):
+                 result_type: str = RESULT_TYPE_DIST, graph_type='dag', burn_in: float = 0.1):
         """
         Initialize the MCMC instance.
 
@@ -112,6 +112,9 @@ class MCMC(Sampler):
         self._cpdag_sizes = {}
         self._to_string = f"MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
         self.iteration = 0
+        if not (0 <= burn_in < 1):
+            raise ValueError("Burn-in must be a float between 0 and 1")
+        self.burn_in = burn_in*max_iter
 
         self.config_dict = {
             'initial_state': initial_state,
@@ -144,7 +147,8 @@ class MCMC(Sampler):
                 results.append((self.results.copy(), self.n_accepted/self.max_iter))
 
             result = self.step()
-            self.update_results(self.iteration, result)
+            if self.iteration >= self.burn_in:
+                self.update_results(self.iteration, result)
             self.iteration += 1
             tqdm_bar.update(1)
         tqdm_bar.close()

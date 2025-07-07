@@ -33,7 +33,7 @@ class StructureMCMC(MCMC):
                  score_object : Union[str, Score] = None, proposal_object : StructureLearningProposal = None, prior: Prior = None,
                  pc_init = True, pc_significance_level = 0.01, pc_ci_test = 'pearsonr',
                  blacklist: np.ndarray = None, whitelist: np.ndarray = None, seed: int = None, sparse=True,
-                 result_type: str = 'distribution', graph_type='dag'):
+                 result_type: str = 'distribution', graph_type='dag', burn_in: float = 0.1):
         """
         Initilialise Structure MCMC instance.
 
@@ -56,7 +56,7 @@ class StructureMCMC(MCMC):
         super().__init__(data=data, initial_state=initial_state, max_iter=max_iter, score_object=score_object,
                          proposal_object='graph' if proposal_object is None else proposal_object, 
                          pc_init=pc_init,  pc_significance_level=pc_significance_level, pc_ci_test=pc_ci_test,
-                         blacklist=blacklist, whitelist=whitelist, seed=seed, result_type=result_type, graph_type=graph_type)
+                         blacklist=blacklist, whitelist=whitelist, seed=seed, result_type=result_type, graph_type=graph_type, burn_in=burn_in)
 
         self._to_string = f"Structure_MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
         self.sparse = sparse
