@@ -121,7 +121,7 @@ class CPDAG(Graph):
         Returns:
             int: Number of DAGs.
         """
-        [g for g in self.enumerate_dags(generate=True)]
+        [g for g in self.enumerate_dags(generate=False)]
         return self._n_dags
 
     def plot(self, filename=None, text=None, data: pd.DataFrame=None):

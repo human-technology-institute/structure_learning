@@ -13,6 +13,7 @@ import time
 import pandas as pd
 import networkx as nx
 import numpy as np
+from tqdm import tqdm
 from matplotlib import pyplot as plt
 from structure_learning.scores import Score, BGeScore, BDeuScore
 from structure_learning.proposals import StructureLearningProposal
@@ -132,6 +133,7 @@ class MCMC(Sampler):
             Tuple[dict, float]: Results of the simulation and acceptance ratio.
         """
         results = []
+        tqdm_bar = tqdm(total=self.max_iter, desc='MCMC iterations', unit='iter')
         while True:
             if self.iteration > self.max_iter:
                 break
@@ -144,6 +146,8 @@ class MCMC(Sampler):
             result = self.step()
             self.update_results(self.iteration, result)
             self.iteration += 1
+            tqdm_bar.update(1)
+        tqdm_bar.close()
 
         if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS):
             self.results.normalise()

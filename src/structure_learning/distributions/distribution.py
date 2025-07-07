@@ -110,7 +110,7 @@ class Distribution:
         """
         return len(self.particles)
    
-    def update(self, particle, data):
+    def update(self, particle, data, **kwargs):
         """
         Adds particle to distribution. If particle already exists, update its data.
 
@@ -261,8 +261,9 @@ class Distribution:
         """
         dsum = self.__copy__()
         for particle, data in other.particles.items():
-            dsum.update(particle, data)
+            dsum.update(particle, data, iteration=data.get('iteration', []), normalise=False)
             dsum.particles[particle]['freq'] = data['freq'] + (0 if particle not in self else self.particles[particle]['freq'])
+        dsum.normalise()
         return dsum
 
     def __sub__(self, other: Type['D']) -> Type['D']:
@@ -343,7 +344,7 @@ class MCMCDistribution(Distribution):
             self.rejected = Distribution()
         super().__init__(particles, logp, theta)
 
-    def update(self, particle, iteration, data):
+    def update(self, particle, data, iteration, **kwargs):
         """
         Adds particle to distribution. If particle already exists, update its data.
 
@@ -352,9 +353,9 @@ class MCMCDistribution(Distribution):
             iteration (int):        Iteration number at which the particle was generated.
             data (dict):            Particle data
         """
-        super().update(particle, {'iteration': iteration, 'logp': data['score_current'] if 'logp' not in data else data['logp'], 'prior': data.get('current_state_prior', None), 'timestamp': data['timestamp']})
+        super().update(particle, {'iteration': iteration, 'logp': data['score_current'] if 'logp' not in data else data['logp'], 'prior': data.get('current_state_prior', None) if 'prior' not in data else data['prior'], 'timestamp': data['timestamp']}, iteration=iteration, **kwargs)
             
-        if self.rejected is not None and not data['accepted']:
+        if self.rejected is not None and ('accepted' in data and not data['accepted']):
             if data['proposed_state'] is not None:
                 particle = data['proposed_state'].to_key()
                 self.rejected.update(particle, {'logp': data['score_proposed'], 'iteration': iteration, 'timestamp': data['timestamp'], 'prior': data.get('proposed_state_prior', None)})
@@ -437,7 +438,7 @@ class OPAD(MCMCDistribution):
                     super(MCMCDistribution, self).update(particle, data)
                 self.rejected.clear()
 
-    def update(self, particle, iteration, data, normalise=True):
+    def update(self, particle, data, iteration, normalise=True):
         """
         Add new particles to the OPAD distribution and optionally renormalise.
 
@@ -447,7 +448,7 @@ class OPAD(MCMCDistribution):
             data (dict): Data associated with the particle.
             normalise (bool): If True, renormalise the distribution after adding the particle.
         """
-        super().update(particle, iteration, data)
+        super().update(particle, data, iteration=iteration, normalise=normalise)
         if normalise:
             self.normalise()
 
