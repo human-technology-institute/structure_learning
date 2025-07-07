@@ -30,9 +30,17 @@
           }
           class metrics {
           }
-          class metrics_old {
+          class experiments {
           }
-          class tests {
+          class experiment {
+          }
+          class inference {
+          }
+          class causal_effects {
+          }
+          class priors {
+          }
+          class prior {
           }
           class proposals {
           }
@@ -48,6 +56,8 @@
           }
           class samplers {
           }
+          class _greedy {
+          }
           class greedy {
           }
           class hillclimb {
@@ -57,6 +67,8 @@
           class partition_mcmc {
           }
           class pc {
+          }
+          class sampler {
           }
           class structure_mcmc {
           }
@@ -72,11 +84,7 @@
           }
           class tests {
           }
-          class test_simulation_structure_mcmc_synthetic {
-          }
           class utils {
-          }
-          class graph_utils {
           }
           data --> data
           data --> synthetic
@@ -86,6 +94,7 @@
           data_structures --> dag
           data_structures --> graph
           data_structures --> partition
+          cpdag --> dag
           cpdag --> graph
           dag --> cpdag
           dag --> graph
@@ -95,8 +104,18 @@
           distribution --> scores
           metrics --> data_structures
           metrics --> distributions
-          metrics_old --> graph_utils
-          tests --> graph_utils
+          experiments --> experiment
+          experiment --> data_structures
+          experiment --> distributions
+          experiment --> metrics
+          experiment --> samplers
+          inference --> causal_effects
+          causal_effects --> data
+          causal_effects --> data_structures
+          causal_effects --> distributions
+          priors --> prior
+          prior --> data_structures
+          prior --> distributions
           proposals --> graph_proposal
           proposals --> partition_proposal
           proposals --> proposal
@@ -104,32 +123,43 @@
           graph_proposal --> proposals
           partition_proposal --> partition
           partition_proposal --> proposals
-          samplers --> greedy
+          samplers --> _greedy
           samplers --> hillclimb
           samplers --> mcmc
           samplers --> partition_mcmc
           samplers --> structure_mcmc
+          _greedy --> data
+          _greedy --> data_structures
+          _greedy --> proposals
+          _greedy --> scores
           greedy --> data
           greedy --> data_structures
           greedy --> proposals
+          greedy --> sampler
           greedy --> scores
+          hillclimb --> data
           hillclimb --> cpdag
           hillclimb --> dag
+          hillclimb --> proposals
+          hillclimb --> sampler
           hillclimb --> scores
           mcmc --> data
-          mcmc --> data_structures
           mcmc --> distributions
           mcmc --> proposals
           mcmc --> pc
+          mcmc --> sampler
           mcmc --> scores
-          mcmc --> graph_utils
           partition_mcmc --> data_structures
           partition_mcmc --> proposals
           partition_mcmc --> samplers
           partition_mcmc --> scores
+          pc --> data
           pc --> cpdag
           pc --> dag
+          pc --> sampler
+          sampler --> data
           structure_mcmc --> data_structures
+          structure_mcmc --> priors
           structure_mcmc --> proposals
           structure_mcmc --> samplers
           structure_mcmc --> scores
@@ -147,12 +177,6 @@
           bge --> scores
           score --> data
           score --> data_structures
-          score --> graph_utils
-          test_simulation_structure_mcmc_synthetic --> data
-          test_simulation_structure_mcmc_synthetic --> proposals
-          test_simulation_structure_mcmc_synthetic --> samplers
-          test_simulation_structure_mcmc_synthetic --> scores
-          test_simulation_structure_mcmc_synthetic --> graph_utils
   
        </div>
   </body>

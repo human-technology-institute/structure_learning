@@ -56,7 +56,7 @@ Dependencies:<br>
     
 <tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
 <td class="singlecolumn"><dl>
-<dt class="heading-text"><a href="structure_learning.samplers.mcmc.html#MCMC">structure_learning.samplers.mcmc.MCMC</a>(<a href="abc.html#ABC">abc.ABC</a>)
+<dt class="heading-text"><a href="structure_learning.samplers.mcmc.html#MCMC">structure_learning.samplers.mcmc.MCMC</a>(<a href="structure_learning.samplers.sampler.html#Sampler">structure_learning.samplers.sampler.Sampler</a>)
 </dt><dd>
 <dl>
 <dt class="heading-text"><a href="structure_learning.samplers.structure_mcmc.html#StructureMCMC">StructureMCMC</a>
@@ -69,23 +69,24 @@ Dependencies:<br>
 <td class="section-title" colspan=3>&nbsp;<br><a name="StructureMCMC">class <strong>StructureMCMC</strong></a>(<a href="structure_learning.samplers.mcmc.html#MCMC">structure_learning.samplers.mcmc.MCMC</a>)</td></tr>
     
 <tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
-<td class="decor title-decor" colspan=2><span class="code"><a href="#StructureMCMC">StructureMCMC</a>(data:&nbsp;pandas.core.frame.DataFrame&nbsp;=&nbsp;None,&nbsp;initial_graph:&nbsp;numpy.ndarray&nbsp;=&nbsp;None,&nbsp;max_iter:&nbsp;int&nbsp;=&nbsp;30000,&nbsp;score_object:&nbsp;Union[str,&nbsp;structure_learning.scores.score.Score]&nbsp;=&nbsp;None,&nbsp;proposal_object:&nbsp;structure_learning.proposals.proposal.StructureLearningProposal&nbsp;=&nbsp;None,&nbsp;pc_init=True,&nbsp;blacklist:&nbsp;numpy.ndarray&nbsp;=&nbsp;None,&nbsp;whitelist:&nbsp;numpy.ndarray&nbsp;=&nbsp;None,&nbsp;seed:&nbsp;int&nbsp;=&nbsp;32,&nbsp;sparse=True,&nbsp;result_type:&nbsp;str&nbsp;=&nbsp;'distribution',&nbsp;graph_type='dag')<br>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#StructureMCMC">StructureMCMC</a>(data:&nbsp;pandas.core.frame.DataFrame&nbsp;=&nbsp;None,&nbsp;initial_state:&nbsp;numpy.ndarray&nbsp;=&nbsp;None,&nbsp;max_iter:&nbsp;int&nbsp;=&nbsp;30000,&nbsp;score_object:&nbsp;Union[str,&nbsp;structure_learning.scores.score.Score]&nbsp;=&nbsp;None,&nbsp;proposal_object:&nbsp;structure_learning.proposals.proposal.StructureLearningProposal&nbsp;=&nbsp;None,&nbsp;prior:&nbsp;structure_learning.priors.prior.Prior&nbsp;=&nbsp;None,&nbsp;pc_init=True,&nbsp;pc_significance_level=0.01,&nbsp;pc_ci_test='pearsonr',&nbsp;blacklist:&nbsp;numpy.ndarray&nbsp;=&nbsp;None,&nbsp;whitelist:&nbsp;numpy.ndarray&nbsp;=&nbsp;None,&nbsp;seed:&nbsp;int&nbsp;=&nbsp;None,&nbsp;sparse=True,&nbsp;result_type:&nbsp;str&nbsp;=&nbsp;'distribution',&nbsp;graph_type='dag')<br>
 &nbsp;<br>
 Implementation&nbsp;of&nbsp;Structure&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>.<br>&nbsp;</span></td></tr>
 <tr><td>&nbsp;</td>
 <td class="singlecolumn"><dl><dt>Method resolution order:</dt>
 <dd><a href="structure_learning.samplers.structure_mcmc.html#StructureMCMC">StructureMCMC</a></dd>
 <dd><a href="structure_learning.samplers.mcmc.html#MCMC">structure_learning.samplers.mcmc.MCMC</a></dd>
+<dd><a href="structure_learning.samplers.sampler.html#Sampler">structure_learning.samplers.sampler.Sampler</a></dd>
 <dd><a href="abc.html#ABC">abc.ABC</a></dd>
 <dd><a href="builtins.html#object">builtins.object</a></dd>
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="StructureMCMC-__init__"><strong>__init__</strong></a>(self, data: pandas.core.frame.DataFrame = None, initial_graph: numpy.ndarray = None, max_iter: int = 30000, score_object: Union[str, structure_learning.scores.score.Score] = None, proposal_object: structure_learning.proposals.proposal.StructureLearningProposal = None, pc_init=True, blacklist: numpy.ndarray = None, whitelist: numpy.ndarray = None, seed: int = 32, sparse=True, result_type: str = 'distribution', graph_type='dag')</dt><dd><span class="code">Initilialise&nbsp;Structure&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;instance.<br>
+<dl><dt><a name="StructureMCMC-__init__"><strong>__init__</strong></a>(self, data: pandas.core.frame.DataFrame = None, initial_state: numpy.ndarray = None, max_iter: int = 30000, score_object: Union[str, structure_learning.scores.score.Score] = None, proposal_object: structure_learning.proposals.proposal.StructureLearningProposal = None, prior: structure_learning.priors.prior.Prior = None, pc_init=True, pc_significance_level=0.01, pc_ci_test='pearsonr', blacklist: numpy.ndarray = None, whitelist: numpy.ndarray = None, seed: int = None, sparse=True, result_type: str = 'distribution', graph_type='dag')</dt><dd><span class="code">Initilialise&nbsp;Structure&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;instance.<br>
 &nbsp;<br>
 Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;data&nbsp;(pd.DataFrame):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Dataset.&nbsp;Optional&nbsp;if&nbsp;score_object&nbsp;is&nbsp;given.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;initial_graph&nbsp;(numpy.ndarray&nbsp;|&nbsp;None):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Initial&nbsp;graph&nbsp;for&nbsp;the&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;simulation.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;initial_state&nbsp;(numpy.ndarray&nbsp;|&nbsp;DAG&nbsp;|&nbsp;None):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Initial&nbsp;graph&nbsp;for&nbsp;the&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;simulation.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;None,&nbsp;simulation&nbsp;starts&nbsp;with&nbsp;a&nbsp;random&nbsp;graph&nbsp;or&nbsp;a&nbsp;graph<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;constructed&nbsp;from&nbsp;PC&nbsp;algorithm.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;max_iter&nbsp;(int):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;number&nbsp;of&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;iterations&nbsp;to&nbsp;run.&nbsp;Default:&nbsp;30000.<br>
@@ -111,6 +112,11 @@ Data and other attributes defined here:<br>
 Methods inherited from <a href="structure_learning.samplers.mcmc.html#MCMC">structure_learning.samplers.mcmc.MCMC</a>:<br>
 <dl><dt><a name="StructureMCMC-__str__"><strong>__str__</strong></a>(self)</dt><dd><span class="code">Return&nbsp;str(self).</span></dd></dl>
 
+<dl><dt><a name="StructureMCMC-config"><strong>config</strong></a>(self)</dt><dd><span class="code">Get&nbsp;the&nbsp;configuration&nbsp;of&nbsp;the&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;instance.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;dict:&nbsp;Configuration&nbsp;dictionary.</span></dd></dl>
+
 <dl><dt><a name="StructureMCMC-get_chain_info"><strong>get_chain_info</strong></a>(self, results, key='graph')</dt><dd><span class="code">Extract&nbsp;chain&nbsp;information&nbsp;from&nbsp;the&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;results.<br>
 &nbsp;<br>
 Parameters:<br>
@@ -128,7 +134,7 @@ Parameters:<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;list:&nbsp;Sampled&nbsp;graphs.</span></dd></dl>
 
-<dl><dt><a name="StructureMCMC-run"><strong>run</strong></a>(self) -&gt; Tuple[dict, float]</dt><dd><span class="code">Execute&nbsp;the&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;simulation.<br>
+<dl><dt><a name="StructureMCMC-run"><strong>run</strong></a>(self, intervals=-1) -&gt; Tuple[dict, float]</dt><dd><span class="code">Execute&nbsp;the&nbsp;<a href="structure_learning.samplers.mcmc.html#MCMC">MCMC</a>&nbsp;simulation.<br>
 &nbsp;<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Tuple[dict,&nbsp;float]:&nbsp;Results&nbsp;of&nbsp;the&nbsp;simulation&nbsp;and&nbsp;acceptance&nbsp;ratio.</span></dd></dl>
@@ -165,14 +171,6 @@ Readonly properties inherited from <a href="structure_learning.samplers.mcmc.htm
 <dl><dt><strong>trace</strong></dt>
 </dl>
 <hr>
-Data descriptors inherited from <a href="structure_learning.samplers.mcmc.html#MCMC">structure_learning.samplers.mcmc.MCMC</a>:<br>
-<dl><dt><strong>__dict__</strong></dt>
-<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
-</dl>
-<dl><dt><strong>__weakref__</strong></dt>
-<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
-</dl>
-<hr>
 Data and other attributes inherited from <a href="structure_learning.samplers.mcmc.html#MCMC">structure_learning.samplers.mcmc.MCMC</a>:<br>
 <dl><dt><strong>RESULT_TYPE_DIST</strong> = 'distribution'</dl>
 
@@ -182,6 +180,14 @@ Data and other attributes inherited from <a href="structure_learning.samplers.mc
 
 <dl><dt><strong>RESULT_TYPE_OPAD_PLUS</strong> = 'opad+'</dl>
 
+<hr>
+Data descriptors inherited from <a href="structure_learning.samplers.sampler.html#Sampler">structure_learning.samplers.sampler.Sampler</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
 </td></tr></table></td></tr></table><p>
 <table class="section">
 <tr class="decor data-decor heading-text">

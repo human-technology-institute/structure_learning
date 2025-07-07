@@ -85,14 +85,40 @@ Parameters:<br>
 Raises:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Exception:&nbsp;If&nbsp;the&nbsp;adjacency&nbsp;matrix&nbsp;contains&nbsp;cycles.</span></dd></dl>
 
-<dl><dt><a name="DAG-to_cpdag"><strong>to_cpdag</strong></a>(self)</dt><dd><span class="code">Convert&nbsp;the&nbsp;<a href="#DAG">DAG</a>&nbsp;to&nbsp;a&nbsp;CPDAG.<br>
+<dl><dt><a name="DAG-fit"><strong>fit</strong></a>(self, data: pandas.core.frame.DataFrame)</dt></dl>
+
+<dl><dt><a name="DAG-plot"><strong>plot</strong></a>(self, filename=None, text=None, data: pandas.core.frame.DataFrame = None)</dt><dd><span class="code">Plot&nbsp;a&nbsp;networkx&nbsp;graph.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;(str):&nbsp;Title&nbsp;of&nbsp;the&nbsp;plot.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;figsize&nbsp;(tuple):&nbsp;Size&nbsp;of&nbsp;the&nbsp;figure.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_size&nbsp;(int):&nbsp;Size&nbsp;of&nbsp;the&nbsp;nodes.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_color&nbsp;(str):&nbsp;Color&nbsp;of&nbsp;the&nbsp;nodes.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(int):&nbsp;Distance&nbsp;between&nbsp;nodes&nbsp;in&nbsp;the&nbsp;layout.</span></dd></dl>
+
+<dl><dt><a name="DAG-to_cpdag"><strong>to_cpdag</strong></a>(self, blocklist: numpy.ndarray = None, verbose=False)</dt><dd><span class="code">Replace&nbsp;with&nbsp;arcs&nbsp;those&nbsp;edges&nbsp;whose&nbsp;orientations&nbsp;can&nbsp;be&nbsp;determined&nbsp;by&nbsp;Meek&nbsp;rules:<br>
+=====<br>
+See&nbsp;Koller&nbsp;&amp;&nbsp;Friedman,&nbsp;Algorithm&nbsp;3.5<br>
+&nbsp;<br>
+Adapted&nbsp;from&nbsp;pgmpy&nbsp;(<a href="https://github.com/uhlerlab/graphical_models/blob/main/graphical_models/classes/dags/pdag.py">https://github.com/uhlerlab/graphical_models/blob/main/graphical_models/classes/dags/pdag.py</a>)<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;verbose&nbsp;(bool):&nbsp;If&nbsp;True,&nbsp;print&nbsp;detailed&nbsp;information&nbsp;about&nbsp;the&nbsp;process.<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;CPDAG:&nbsp;Completed&nbsp;Partially&nbsp;Directed&nbsp;Acyclic&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>.</span></dd></dl>
+
+<dl><dt><a name="DAG-to_cpdag_old"><strong>to_cpdag_old</strong></a>(self)</dt><dd><span class="code">Convert&nbsp;the&nbsp;<a href="#DAG">DAG</a>&nbsp;to&nbsp;a&nbsp;CPDAG.<br>
 &nbsp;<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;CPDAG:&nbsp;Completed&nbsp;Partially&nbsp;Directed&nbsp;Acyclic&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>.</span></dd></dl>
 
+<dl><dt><a name="DAG-topological_sort"><strong>topological_sort</strong></a>(self)</dt><dd><span class="code">Perform&nbsp;topological&nbsp;sorting&nbsp;of&nbsp;the&nbsp;nodes&nbsp;in&nbsp;the&nbsp;<a href="#DAG">DAG</a>.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;List:&nbsp;Nodes&nbsp;sorted&nbsp;in&nbsp;topological&nbsp;order.</span></dd></dl>
+
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="DAG-compute_ancestor_matrix"><strong>compute_ancestor_matrix</strong></a>(adj_matrix=None)</dt><dd><span class="code">Compute&nbsp;the&nbsp;ancestor&nbsp;matrix&nbsp;from&nbsp;an&nbsp;adjacency&nbsp;matrix.<br>
+<dl><dt><a name="DAG-compute_ancestor_matrix"><strong>compute_ancestor_matrix</strong></a>(adj_matrix)</dt><dd><span class="code">Compute&nbsp;the&nbsp;ancestor&nbsp;matrix&nbsp;from&nbsp;an&nbsp;adjacency&nbsp;matrix.<br>
 &nbsp;<br>
 Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;adj_matrix&nbsp;(numpy.ndarray,&nbsp;optional):&nbsp;Adjacency&nbsp;matrix&nbsp;of&nbsp;the&nbsp;graph.<br>
@@ -129,6 +155,8 @@ Returns:<br>
 
 <hr>
 Methods inherited from <a href="structure_learning.data_structures.graph.html#Graph">structure_learning.data_structures.graph.Graph</a>:<br>
+<dl><dt><a name="DAG-__copy__"><strong>__copy__</strong></a>(self)</dt></dl>
+
 <dl><dt><a name="DAG-__eq__"><strong>__eq__</strong></a>(self, g: Type[ForwardRef('G')])</dt><dd><span class="code">Checks&nbsp;equality&nbsp;of&nbsp;two&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>&nbsp;objects.<br>
 &nbsp;<br>
 Parameters:<br>
@@ -187,6 +215,8 @@ Parameters:<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;str&nbsp;|&nbsp;list:&nbsp;Labels&nbsp;of&nbsp;nodes&nbsp;connected&nbsp;to&nbsp;relevant&nbsp;edges&nbsp;under&nbsp;the&nbsp;specified&nbsp;operation,&nbsp;or&nbsp;an&nbsp;error&nbsp;message.</span></dd></dl>
 
+<dl><dt><a name="DAG-copy"><strong>copy</strong></a>(self)</dt></dl>
+
 <dl><dt><a name="DAG-find_parents"><strong>find_parents</strong></a>(self, node, return_index=False)</dt><dd><span class="code">Finds&nbsp;the&nbsp;parent&nbsp;nodes&nbsp;of&nbsp;a&nbsp;given&nbsp;node.<br>
 &nbsp;<br>
 Parameters:<br>
@@ -196,24 +226,15 @@ Parameters:<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;list&nbsp;|&nbsp;tuple:&nbsp;List&nbsp;of&nbsp;parent&nbsp;node&nbsp;labels,&nbsp;or&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;parent&nbsp;node&nbsp;labels&nbsp;and&nbsp;their&nbsp;indices&nbsp;if&nbsp;return_index&nbsp;is&nbsp;True.</span></dd></dl>
 
-<dl><dt><a name="DAG-from_key"><strong>from_key</strong></a>(key: str, type: str = 'default', nodes: Union[List, Tuple, numpy.ndarray] = None) -&gt; Type[~Graph]</dt><dd><span class="code">Creates&nbsp;a&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>&nbsp;object&nbsp;from&nbsp;a&nbsp;key.<br>
+<dl><dt><a name="DAG-has_edge"><strong>has_edge</strong></a>(self, node1, node2, undirected=False) -&gt; bool</dt><dd><span class="code">Checks&nbsp;if&nbsp;an&nbsp;edge&nbsp;exists&nbsp;in&nbsp;the&nbsp;graph.<br>
 &nbsp;<br>
 Parameters:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;key&nbsp;(str):&nbsp;String&nbsp;representation&nbsp;of&nbsp;the&nbsp;graph.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;type&nbsp;(str):&nbsp;Type&nbsp;of&nbsp;key.&nbsp;Defaults&nbsp;to&nbsp;'default'.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;nodes&nbsp;(list&nbsp;|&nbsp;tuple&nbsp;|&nbsp;np.ndarray):&nbsp;Node&nbsp;labels.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node1&nbsp;(str):&nbsp;First&nbsp;node&nbsp;label.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node2&nbsp;(str):&nbsp;Second&nbsp;node&nbsp;label.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;undirected&nbsp;(bool):&nbsp;If&nbsp;True,&nbsp;checks&nbsp;for&nbsp;an&nbsp;undirected&nbsp;edge&nbsp;(i.e.,&nbsp;edge&nbsp;exists&nbsp;in&nbsp;either&nbsp;direction).<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>:&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>&nbsp;object.</span></dd></dl>
-
-<dl><dt><a name="DAG-plot"><strong>plot</strong></a>(self, title='Graph', figsize=(5, 3), node_size=2000, node_color='skyblue', k=5)</dt><dd><span class="code">Plot&nbsp;a&nbsp;networkx&nbsp;graph.<br>
-&nbsp;<br>
-Parameters:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;(str):&nbsp;Title&nbsp;of&nbsp;the&nbsp;plot.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;figsize&nbsp;(tuple):&nbsp;Size&nbsp;of&nbsp;the&nbsp;figure.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;node_size&nbsp;(int):&nbsp;Size&nbsp;of&nbsp;the&nbsp;nodes.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;node_color&nbsp;(str):&nbsp;Color&nbsp;of&nbsp;the&nbsp;nodes.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;k&nbsp;(int):&nbsp;Distance&nbsp;between&nbsp;nodes&nbsp;in&nbsp;the&nbsp;layout.</span></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;if&nbsp;the&nbsp;edge&nbsp;exists,&nbsp;False&nbsp;otherwise.</span></dd></dl>
 
 <dl><dt><a name="DAG-remove_edge"><strong>remove_edge</strong></a>(self, edge: Union[List, Tuple])</dt><dd><span class="code">Removes&nbsp;a&nbsp;single&nbsp;edge&nbsp;from&nbsp;the&nbsp;graph.<br>
 &nbsp;<br>
@@ -285,6 +306,16 @@ Returns:<br>
 &nbsp;<br>
 Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(str):&nbsp;Path&nbsp;to&nbsp;the&nbsp;input&nbsp;CSV&nbsp;file.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>:&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>&nbsp;object.</span></dd></dl>
+
+<dl><dt><a name="DAG-from_key"><strong>from_key</strong></a>(key: str, type: str = 'default', nodes: Union[List, Tuple, numpy.ndarray] = None) -&gt; Type[~Graph]</dt><dd><span class="code">Creates&nbsp;a&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>&nbsp;object&nbsp;from&nbsp;a&nbsp;key.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;key&nbsp;(str):&nbsp;String&nbsp;representation&nbsp;of&nbsp;the&nbsp;graph.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;type&nbsp;(str):&nbsp;Type&nbsp;of&nbsp;key.&nbsp;Defaults&nbsp;to&nbsp;'default'.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nodes&nbsp;(list&nbsp;|&nbsp;tuple&nbsp;|&nbsp;np.ndarray):&nbsp;Node&nbsp;labels.<br>
 &nbsp;<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>:&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>&nbsp;object.</span></dd></dl>
@@ -377,9 +408,5 @@ Raises&nbsp;ValueError&nbsp;if&nbsp;either&nbsp;of&nbsp;the&nbsp;arguments&nbsp;
 <td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
     
 <tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
-<td class="singlecolumn"><strong>D</strong> = ~DAG<br>
-<strong>List</strong> = typing.List<br>
-<strong>Tuple</strong> = typing.Tuple<br>
-<strong>Type</strong> = typing.Type<br>
-<strong>Union</strong> = typing.Union</td></tr></table></div>
+<td class="singlecolumn"><strong>D</strong> = ~DAG</td></tr></table></div>
 </body></html>

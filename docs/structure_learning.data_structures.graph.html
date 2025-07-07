@@ -40,9 +40,9 @@ It&nbsp;also&nbsp;includes&nbsp;utility&nbsp;methods&nbsp;for&nbsp;checking&nbsp
 <td class="singlecolumn"><table><tr><td class="multicolumn"><a href="numpy.html">numpy</a><br>
 <a href="networkx.html">networkx</a><br>
 </td><td class="multicolumn"><a href="pandas.html">pandas</a><br>
-<a href="matplotlib.pyplot.html">matplotlib.pyplot</a><br>
-</td><td class="multicolumn"><a href="re.html">re</a><br>
-<a href="seaborn.html">seaborn</a><br>
+<a href="pygraphviz.html">pygraphviz</a><br>
+</td><td class="multicolumn"><a href="matplotlib.pyplot.html">matplotlib.pyplot</a><br>
+<a href="re.html">re</a><br>
 </td><td class="multicolumn"></td></tr></table></td></tr></table><p>
 <table class="section">
 <tr class="decor index-decor heading-text">
@@ -68,6 +68,8 @@ It&nbsp;also&nbsp;includes&nbsp;utility&nbsp;methods&nbsp;for&nbsp;checking&nbsp
 Class&nbsp;wrapper&nbsp;for&nbsp;graphs.<br>&nbsp;</span></td></tr>
 <tr><td>&nbsp;</td>
 <td class="singlecolumn">Methods defined here:<br>
+<dl><dt><a name="Graph-__copy__"><strong>__copy__</strong></a>(self)</dt></dl>
+
 <dl><dt><a name="Graph-__eq__"><strong>__eq__</strong></a>(self, g: Type[ForwardRef('G')])</dt><dd><span class="code">Checks&nbsp;equality&nbsp;of&nbsp;two&nbsp;<a href="#Graph">Graph</a>&nbsp;objects.<br>
 &nbsp;<br>
 Parameters:<br>
@@ -133,6 +135,8 @@ Parameters:<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;str&nbsp;|&nbsp;list:&nbsp;Labels&nbsp;of&nbsp;nodes&nbsp;connected&nbsp;to&nbsp;relevant&nbsp;edges&nbsp;under&nbsp;the&nbsp;specified&nbsp;operation,&nbsp;or&nbsp;an&nbsp;error&nbsp;message.</span></dd></dl>
 
+<dl><dt><a name="Graph-copy"><strong>copy</strong></a>(self)</dt></dl>
+
 <dl><dt><a name="Graph-find_parents"><strong>find_parents</strong></a>(self, node, return_index=False)</dt><dd><span class="code">Finds&nbsp;the&nbsp;parent&nbsp;nodes&nbsp;of&nbsp;a&nbsp;given&nbsp;node.<br>
 &nbsp;<br>
 Parameters:<br>
@@ -142,17 +146,17 @@ Parameters:<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;list&nbsp;|&nbsp;tuple:&nbsp;List&nbsp;of&nbsp;parent&nbsp;node&nbsp;labels,&nbsp;or&nbsp;a&nbsp;tuple&nbsp;containing&nbsp;parent&nbsp;node&nbsp;labels&nbsp;and&nbsp;their&nbsp;indices&nbsp;if&nbsp;return_index&nbsp;is&nbsp;True.</span></dd></dl>
 
-<dl><dt><a name="Graph-from_key"><strong>from_key</strong></a>(key: str, type: str = 'default', nodes: Union[List, Tuple, numpy.ndarray] = None) -&gt; Type[~Graph]</dt><dd><span class="code">Creates&nbsp;a&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;from&nbsp;a&nbsp;key.<br>
+<dl><dt><a name="Graph-has_edge"><strong>has_edge</strong></a>(self, node1, node2, undirected=False) -&gt; bool</dt><dd><span class="code">Checks&nbsp;if&nbsp;an&nbsp;edge&nbsp;exists&nbsp;in&nbsp;the&nbsp;graph.<br>
 &nbsp;<br>
 Parameters:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;key&nbsp;(str):&nbsp;String&nbsp;representation&nbsp;of&nbsp;the&nbsp;graph.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;type&nbsp;(str):&nbsp;Type&nbsp;of&nbsp;key.&nbsp;Defaults&nbsp;to&nbsp;'default'.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;nodes&nbsp;(list&nbsp;|&nbsp;tuple&nbsp;|&nbsp;np.ndarray):&nbsp;Node&nbsp;labels.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node1&nbsp;(str):&nbsp;First&nbsp;node&nbsp;label.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node2&nbsp;(str):&nbsp;Second&nbsp;node&nbsp;label.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;undirected&nbsp;(bool):&nbsp;If&nbsp;True,&nbsp;checks&nbsp;for&nbsp;an&nbsp;undirected&nbsp;edge&nbsp;(i.e.,&nbsp;edge&nbsp;exists&nbsp;in&nbsp;either&nbsp;direction).<br>
 &nbsp;<br>
 Returns:<br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Graph">Graph</a>:&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.</span></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;if&nbsp;the&nbsp;edge&nbsp;exists,&nbsp;False&nbsp;otherwise.</span></dd></dl>
 
-<dl><dt><a name="Graph-plot"><strong>plot</strong></a>(self, title='Graph', figsize=(5, 3), node_size=2000, node_color='skyblue', k=5)</dt><dd><span class="code">Plot&nbsp;a&nbsp;networkx&nbsp;graph.<br>
+<dl><dt><a name="Graph-plot"><strong>plot</strong></a>(self, filename=None, text=None, edge_colors: dict = None, edge_weights: dict = None)</dt><dd><span class="code">Plot&nbsp;a&nbsp;networkx&nbsp;graph.<br>
 &nbsp;<br>
 Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;title&nbsp;(str):&nbsp;Title&nbsp;of&nbsp;the&nbsp;plot.<br>
@@ -235,6 +239,16 @@ Parameters:<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#Graph">Graph</a>:&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.</span></dd></dl>
 
+<dl><dt><a name="Graph-from_key"><strong>from_key</strong></a>(key: str, type: str = 'default', nodes: Union[List, Tuple, numpy.ndarray] = None) -&gt; Type[~Graph]</dt><dd><span class="code">Creates&nbsp;a&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;from&nbsp;a&nbsp;key.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;key&nbsp;(str):&nbsp;String&nbsp;representation&nbsp;of&nbsp;the&nbsp;graph.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;type&nbsp;(str):&nbsp;Type&nbsp;of&nbsp;key.&nbsp;Defaults&nbsp;to&nbsp;'default'.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nodes&nbsp;(list&nbsp;|&nbsp;tuple&nbsp;|&nbsp;np.ndarray):&nbsp;Node&nbsp;labels.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Graph">Graph</a>:&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.</span></dd></dl>
+
 <dl><dt><a name="Graph-from_numpy"><strong>from_numpy</strong></a>(incidence: numpy.ndarray, nodes: Union[List, Tuple, numpy.ndarray]) -&gt; Type[~Graph]</dt><dd><span class="code">Creates&nbsp;a&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;from&nbsp;a&nbsp;numpy&nbsp;array.<br>
 &nbsp;<br>
 Parameters:<br>
@@ -302,33 +316,12 @@ Data and other attributes defined here:<br>
 
 </td></tr></table></td></tr></table><p>
 <table class="section">
-<tr class="decor functions-decor heading-text">
-<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
-    
-<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
-<td class="singlecolumn"><dl><dt><a name="-comb"><strong>comb</strong></a>(n, k, /)</dt><dd><span class="code">Number&nbsp;of&nbsp;ways&nbsp;to&nbsp;choose&nbsp;k&nbsp;items&nbsp;from&nbsp;n&nbsp;items&nbsp;without&nbsp;repetition&nbsp;and&nbsp;without&nbsp;order.<br>
-&nbsp;<br>
-Evaluates&nbsp;to&nbsp;n!&nbsp;/&nbsp;(k!&nbsp;*&nbsp;(n&nbsp;-&nbsp;k)!)&nbsp;when&nbsp;k&nbsp;&lt;=&nbsp;n&nbsp;and&nbsp;evaluates<br>
-to&nbsp;zero&nbsp;when&nbsp;k&nbsp;&gt;&nbsp;n.<br>
-&nbsp;<br>
-Also&nbsp;called&nbsp;the&nbsp;binomial&nbsp;coefficient&nbsp;because&nbsp;it&nbsp;is&nbsp;equivalent<br>
-to&nbsp;the&nbsp;coefficient&nbsp;of&nbsp;k-th&nbsp;term&nbsp;in&nbsp;polynomial&nbsp;expansion&nbsp;of&nbsp;the<br>
-expression&nbsp;(1&nbsp;+&nbsp;x)**n.<br>
-&nbsp;<br>
-Raises&nbsp;TypeError&nbsp;if&nbsp;either&nbsp;of&nbsp;the&nbsp;arguments&nbsp;are&nbsp;not&nbsp;integers.<br>
-Raises&nbsp;ValueError&nbsp;if&nbsp;either&nbsp;of&nbsp;the&nbsp;arguments&nbsp;are&nbsp;negative.</span></dd></dl>
- <dl><dt><a name="-factorial"><strong>factorial</strong></a>(n, /)</dt><dd><span class="code">Find&nbsp;n!.<br>
-&nbsp;<br>
-Raise&nbsp;a&nbsp;ValueError&nbsp;if&nbsp;x&nbsp;is&nbsp;negative&nbsp;or&nbsp;non-integral.</span></dd></dl>
-</td></tr></table><p>
-<table class="section">
 <tr class="decor data-decor heading-text">
 <td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
     
 <tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
 <td class="singlecolumn"><strong>G</strong> = ~Graph<br>
 <strong>List</strong> = typing.List<br>
-<strong>Set</strong> = typing.Set<br>
 <strong>Tuple</strong> = typing.Tuple<br>
 <strong>Type</strong> = typing.Type<br>
 <strong>Union</strong> = typing.Union</td></tr></table></div>

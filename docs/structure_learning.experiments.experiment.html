@@ -1,0 +1,103 @@
+<!DOCTYPE>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pydoc: module structure_learning.experiments.experiment</title>
+<link rel="stylesheet" type="text/css" href="_pydoc.css"></head><body>
+                <div style='float:right'>
+                    <div style='text-align:center'>
+                    <a href="index.html">Module Index</a>
+                    : <a href="topics.html">Topics</a>
+                    : <a href="keywords.html">Keywords</a>
+                    </div>
+                    <div>
+                        <form action="get" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Get">
+                        </form>&nbsp;
+                        <form action="search" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Search">
+                        </form>
+                    </div>
+                </div>
+                <div style="clear:both;padding-top:.5em;">
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.experiments.html" class="white">experiments</a>.experiment</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/Users/165421/Documents/code/structure_learning/src/structure_learning/experiments/experiment.py">/Users/165421/Documents/code/structure_learning/src/structure_learning/experiments/experiment.py</a></td></tr></table>
+    <p></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="numpy.html">numpy</a><br>
+</td><td class="multicolumn"><a href="pandas.html">pandas</a><br>
+</td><td class="multicolumn"><a href="matplotlib.pyplot.html">matplotlib.pyplot</a><br>
+</td><td class="multicolumn"><a href="yaml.html">yaml</a><br>
+</td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
+    
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="builtins.html#object">builtins.object</a>
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="structure_learning.experiments.experiment.html#Experiment">Experiment</a>
+</dt></dl>
+</dd>
+</dl>
+ <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="Experiment">class <strong>Experiment</strong></a>(<a href="builtins.html#object">builtins.object</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#Experiment">Experiment</a>(experiment_name:&nbsp;str&nbsp;=&nbsp;None,&nbsp;data:&nbsp;pandas.core.frame.DataFrame&nbsp;=&nbsp;None,&nbsp;samplers:&nbsp;list&nbsp;=&nbsp;[],&nbsp;metrics:&nbsp;list&nbsp;=&nbsp;[],&nbsp;ground_truth:&nbsp;str&nbsp;=&nbsp;None,&nbsp;snapshot_interval:&nbsp;int&nbsp;=&nbsp;-1,&nbsp;n_threads:&nbsp;int&nbsp;=&nbsp;1,&nbsp;seed:&nbsp;int&nbsp;=&nbsp;42)<br>
+&nbsp;<br>
+<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn">Methods defined here:<br>
+<dl><dt><a name="Experiment-__init__"><strong>__init__</strong></a>(self, experiment_name: str = None, data: pandas.core.frame.DataFrame = None, samplers: list = [], metrics: list = [], ground_truth: str = None, snapshot_interval: int = -1, n_threads: int = 1, seed: int = 42)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="Experiment-evaluate"><strong>evaluate</strong></a>(self, plot=False, plot_labels=None)</dt></dl>
+
+<dl><dt><a name="Experiment-run"><strong>run</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="Experiment-run_sampler"><strong>run_sampler</strong></a>(self, sampler: structure_learning.samplers.sampler.Sampler)</dt><dd><span class="code">Run&nbsp;a&nbsp;specific&nbsp;sampler.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sampler:&nbsp;The&nbsp;sampler&nbsp;instance&nbsp;to&nbsp;run.</span></dd></dl>
+
+<dl><dt><a name="Experiment-to_yaml"><strong>to_yaml</strong></a>(self, yaml_file: str)</dt><dd><span class="code">Save&nbsp;experiment&nbsp;configuration&nbsp;to&nbsp;a&nbsp;YAML&nbsp;file.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;yaml_file&nbsp;(str):&nbsp;Path&nbsp;to&nbsp;the&nbsp;YAML&nbsp;file&nbsp;where&nbsp;the&nbsp;configuration&nbsp;will&nbsp;be&nbsp;saved.</span></dd></dl>
+
+<hr>
+Class methods defined here:<br>
+<dl><dt><a name="Experiment-from_yaml"><strong>from_yaml</strong></a>(yaml_file: str, data: pandas.core.frame.DataFrame, ground_truth: str = None)</dt><dd><span class="code">Load&nbsp;experiment&nbsp;configuration&nbsp;from&nbsp;a&nbsp;YAML&nbsp;file.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;yaml_file&nbsp;(str):&nbsp;Path&nbsp;to&nbsp;the&nbsp;YAML&nbsp;file&nbsp;containing&nbsp;experiment&nbsp;configuration.</span></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>Union</strong> = typing.Union</td></tr></table></div>
+</body></html>

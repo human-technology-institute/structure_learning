@@ -33,13 +33,28 @@
 <td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Package Contents</strong></td></tr>
     
 <tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
-<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="structure_learning.samplers.greedy.html">greedy</a><br>
-<a href="structure_learning.samplers.hillclimb.html">hillclimb</a><br>
-</td><td class="multicolumn"><a href="structure_learning.samplers.mcmc.html">mcmc</a><br>
-<a href="structure_learning.samplers.partition_mcmc.html">partition_mcmc</a><br>
-</td><td class="multicolumn"><a href="structure_learning.samplers.pc.html">pc</a><br>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="structure_learning.samplers._greedy.html">_greedy</a><br>
+<a href="structure_learning.samplers.greedy.html">greedy</a><br>
+</td><td class="multicolumn"><a href="structure_learning.samplers.hillclimb.html">hillclimb</a><br>
+<a href="structure_learning.samplers.mcmc.html">mcmc</a><br>
+</td><td class="multicolumn"><a href="structure_learning.samplers.partition_mcmc.html">partition_mcmc</a><br>
+<a href="structure_learning.samplers.pc.html">pc</a><br>
+</td><td class="multicolumn"><a href="structure_learning.samplers.sampler.html">sampler</a><br>
 <a href="structure_learning.samplers.structure_mcmc.html">structure_mcmc</a><br>
-</td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+</td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-get_sampler"><strong>get_sampler</strong></a>(name: str)</dt><dd><span class="code">Get&nbsp;a&nbsp;sampler&nbsp;class&nbsp;by&nbsp;its&nbsp;name.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;name&nbsp;(str):&nbsp;Name&nbsp;of&nbsp;the&nbsp;sampler.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Sampler&nbsp;class&nbsp;corresponding&nbsp;to&nbsp;the&nbsp;given&nbsp;name.</span></dd></dl>
+</td></tr></table><p>
 <table class="section">
 <tr class="decor data-decor heading-text">
 <td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
@@ -47,5 +62,6 @@
 <tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
 <td class="singlecolumn"><strong>State</strong> = ~State<br>
 <strong>Tuple</strong> = typing.Tuple<br>
-<strong>Union</strong> = typing.Union</td></tr></table></div>
+<strong>Union</strong> = typing.Union<br>
+<strong>samplers</strong> = {'GreedySearch': &lt;class 'structure_learning.samplers._greedy.GreedySearch'&gt;, 'HillClimb': &lt;class 'structure_learning.samplers.hillclimb.HillClimb'&gt;, 'PC': &lt;class 'structure_learning.samplers.pc.PC'&gt;, 'PartitionMCMC': &lt;class 'structure_learning.samplers.partition_mcmc.PartitionMCMC'&gt;, 'StructureMCMC': &lt;class 'structure_learning.samplers.structure_mcmc.StructureMCMC'&gt;}</td></tr></table></div>
 </body></html>
