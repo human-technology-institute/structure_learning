@@ -20,7 +20,8 @@ dependencies = [
   "torch",
   "conditional_independence",
   "graphical_models",
-  "pgmpy"
+  "pgmpy",
+  "compress_pickle"
 ]
 readme = "README.md"
 license = {file = "LICENSE"}
