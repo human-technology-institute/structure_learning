@@ -96,7 +96,8 @@ class CPDAG(Graph):
         else:
             if self.dags is None:
                 self._n_dags = 0
-                self.dags = []
+                if generate:
+                    self.dags = []
                 fstr = "{0:0" + str(dim) + "b}"
                 for i in range(2**dim):
                     binstr = fstr.format(i)

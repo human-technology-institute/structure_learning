@@ -536,3 +536,30 @@ class OrderedPartition:
 
         plt.tight_layout()  # Optimize layout to reduce unnecessary plot area
         plt.show()
+        
+    # pickle
+    def save(self, filename: str):
+        """
+        Saves the Graph object to a file.
+
+        Parameters:
+            filename (str): Path to the output file.
+        """
+        with open(filename, 'wb') as f:
+            import pickle
+            pickle.dump(self, f)
+
+    @classmethod
+    def load(cls, filename: str):
+        """
+        Loads a Graph object from a file.
+
+        Parameters:
+            filename (str): Path to the input file.
+
+        Returns:
+            Graph: Loaded Graph object.
+        """
+        with open(filename, 'rb') as f:
+            import pickle
+            return pickle.load(f)

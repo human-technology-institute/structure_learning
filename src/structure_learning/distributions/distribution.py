@@ -315,7 +315,34 @@ class Distribution:
 
         dist = TrueDistribution(particles=list(particles.keys()), logp=particles.values(), theta=particle_weights.values())
         
-        return dist
+        return dist  
+        
+    # pickle
+    def save(self, filename: str, compression='gzip'):  
+        """
+        Saves the Graph object to a file.
+
+        Parameters:
+            filename (str): Path to the output file.
+        """
+        with open(filename, 'wb') as f:
+            import compress_pickle as pickle
+            pickle.dump(self, f, compression=compression)
+
+    @classmethod
+    def load(cls, filename: str, compression='gzip'):
+        """
+        Loads a Graph object from a file.
+
+        Parameters:
+            filename (str): Path to the input file.
+
+        Returns:
+            Graph: Loaded Graph object.
+        """
+        with open(filename, 'rb') as f:
+            import compress_pickle as pickle
+            return pickle.load(f, compression=compression)
 
 class TrueDistribution(Distribution):
 
