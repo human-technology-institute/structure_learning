@@ -112,6 +112,7 @@ dependencies:
       - pydantic-core==2.33.2
       - pygam==0.9.1
       - pygments==2.19.1
+      - pygraphviz==1.14
       - pyparsing==3.2.3
       - pyproject-hooks==1.2.0
       - pyro-api==0.1.2

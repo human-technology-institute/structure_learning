@@ -21,7 +21,8 @@ dependencies = [
   "conditional_independence",
   "graphical_models",
   "pgmpy",
-  "compress_pickle"
+  "compress_pickle",
+  "pygraphviz"
 ]
 readme = "README.md"
 license = {file = "LICENSE"}
