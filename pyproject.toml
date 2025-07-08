@@ -13,13 +13,9 @@ dependencies = [
   "scipy",
   "scikit-learn",
   "matplotlib",
-  "mlflow",
   "networkx",
-  "igraph",
   "seaborn",
   "torch",
-  "conditional_independence",
-  "graphical_models",
   "pgmpy",
   "compress_pickle",
   "pygraphviz"
