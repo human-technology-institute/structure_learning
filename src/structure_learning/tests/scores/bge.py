@@ -15,7 +15,7 @@ from rpy2.robjects import pandas2ri
 import numpy as np
 import pandas as pd
 from structure_learning.scores import BGeScore as implemented_BGe
-from structure_learning.samplers import PartitionMCMC
+from structure_learning.approximators import PartitionMCMC
 
 rules = default_converter + numpy2ri.converter + pandas2ri.converter
 bidag = importr('BiDAG')

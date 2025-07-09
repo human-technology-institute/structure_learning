@@ -23,7 +23,7 @@ from structure_learning.proposals import StructureLearningProposal, GraphProposa
 from structure_learning.data_structures import DAG
 from structure_learning.priors import Prior, UniformPrior
 from structure_learning.scores import Score
-from structure_learning.samplers import MCMC
+from structure_learning.approximators import MCMC
 
 class StructureMCMC(MCMC):
     """

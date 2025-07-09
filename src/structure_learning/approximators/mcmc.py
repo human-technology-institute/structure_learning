@@ -20,11 +20,11 @@ from structure_learning.proposals import StructureLearningProposal
 from structure_learning.data import Data
 from structure_learning.distributions import MCMCDistribution, OPAD
 from .pc import PC
-from .sampler import Sampler
+from .approximator import Approximator
 
 State = TypeVar('State')
 
-class MCMC(Sampler):
+class MCMC(Approximator):
     """
     Base class for Markov Chain Monte Carlo (MCMC) simulations.
     Inheriting classes must implement the `step` method to define the behavior of a single MCMC iteration.

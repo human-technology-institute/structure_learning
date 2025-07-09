@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 from multiprocessing import Pool
 from structure_learning.distributions import Distribution
 from structure_learning.data_structures import DAG
-from structure_learning.samplers import get_sampler, Sampler
+from structure_learning.approximators import get_approximator, Approximator
 from structure_learning.evaluation.metrics import get_metric, SHD, MAE, MSE, KLD, JSD, RHat
 
 class Experiment:
@@ -81,14 +81,14 @@ class Experiment:
 
         return evaluation
 
-    def run_sampler(self, sampler: Sampler):
+    def run_sampler(self, approximator: Approximator):
         """
         Run a specific sampler.
 
         Parameters:
             sampler: The sampler instance to run.
         """
-        return sampler.run(self.snapshot_interval)
+        return approximator.run(self.snapshot_interval)
     
     @classmethod
     def from_yaml(cls, yaml_file: str, data: pd.DataFrame, ground_truth:str=None):
@@ -188,7 +188,7 @@ class Experiment:
                 sampler_config = sampler.get('config', {}).copy()
                 if seeds is not None and len(seeds)==n_chains and 'seed' not in sampler_config:
                     sampler_config['seed'] = seeds[chain]
-                _sampler = get_sampler(sampler['sampler_type'])(data=self.data, **sampler_config)
+                _sampler = get_approximator(sampler['sampler_type'])(data=self.data, **sampler_config)
                 self.samplers.append(_sampler)
 
         # metrics

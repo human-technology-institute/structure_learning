@@ -11,7 +11,7 @@ from pgmpy.estimators.StructureScore import BDeu as target_bdeu
 import numpy as np
 import pandas as pd
 from structure_learning.scores import BDeuScore as implemented_bdeu
-from structure_learning.samplers import PartitionMCMC
+from structure_learning.approximators import PartitionMCMC
 
 class TestBDeu(unittest.TestCase):
     """

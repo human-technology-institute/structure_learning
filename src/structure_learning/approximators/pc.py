@@ -2,12 +2,12 @@ from typing import Union
 import pgmpy
 import networkx as nx
 import pandas as pd
-from .sampler import Sampler
+from .approximator import Approximator
 from structure_learning.data import Data
 from structure_learning.data_structures.dag import DAG
 from structure_learning.data_structures.cpdag import CPDAG
 
-class PC(Sampler):
+class PC(Approximator):
     
     def __init__(self, data: Union[Data,pd.DataFrame], significance_level=0.01, ci_test='pearsonr'):
         super().__init__(data)

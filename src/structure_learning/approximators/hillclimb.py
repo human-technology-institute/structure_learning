@@ -8,9 +8,9 @@ from structure_learning.data import Data
 from structure_learning.scores import Score, BGeScore
 from structure_learning.data_structures.dag import DAG
 from structure_learning.proposals import GraphProposal
-from .sampler import Sampler
+from .approximator import Approximator
 
-class HillClimb(Sampler):
+class HillClimb(Approximator):
     # adapted from https://pgmpy.org/_modules/pgmpy/estimators/HillClimbSearch.html#HillClimbSearch.estimate
     def __init__(self, data: Union[Data, pd.DataFrame], initial_state: DAG=None, score: Score=BGeScore, max_iter=100000, epsilon=1e-4, 
                  tabu_length=100, keep_particles=False, blacklist=None, whitelist=None, seed=None, probabilistic=False):
