@@ -1,0 +1,146 @@
+<!DOCTYPE>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pydoc: module structure_learning.data.synthetic</title>
+<link rel="stylesheet" type="text/css" href="_pydoc.css"></head><body>
+                <div style='float:right'>
+                    <div style='text-align:center'>
+                    <a href="index.html">Module Index</a>
+                    : <a href="topics.html">Topics</a>
+                    : <a href="keywords.html">Keywords</a>
+                    </div>
+                    <div>
+                        <form action="get" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Get">
+                        </form>&nbsp;
+                        <form action="search" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Search">
+                        </form>
+                    </div>
+                </div>
+                <div style="clear:both;padding-top:.5em;">
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.data.html" class="white">data</a>.synthetic</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/Users/165421/Documents/code/structure_learning/src/structure_learning/data/synthetic.py">/Users/165421/Documents/code/structure_learning/src/structure_learning/data/synthetic.py</a></td></tr></table>
+    <p><span class="code">##&nbsp;Simulate&nbsp;data<br>
+##&nbsp;<a href="https://github.com/ermongroup/BCD-Nets/blob/main/dag_utils.py">https://github.com/ermongroup/BCD-Nets/blob/main/dag_utils.py</a></span></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="numpy.html">numpy</a><br>
+</td><td class="multicolumn"><a href="networkx.html">networkx</a><br>
+</td><td class="multicolumn"><a href="pandas.html">pandas</a><br>
+</td><td class="multicolumn"><a href="scipy.stats.html">scipy.stats</a><br>
+</td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
+    
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="builtins.html#object">builtins.object</a>
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="structure_learning.data.synthetic.html#SyntheticDataset">SyntheticDataset</a>
+</dt></dl>
+</dd>
+</dl>
+ <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="SyntheticDataset">class <strong>SyntheticDataset</strong></a>(<a href="builtins.html#object">builtins.object</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#SyntheticDataset">SyntheticDataset</a>(num_nodes:&nbsp;float,&nbsp;num_obs:&nbsp;float,&nbsp;node_labels:&nbsp;list,&nbsp;degree:&nbsp;float,&nbsp;graph_type:&nbsp;str&nbsp;=&nbsp;'erdos-renyi',&nbsp;noise_scale:&nbsp;float&nbsp;=&nbsp;1.0,&nbsp;true_dag=None)<br>
+&nbsp;<br>
+Generate&nbsp;synthetic&nbsp;data&nbsp;from&nbsp;graphs.<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn">Methods defined here:<br>
+<dl><dt><a name="SyntheticDataset-__init__"><strong>__init__</strong></a>(self, num_nodes: float, num_obs: float, node_labels: list, degree: float, graph_type: str = 'erdos-renyi', noise_scale: float = 1.0, true_dag=None)</dt><dd><span class="code">Initialise&nbsp;<a href="#SyntheticDataset">SyntheticDataset</a>&nbsp;instance</span></dd></dl>
+
+<hr>
+Static methods defined here:<br>
+<dl><dt><a name="SyntheticDataset-simulate_data"><strong>simulate_data</strong></a>(W: Union[numpy.ndarray, structure_learning.data_structures.dag.DAG], n, noise_scale=1.0, sigmas=None)</dt><dd><span class="code">Simulate&nbsp;samples&nbsp;from&nbsp;SEM&nbsp;with&nbsp;specified&nbsp;type&nbsp;of&nbsp;noise.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;W&nbsp;(numpy.ndarray):&nbsp;weigthed&nbsp;DAG<br>
+&nbsp;&nbsp;&nbsp;&nbsp;n&nbsp;(int):&nbsp;number&nbsp;of&nbsp;samples<br>
+&nbsp;&nbsp;&nbsp;&nbsp;noise_scale&nbsp;(float):&nbsp;scale&nbsp;parameter&nbsp;of&nbsp;noise&nbsp;distribution&nbsp;in&nbsp;linear&nbsp;SEM<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sigmas&nbsp;(numpy.ndarray):&nbsp;noise&nbsp;vector<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray)&nbsp;[n,d]&nbsp;sample&nbsp;matrix</span></dd></dl>
+
+<dl><dt><a name="SyntheticDataset-simulate_data_V1"><strong>simulate_data_V1</strong></a>(W: Union[numpy.ndarray, structure_learning.data_structures.dag.DAG], n, noise_scale=1.0, sigmas=None)</dt><dd><span class="code">Simulate&nbsp;samples&nbsp;from&nbsp;SEM&nbsp;with&nbsp;specified&nbsp;type&nbsp;of&nbsp;noise.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;W&nbsp;(numpy.ndarray):&nbsp;weigthed&nbsp;DAG<br>
+&nbsp;&nbsp;&nbsp;&nbsp;n&nbsp;(int):&nbsp;number&nbsp;of&nbsp;samples<br>
+&nbsp;&nbsp;&nbsp;&nbsp;noise_scale&nbsp;(float):&nbsp;scale&nbsp;parameter&nbsp;of&nbsp;noise&nbsp;distribution&nbsp;in&nbsp;linear&nbsp;SEM<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sigmas&nbsp;(numpy.ndarray):&nbsp;noise&nbsp;vector<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray)&nbsp;[n,d]&nbsp;sample&nbsp;matrix</span></dd></dl>
+
+<dl><dt><a name="SyntheticDataset-simulate_data_from_dag"><strong>simulate_data_from_dag</strong></a>(dag: Union[numpy.ndarray, structure_learning.data_structures.dag.DAG], num_obs, num_nodes, node_labels, w_range, noise_scale)</dt><dd><span class="code">Simulate&nbsp;samples&nbsp;from&nbsp;ground&nbsp;truth&nbsp;DAG.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;DAG&nbsp;(numpy.ndarray):&nbsp;ground&nbsp;truth&nbsp;DAG<br>
+&nbsp;&nbsp;&nbsp;&nbsp;num_obs&nbsp;(int):&nbsp;number&nbsp;of&nbsp;observations&nbsp;to&nbsp;simulate<br>
+&nbsp;&nbsp;&nbsp;&nbsp;num_nodes&nbsp;(int):&nbsp;number&nbsp;of&nbsp;nodes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node_labels&nbsp;(list&nbsp;(str)):&nbsp;node&nbsp;labels<br>
+&nbsp;&nbsp;&nbsp;&nbsp;w_range&nbsp;(2-tuple&nbsp;(float)):&nbsp;weight&nbsp;range&nbsp;+/-&nbsp;(low,&nbsp;high)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;noise_scale&nbsp;(float):&nbsp;scale&nbsp;parameter&nbsp;of&nbsp;noise&nbsp;distribution<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;[n,d]&nbsp;sample&nbsp;matrix</span></dd></dl>
+
+<dl><dt><a name="SyntheticDataset-simulate_gaussian_dag"><strong>simulate_gaussian_dag</strong></a>(d, w_std)</dt><dd><span class="code">Simulate&nbsp;dense&nbsp;DAG&nbsp;adjacency&nbsp;matrix<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;d&nbsp;(int):&nbsp;number&nbsp;of&nbsp;nodes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;w_std&nbsp;(float):&nbsp;weight&nbsp;std<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;weighted&nbsp;DAG<br>
+&nbsp;&nbsp;&nbsp;&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;permutation&nbsp;matrix<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;lower&nbsp;triangular&nbsp;matrix</span></dd></dl>
+
+<dl><dt><a name="SyntheticDataset-simulate_random_dag"><strong>simulate_random_dag</strong></a>(d, degree, graph_type, w_range)</dt><dd><span class="code">Simulate&nbsp;random&nbsp;DAG&nbsp;with&nbsp;some&nbsp;expected&nbsp;degree.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;d&nbsp;(int):&nbsp;number&nbsp;of&nbsp;nodes<br>
+&nbsp;&nbsp;&nbsp;&nbsp;degree&nbsp;(int):&nbsp;expected&nbsp;node&nbsp;degree,&nbsp;in&nbsp;+&nbsp;out<br>
+&nbsp;&nbsp;&nbsp;&nbsp;graph_type&nbsp;(str):&nbsp;{erdos-renyi,&nbsp;barabasi-albert,&nbsp;full}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;w_range&nbsp;(2-tuple&nbsp;(float)):&nbsp;weight&nbsp;range&nbsp;+/-&nbsp;(low,&nbsp;high)<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(DAG):&nbsp;weighted&nbsp;DAG<br>
+&nbsp;&nbsp;&nbsp;&nbsp;None<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(numpy.ndarray):&nbsp;permutation&nbsp;matrix</span></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>Union</strong> = typing.Union<br>
+<strong>multivariate_normal</strong> = &lt;scipy.stats._multivariate.multivariate_normal_gen object&gt;</td></tr></table></div>
+</body></html>

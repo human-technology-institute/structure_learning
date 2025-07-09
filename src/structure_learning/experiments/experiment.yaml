@@ -1,0 +1,29 @@
+{
+    # General configuration
+    experiment_name: "a",
+
+    # data configuration
+    data: "",
+    variables: [],
+    variable_types: [],
+
+    # samplers
+    samplers: [
+        {
+            sampler_type: "SMCMC",
+            n_chains: 10,
+            config: {
+                
+            }
+        },
+        {
+            sampler_type: "PMCMC",
+            config: {
+                
+            }
+        },
+        {
+            
+        }
+    ]
+}

@@ -1,0 +1,110 @@
+<!DOCTYPE>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pydoc: module structure_learning.scores.score</title>
+<link rel="stylesheet" type="text/css" href="_pydoc.css"></head><body>
+                <div style='float:right'>
+                    <div style='text-align:center'>
+                    <a href="index.html">Module Index</a>
+                    : <a href="topics.html">Topics</a>
+                    : <a href="keywords.html">Keywords</a>
+                    </div>
+                    <div>
+                        <form action="get" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Get">
+                        </form>&nbsp;
+                        <form action="search" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Search">
+                        </form>
+                    </div>
+                </div>
+                <div style="clear:both;padding-top:.5em;">
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.scores.html" class="white">scores</a>.score</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/Users/165421/Documents/code/structure_learning/src/structure_learning/scores/score.py">/Users/165421/Documents/code/structure_learning/src/structure_learning/scores/score.py</a></td></tr></table>
+    <p></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="pandas.html">pandas</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
+    
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="abc.html#ABC">abc.ABC</a>(<a href="builtins.html#object">builtins.object</a>)
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="structure_learning.scores.score.html#Score">Score</a>
+</dt></dl>
+</dd>
+</dl>
+ <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="Score">class <strong>Score</strong></a>(<a href="abc.html#ABC">abc.ABC</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#Score">Score</a>(data:&nbsp;Union[structure_learning.data.data.Data,&nbsp;pandas.core.frame.DataFrame])<br>
+&nbsp;<br>
+Base&nbsp;class&nbsp;for&nbsp;graph&nbsp;scores&nbsp;for&nbsp;structure&nbsp;learning&nbsp;using&nbsp;MCMC.<br>
+Inheriting&nbsp;classes&nbsp;must&nbsp;implement&nbsp;the&nbsp;following&nbsp;methods:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Score-compute">compute</a>()&nbsp;-&gt;&nbsp;dict<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Score-compute_node">compute_node</a>()&nbsp;-&gt;&nbsp;dict<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.scores.score.html#Score">Score</a></dd>
+<dd><a href="abc.html#ABC">abc.ABC</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="Score-__init__"><strong>__init__</strong></a>(self, data: Union[structure_learning.data.data.Data, pandas.core.frame.DataFrame])</dt><dd><span class="code">Initialises&nbsp;the&nbsp;<a href="#Score">Score</a>&nbsp;abstract&nbsp;class.<br>
+All&nbsp;classes&nbsp;that&nbsp;inherit&nbsp;from&nbsp;this&nbsp;class&nbsp;must&nbsp;implement&nbsp;the&nbsp;compute&nbsp;method.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;data&nbsp;(pd.DataFrame):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dataset<br>
+&nbsp;&nbsp;&nbsp;&nbsp;graph&nbsp;(nx.DiGraph,&nbsp;optional):&nbsp;&nbsp;&nbsp;graph&nbsp;structure.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Defaults&nbsp;to&nbsp;None.&nbsp;The&nbsp;graph&nbsp;must&nbsp;be&nbsp;a&nbsp;DAG.</span></dd></dl>
+
+<dl><dt><a name="Score-compute"><strong>compute</strong></a>(self, graph: structure_learning.data_structures.graph.Graph)</dt><dd><span class="code">Implements&nbsp;a&nbsp;score&nbsp;function&nbsp;(e.g.&nbsp;BGe,&nbsp;Marginal&nbsp;Likelihood,&nbsp;etc)</span></dd></dl>
+
+<dl><dt><a name="Score-compute_node"><strong>compute_node</strong></a>(self, graph: structure_learning.data_structures.graph.Graph, node: str)</dt><dd><span class="code">Implements&nbsp;a&nbsp;score&nbsp;function&nbsp;(e.g.&nbsp;BGe,&nbsp;Marginal&nbsp;Likelihood,&nbsp;etc)&nbsp;for&nbsp;a&nbsp;specific&nbsp;node</span></dd></dl>
+
+<dl><dt><a name="Score-compute_node_with_edges"><strong>compute_node_with_edges</strong></a>(self, node: str, parents: list = None, node_index_map: dict = None)</dt><dd><span class="code">Implements&nbsp;a&nbsp;score&nbsp;function&nbsp;(e.g.&nbsp;BGe,&nbsp;Marginal&nbsp;Likelihood,&nbsp;etc)&nbsp;for&nbsp;a&nbsp;specific&nbsp;node&nbsp;and&nbsp;parents</span></dd></dl>
+
+<hr>
+Readonly properties defined here:<br>
+<dl><dt><strong>node_labels</strong></dt>
+</dl>
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+<dl><dt><strong>data</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__abstractmethods__</strong> = frozenset({'compute', 'compute_node_with_edges'})</dl>
+
+</td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>Union</strong> = typing.Union</td></tr></table></div>
+</body></html>

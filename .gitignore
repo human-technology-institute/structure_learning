@@ -10,4 +10,4 @@ src/.DS_Store
 src/mcmc.egg-info/
 src/structure_mcmc.egg-info/
 src/structure_learning.egg-info/
-src/mcmc/.DS_Store
+src/structure_learning/.DS_Store

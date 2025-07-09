@@ -1,0 +1,74 @@
+# Changelog
+
+## Version 1.0.0
+
+### General Updates
+- Major code refactoring
+- Integration with OPAD re-weighing scheme
+- Integration with CPDAG analysis
+- Integration with causal effects
+
+### Experiment Class Enhancements
+#### Experiment Configuration
+- Added functionality to define experiments using various samplers and metrics 
+without the explicit instantiation and handling of the specific classes
+- Added functionality to export experiment configurations to YAML files using `exp.to_yaml()`.
+- Enabled loading and running experiments directly from YAML files via `Experiment.from_yaml()`.
+
+#### Evaluation Metrics
+- Expanded evaluation metrics to include:
+  - `mae` (Mean Absolute Error)
+  - `mse` (Mean Squared Error)
+  - `rhat` (Potential Scale Reduction Factor)
+  - `kld` (Kullback-Leibler Divergence)
+  - `jsd` (Jensen-Shannon Divergence)
+- Improved plotting functionality for evaluation results, allowing better visualization of sampler performance.
+
+### Sampler Updates
+#### StructureMCMC Sampler
+- Added configurations for `distribution`, `opad`, and `opad+` result types to support advanced result handling.
+- Enhanced support for multiple chains and seeds, improving reproducibility and scalability.
+
+#### PartitionMCMC Sampler
+- Added configuration for `FULL` and `PC` search space
+- Improved handling of DAG graph types for compatibility with new features.
+
+#### Other Implemented Sampler Classes
+- Introduced additional sampler classes to support diverse sampling strategies, including:
+  - `HillClimb`
+  - `PC`
+- Enhanced flexibility in selecting samplers based on experiment requirements.
+
+### Distribution Handling
+#### True Distribution Computation
+- Added functionality to compute true distributions using `Distribution.compute_distribution()`.
+- Enhanced compatibility with various scoring methods, including `BGeScore`.
+
+#### Plotting Enhancements
+- Introduced `Distribution.plot_multiple()` for visualizing multiple distributions simultaneously.
+- Improved plotting options for better clarity and customization.
+
+### Causal Inference
+#### Ability to Compute Causal Effects
+- Implemented methods to compute causal effects between variables using learned structures.
+- Added support for interventions in causal inference workflows.
+
+### Incorporating Priors
+#### Priors in Structure Learning
+- Added functionality to include prior knowledge in structure learning processes.
+- Supported priors for edge constraints
+
+### Data Class Enhancements
+#### Updates from `src/data/data.py`
+- Added functionality to load datasets from various file formats, including `.csv` and `.npy`.
+- Implemented methods for preprocessing data, such as normalization.
+- Enhanced support for splitting datasets into training and testing subsets.
+- Improved integration with scoring functions and graph structures for seamless experimentation.
+
+### Bug Fixes
+- Fixed issues with unsupported result types in samplers, ensuring compatibility with new configurations.
+- Improved error handling in `Experiment.run()` to prevent crashes during execution.
+
+### Code Refactoring
+- Refactored methods across samplers and experiments to improve readability and maintainability.
+- Optimized performance for large-scale experiments and sampling processes.
