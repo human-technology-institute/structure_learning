@@ -79,7 +79,7 @@ pip install dist/structure_learning-1.0.0-py3-none-any.whl
 # Running Structure MCMC
 
 ```python
-from structure_learning.samplers.mcmc import StructureMCMC
+from structure_learning.approximators import StructureMCMC
 
 # initialise structure MCMC
 M = StructureMCMC(max_iter=n_iterations, data=data, score_object='bge') # data is a pd.DataFrame/Data object
@@ -92,7 +92,7 @@ mcmc_results, acceptance = M.run()
 # Running Partition MCMC
 
 ```python
-from structure_learning.samplers.partition_mcmc import PartitionMCMC
+from structure_learning.approximators import PartitionMCMC
 
 # initialise partition MCMC
 M = PartitionMCMC(data=data, max_iter=n_iterations, score_object='bge') # data is a pd.DataFrame/Data object
