@@ -18,7 +18,8 @@ dependencies = [
   "torch",
   "pgmpy",
   "compress_pickle",
-  "pygraphviz"
+  "pygraphviz",
+  "cliquepicking"
 ]
 readme = "README.md"
 license = {file = "LICENSE"}
