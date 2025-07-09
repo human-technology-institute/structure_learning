@@ -7,6 +7,7 @@ Classes:
 
 import numpy as np
 import pandas as pd
+import networkx as nx
 from .graph import Graph 
 
 class CPDAG(Graph):
@@ -76,7 +77,27 @@ class CPDAG(Graph):
         """
         return (self.incidence == other.incidence).all()
 
-    def enumerate_dags(self, generate=True):
+    def __len__(self):
+        import cliquepicking as cp
+        nodes = {node:idx for idx, node in enumerate(self.nodes)}
+        edges = [(nodes[u], nodes[v]) for u, v in self.edges]
+        return cp.mec_size(edges)
+    
+    def enumerate_dags(self):
+        import cliquepicking as cp
+        from .dag import DAG 
+        nodes = {node:idx for idx, node in enumerate(self.nodes)}
+        edges = [(nodes[u], nodes[v]) for u, v in self.edges]
+
+        dags = cp.mec_list_dags(edges)
+        for dag in dags:
+            incidence = np.zeros((len(self.nodes), len(self.nodes)), dtype=bool)
+            for u, v in dag:
+                incidence[u, v] = True
+            g = DAG(incidence=incidence, nodes=self.nodes)
+            yield g
+
+    def enumerate_dags_old(self, generate=True):
         """
         Enumerate all DAGs represented by the CPDAG.
 
@@ -99,6 +120,7 @@ class CPDAG(Graph):
                 if generate:
                     self.dags = []
                 fstr = "{0:0" + str(dim) + "b}"
+                v_structures = self.v_structures()
                 for i in range(2**dim):
                     binstr = fstr.format(i)
                     incidence = self.incidence.copy()
@@ -109,20 +131,22 @@ class CPDAG(Graph):
                         else:
                             incidence[c, r] = False
                     if not Graph.has_cycle(incidence):
+                        g = DAG(incidence=incidence, nodes=self.nodes)
+                        if g.v_structures() != v_structures:
+                            continue
                         self._n_dags += 1
                         if generate:
-                            g = DAG(incidence=incidence, nodes=self.nodes)
                             self.dags.append(g)
                             yield g
 
-    def __len__(self):
+    def __len_old__(self):
         """
         Get the number of DAGs represented by the CPDAG.
 
         Returns:
             int: Number of DAGs.
         """
-        [g for g in self.enumerate_dags(generate=False)]
+        [g for g in self.enumerate_dags()]
         return self._n_dags
 
     def plot(self, filename=None, text=None, data: pd.DataFrame=None):
@@ -130,6 +154,7 @@ class CPDAG(Graph):
         if data is None:
             return super().plot(filename=filename, text=text)
         else:
-            [dag for dag in self.enumerate_dags(generate=True)]
-            weights, colors = self.dags[0].fit(data=data)
+            dags = [dag for dag in self.enumerate_dags()]
+            weights, colors = dags[0].fit(data=data)
             return super().plot(filename=filename, text=text, edge_colors=colors, edge_weights=weights)
+        
