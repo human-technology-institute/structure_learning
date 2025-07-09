@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Pydoc: module structure_learning.samplers.pc</title>
+<title>Pydoc: module structure_learning.approximators.pc</title>
 <link rel="stylesheet" type="text/css" href="_pydoc.css"></head><body>
                 <div style='float:right'>
                     <div style='text-align:center'>
@@ -24,8 +24,8 @@
                 <div style="clear:both;padding-top:.5em;">
 <table class="heading">
 <tr class="heading-text decor">
-<td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.samplers.html" class="white">samplers</a>.pc</strong></td>
-<td class="extra"><a href=".">index</a><br><a href="file:/Users/165421/Documents/code/structure_learning/src/structure_learning/samplers/pc.py">/Users/165421/Documents/code/structure_learning/src/structure_learning/samplers/pc.py</a></td></tr></table>
+<td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.approximators.html" class="white">approximators</a>.pc</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/Users/165421/Documents/code/structure_learning/src/structure_learning/approximators/pc.py">/Users/165421/Documents/code/structure_learning/src/structure_learning/approximators/pc.py</a></td></tr></table>
     <p></p>
 <p>
 <table class="section">
@@ -33,28 +33,27 @@
 <td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
     
 <tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
-<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="graphical_models.html">graphical_models</a><br>
-</td><td class="multicolumn"><a href="networkx.html">networkx</a><br>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="networkx.html">networkx</a><br>
 </td><td class="multicolumn"><a href="pandas.html">pandas</a><br>
 </td><td class="multicolumn"><a href="pgmpy.html">pgmpy</a><br>
-</td></tr></table></td></tr></table><p>
+</td><td class="multicolumn"></td></tr></table></td></tr></table><p>
 <table class="section">
 <tr class="decor index-decor heading-text">
 <td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
     
 <tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
 <td class="singlecolumn"><dl>
-<dt class="heading-text"><a href="structure_learning.samplers.sampler.html#Sampler">structure_learning.samplers.sampler.Sampler</a>(<a href="abc.html#ABC">abc.ABC</a>)
+<dt class="heading-text"><a href="structure_learning.approximators.approximator.html#Approximator">structure_learning.approximators.approximator.Approximator</a>(<a href="abc.html#ABC">abc.ABC</a>)
 </dt><dd>
 <dl>
-<dt class="heading-text"><a href="structure_learning.samplers.pc.html#PC">PC</a>
+<dt class="heading-text"><a href="structure_learning.approximators.pc.html#PC">PC</a>
 </dt></dl>
 </dd>
 </dl>
  <p>
 <table class="section">
 <tr class="decor title-decor heading-text">
-<td class="section-title" colspan=3>&nbsp;<br><a name="PC">class <strong>PC</strong></a>(<a href="structure_learning.samplers.sampler.html#Sampler">structure_learning.samplers.sampler.Sampler</a>)</td></tr>
+<td class="section-title" colspan=3>&nbsp;<br><a name="PC">class <strong>PC</strong></a>(<a href="structure_learning.approximators.approximator.html#Approximator">structure_learning.approximators.approximator.Approximator</a>)</td></tr>
     
 <tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
 <td class="decor title-decor" colspan=2><span class="code"><a href="#PC">PC</a>(data:&nbsp;Union[structure_learning.data.data.Data,&nbsp;pandas.core.frame.DataFrame],&nbsp;significance_level=0.01,&nbsp;ci_test='pearsonr')<br>
@@ -62,8 +61,8 @@
 <br>&nbsp;</span></td></tr>
 <tr><td>&nbsp;</td>
 <td class="singlecolumn"><dl><dt>Method resolution order:</dt>
-<dd><a href="structure_learning.samplers.pc.html#PC">PC</a></dd>
-<dd><a href="structure_learning.samplers.sampler.html#Sampler">structure_learning.samplers.sampler.Sampler</a></dd>
+<dd><a href="structure_learning.approximators.pc.html#PC">PC</a></dd>
+<dd><a href="structure_learning.approximators.approximator.html#Approximator">structure_learning.approximators.approximator.Approximator</a></dd>
 <dd><a href="abc.html#ABC">abc.ABC</a></dd>
 <dd><a href="builtins.html#object">builtins.object</a></dd>
 </dl>
@@ -80,7 +79,24 @@ Data and other attributes defined here:<br>
 <dl><dt><strong>__abstractmethods__</strong> = frozenset()</dl>
 
 <hr>
-Data descriptors inherited from <a href="structure_learning.samplers.sampler.html#Sampler">structure_learning.samplers.sampler.Sampler</a>:<br>
+Methods inherited from <a href="structure_learning.approximators.approximator.html#Approximator">structure_learning.approximators.approximator.Approximator</a>:<br>
+<dl><dt><a name="PC-save"><strong>save</strong></a>(self, filename: str, compression='gzip')</dt><dd><span class="code">Saves&nbsp;the&nbsp;Graph&nbsp;object&nbsp;to&nbsp;a&nbsp;file.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(str):&nbsp;Path&nbsp;to&nbsp;the&nbsp;output&nbsp;file.</span></dd></dl>
+
+<hr>
+Class methods inherited from <a href="structure_learning.approximators.approximator.html#Approximator">structure_learning.approximators.approximator.Approximator</a>:<br>
+<dl><dt><a name="PC-load"><strong>load</strong></a>(filename: str, compression='gzip')</dt><dd><span class="code">Loads&nbsp;a&nbsp;Graph&nbsp;object&nbsp;from&nbsp;a&nbsp;file.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(str):&nbsp;Path&nbsp;to&nbsp;the&nbsp;input&nbsp;file.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Graph:&nbsp;Loaded&nbsp;Graph&nbsp;object.</span></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="structure_learning.approximators.approximator.html#Approximator">structure_learning.approximators.approximator.Approximator</a>:<br>
 <dl><dt><strong>__dict__</strong></dt>
 <dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
 </dl>

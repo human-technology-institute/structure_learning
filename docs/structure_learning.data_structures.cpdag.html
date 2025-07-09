@@ -37,8 +37,9 @@ Classes:<br>
     
 <tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
 <td class="singlecolumn"><table><tr><td class="multicolumn"><a href="numpy.html">numpy</a><br>
+</td><td class="multicolumn"><a href="networkx.html">networkx</a><br>
 </td><td class="multicolumn"><a href="pandas.html">pandas</a><br>
-</td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+</td><td class="multicolumn"></td></tr></table></td></tr></table><p>
 <table class="section">
 <tr class="decor index-decor heading-text">
 <td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
@@ -97,12 +98,16 @@ Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;incidence&nbsp;(numpy.ndarray):&nbsp;Adjacency&nbsp;matrix&nbsp;of&nbsp;the&nbsp;graph.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;nodes&nbsp;(list):&nbsp;List&nbsp;of&nbsp;node&nbsp;labels.</span></dd></dl>
 
-<dl><dt><a name="CPDAG-__len__"><strong>__len__</strong></a>(self)</dt><dd><span class="code">Get&nbsp;the&nbsp;number&nbsp;of&nbsp;DAGs&nbsp;represented&nbsp;by&nbsp;the&nbsp;<a href="#CPDAG">CPDAG</a>.<br>
+<dl><dt><a name="CPDAG-__len__"><strong>__len__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="CPDAG-__len_old__"><strong>__len_old__</strong></a>(self)</dt><dd><span class="code">Get&nbsp;the&nbsp;number&nbsp;of&nbsp;DAGs&nbsp;represented&nbsp;by&nbsp;the&nbsp;<a href="#CPDAG">CPDAG</a>.<br>
 &nbsp;<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;int:&nbsp;Number&nbsp;of&nbsp;DAGs.</span></dd></dl>
 
-<dl><dt><a name="CPDAG-enumerate_dags"><strong>enumerate_dags</strong></a>(self, generate=True)</dt><dd><span class="code">Enumerate&nbsp;all&nbsp;DAGs&nbsp;represented&nbsp;by&nbsp;the&nbsp;<a href="#CPDAG">CPDAG</a>.<br>
+<dl><dt><a name="CPDAG-enumerate_dags"><strong>enumerate_dags</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="CPDAG-enumerate_dags_old"><strong>enumerate_dags_old</strong></a>(self, generate=True)</dt><dd><span class="code">Enumerate&nbsp;all&nbsp;DAGs&nbsp;represented&nbsp;by&nbsp;the&nbsp;<a href="#CPDAG">CPDAG</a>.<br>
 &nbsp;<br>
 Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;generate&nbsp;(bool):&nbsp;Whether&nbsp;to&nbsp;generate&nbsp;DAG&nbsp;instances.<br>
@@ -228,6 +233,11 @@ Parameters:<br>
 Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;nodes&nbsp;(list&nbsp;|&nbsp;tuple):&nbsp;List&nbsp;or&nbsp;tuple&nbsp;of&nbsp;node&nbsp;labels.</span></dd></dl>
 
+<dl><dt><a name="CPDAG-save"><strong>save</strong></a>(self, filename: str, compression='gzip')</dt><dd><span class="code">Saves&nbsp;the&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>&nbsp;object&nbsp;to&nbsp;a&nbsp;file.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(str):&nbsp;Path&nbsp;to&nbsp;the&nbsp;output&nbsp;file.</span></dd></dl>
+
 <dl><dt><a name="CPDAG-to_csv"><strong>to_csv</strong></a>(self, filename)</dt><dd><span class="code">Saves&nbsp;the&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>&nbsp;object&nbsp;to&nbsp;a&nbsp;CSV&nbsp;file.<br>
 &nbsp;<br>
 Parameters:<br>
@@ -324,6 +334,14 @@ Parameters:<br>
 &nbsp;<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;if&nbsp;the&nbsp;graph&nbsp;has&nbsp;a&nbsp;cycle,&nbsp;False&nbsp;otherwise.</span></dd></dl>
+
+<dl><dt><a name="CPDAG-load"><strong>load</strong></a>(filename: str, compression='gzip') -&gt; Type[~Graph]</dt><dd><span class="code">Loads&nbsp;a&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>&nbsp;object&nbsp;from&nbsp;a&nbsp;file.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(str):&nbsp;Path&nbsp;to&nbsp;the&nbsp;input&nbsp;file.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>:&nbsp;Loaded&nbsp;<a href="structure_learning.data_structures.graph.html#Graph">Graph</a>&nbsp;object.</span></dd></dl>
 
 <hr>
 Readonly properties inherited from <a href="structure_learning.data_structures.graph.html#Graph">structure_learning.data_structures.graph.Graph</a>:<br>

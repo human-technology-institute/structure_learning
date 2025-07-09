@@ -68,10 +68,15 @@
 
 <dl><dt><a name="Experiment-run"><strong>run</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="Experiment-run_sampler"><strong>run_sampler</strong></a>(self, sampler: structure_learning.samplers.sampler.Sampler)</dt><dd><span class="code">Run&nbsp;a&nbsp;specific&nbsp;sampler.<br>
+<dl><dt><a name="Experiment-run_sampler"><strong>run_sampler</strong></a>(self, approximator: structure_learning.approximators.approximator.Approximator)</dt><dd><span class="code">Run&nbsp;a&nbsp;specific&nbsp;sampler.<br>
 &nbsp;<br>
 Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;sampler:&nbsp;The&nbsp;sampler&nbsp;instance&nbsp;to&nbsp;run.</span></dd></dl>
+
+<dl><dt><a name="Experiment-save"><strong>save</strong></a>(self, filename: str, compression='gzip')</dt><dd><span class="code">Saves&nbsp;the&nbsp;Graph&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;a&nbsp;file.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(str):&nbsp;Path&nbsp;to&nbsp;the&nbsp;output&nbsp;file.</span></dd></dl>
 
 <dl><dt><a name="Experiment-to_yaml"><strong>to_yaml</strong></a>(self, yaml_file: str)</dt><dd><span class="code">Save&nbsp;experiment&nbsp;configuration&nbsp;to&nbsp;a&nbsp;YAML&nbsp;file.<br>
 &nbsp;<br>
@@ -84,6 +89,14 @@ Class methods defined here:<br>
 &nbsp;<br>
 Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;yaml_file&nbsp;(str):&nbsp;Path&nbsp;to&nbsp;the&nbsp;YAML&nbsp;file&nbsp;containing&nbsp;experiment&nbsp;configuration.</span></dd></dl>
+
+<dl><dt><a name="Experiment-load"><strong>load</strong></a>(filename: str, compression='gzip')</dt><dd><span class="code">Loads&nbsp;a&nbsp;Graph&nbsp;<a href="builtins.html#object">object</a>&nbsp;from&nbsp;a&nbsp;file.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(str):&nbsp;Path&nbsp;to&nbsp;the&nbsp;input&nbsp;file.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Graph:&nbsp;Loaded&nbsp;Graph&nbsp;<a href="builtins.html#object">object</a>.</span></dd></dl>
 
 <hr>
 Data descriptors defined here:<br>

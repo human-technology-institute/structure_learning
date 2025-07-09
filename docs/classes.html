@@ -4,6 +4,13 @@
       <div class="mermaid">
     
         classDiagram
+          class Approximator {
+            data
+            config()*
+            load(filename: str, compression)
+            run()*
+            save(filename: str, compression)
+          }
           class BDScore {
             alpha : float
             compute(graph: Graph)
@@ -28,7 +35,8 @@
           class CPDAG {
             dags : NoneType, list
             undirected_edges : list
-            enumerate_dags(generate)
+            enumerate_dags()
+            enumerate_dags_old(generate)
             from_dag(dag)
             plot(filename, text, data: pd.DataFrame)
           }
@@ -83,10 +91,12 @@
             compute_distribution(data: pd.DataFrame, score: Score, graph_type)
             copy()
             hist(prop, normalise)
+            load(filename: str, compression)
             normalise(prop, log)
             plot(prop, sort, normalise, limit, ax)
             plot_multiple(dists: List[Type['D']], prop, normalise, limit, ax, labels)
             prop(name)
+            save(filename: str, compression)
             top(prop, n)
             update(particle, data)
           }
@@ -103,8 +113,10 @@
             variables
             evaluate(plot, plot_labels)
             from_yaml(yaml_file: str, data: pd.DataFrame, ground_truth: str)
+            load(filename: str, compression)
             run()
-            run_sampler(sampler: Sampler)
+            run_sampler(approximator: Approximator)
+            save(filename: str, compression)
             to_yaml(yaml_file: str)
           }
           class Graph {
@@ -129,11 +141,13 @@
             from_pandas(graph: pd.DataFrame) Type[G]
             has_cycle(graph: Union[np.ndarray, Type[G]]) bool
             has_edge(node1, node2, undirected) bool
+            load(filename: str, compression) Type[G]
             plot(filename, text, edge_colors: dict, edge_weights: dict)
             remove_edge(edge: Union[List, Tuple])
             remove_edges(edges: Union[List[Tuple], Tuple[Tuple]])
             remove_node(node: str)
             remove_nodes(nodes: Union[List[str], Tuple[str]])
+            save(filename: str, compression)
             to_csv(filename)
             to_key(type: str)
             to_numpy(return_node_labels)
@@ -185,33 +199,6 @@
             get_state_to_explore()
             run(increment)
           }
-          class GreedySearch {
-            DETERMINISTIC_STRATEGY : str
-            PROBABILISTIC_PARTIAL_EXPLORATION_STRATEGY : str
-            PROBABILISTIC_STRATEGY : str
-            data : Union[Data, pd.DataFrame]
-            include_reversal : bool
-            initial_state : Union[np.ndarray, DAG]
-            max_evaluations : int
-            max_unexplored : int
-            n_nodes
-            n_particles : int
-            neighbour_count : defaultdict
-            neighbour_score : defaultdict
-            particles : OrderedDict
-            proposal
-            retain_size : int
-            scorer
-            state_score : dict
-            strategy : str
-            unexplored : list
-            unexplored_keys : list
-            unexplored_scores : list
-            unexplored_timestamp : list
-            add_neighbours(neighbours)
-            get_state_to_explore()
-            run()
-          }
           class HillClimb {
             config_dict : dict
             current_score : int
@@ -245,6 +232,7 @@
             RESULT_TYPE_OPAD : str
             RESULT_TYPE_OPAD_PLUS : str
             blacklist : ndarray
+            burn_in : float
             config_dict : dict
             graph_type : str
             initial_state : State
@@ -267,6 +255,7 @@
             get_graphs(results)
             run(intervals) Tuple[dict, float]
             step()* dict
+            to_cpdag_distribution()
             to_distribution()
             to_opad(plus)
             traceplot(ax)
@@ -277,13 +266,13 @@
             rejected : NoneType
             from_iterates(iterates: dict)
             to_opad(plus)
-            update(particle, iteration, data)
+            update(particle, data, iteration)
           }
           class MSE {
             compute(dist1: Distribution, dist2: Distribution)
           }
           class Metric {
-            compute(dist1: Distribution, dist2: Distribution)*
+            compute()*
           }
           class OPAD {
             particles : dict
@@ -293,7 +282,7 @@
             from_mcmc(dist: Distribution, plus)
             normalise()
             plot(prop, sort, normalise, limit)
-            update(particle, iteration, data, normalise)
+            update(particle, data, iteration, normalise)
           }
           class OrderedPartition {
             all_nodes
@@ -315,12 +304,14 @@
             info()
             insert_partition(part_id: int, nodes: set)
             join_partition(part_id: int)
+            load(filename: str)
             plot(fig_size, title)
             print_partitions()
             remove_empty_partitions()
             remove_node_from_partition(part_id: int, node: str)
             remove_partition(part_id)
             replace_partition(new_partition: Partition, index: int)
+            save(filename: str)
             to_party_permy_posy()
             update_IDs()
           }
@@ -400,12 +391,7 @@
             compute(dists: List[Distribution], prop)
           }
           class SHD {
-            compute(dags: Union[Distribution, DAG], true_DAG: DAG)
-          }
-          class Sampler {
-            data
-            config()*
-            run()*
+            compute(dags: Union[Distribution, Graph], true_graph: Graph)
           }
           class Score {
             data
@@ -464,6 +450,12 @@
             value : int
             compute(dag: DAG)
           }
+          GreedySearch --|> Approximator
+          HillClimb --|> Approximator
+          MCMC --|> Approximator
+          PartitionMCMC --|> MCMC
+          PC --|> Approximator
+          StructureMCMC --|> MCMC
           CPDAG --|> Graph
           DAG --|> Graph
           MCMCDistribution --|> Distribution
@@ -480,29 +472,23 @@
           UniformPrior --|> Prior
           GraphProposal --|> StructureLearningProposal
           PartitionProposal --|> StructureLearningProposal
-          GreedySearch --|> Sampler
-          HillClimb --|> Sampler
-          MCMC --|> Sampler
-          PartitionMCMC --|> MCMC
-          PC --|> Sampler
-          StructureMCMC --|> MCMC
           BDScore --|> Score
           BDeuScore --|> Score
           BGeScore --|> Score
+          Data --* Approximator : data
           Data --* SyntheticDataset : data
-          Data --* Sampler : data
           Data --* Score : _data
           CPDAG --* MCMC : pc_graph
           CPDAG --* PC : cpdag
-          DAG --* SyntheticDataset : W
-          DAG --* SyntheticDataset : graph
-          DAG --* GraphProposal : initial_state
-          DAG --* GraphProposal : proposed_state
           DAG --* HillClimb : initial_state
           DAG --* HillClimb : current_state
           DAG --* MCMC : _pc_state
           DAG --* PartitionMCMC : initial_state
           DAG --* PC : dag
+          DAG --* SyntheticDataset : W
+          DAG --* SyntheticDataset : graph
+          DAG --* GraphProposal : initial_state
+          DAG --* GraphProposal : proposed_state
           OrderedPartition --* PartitionMCMC : initial_state
           OrderedPartition --* PartitionMCMC : initial_state
           Distribution --* MCMCDistribution : rejected
@@ -513,11 +499,8 @@
           OPAD --* MCMC : results
           OPAD --* MCMC : results
           GraphProposal --* GreedySearch : proposal
-          GraphProposal --* GreedySearch : proposal
           GraphProposal --* HillClimb : proposal
           BDeuScore --* GreedySearch : scorer
-          BDeuScore --* GreedySearch : scorer
-          BGeScore --* GreedySearch : scorer
           BGeScore --* GreedySearch : scorer
           BGeScore --* HillClimb : scorer
           Data --o CausalEffects : data

@@ -208,7 +208,7 @@ This&nbsp;class&nbsp;serves&nbsp;as&nbsp;a&nbsp;blueprint&nbsp;for&nbsp;all&nbsp
 the&nbsp;structure&nbsp;and&nbsp;behavior&nbsp;that&nbsp;all&nbsp;derived&nbsp;metric&nbsp;classes&nbsp;must&nbsp;follow.<br>&nbsp;</span></td></tr>
 <tr><td>&nbsp;</td>
 <td class="singlecolumn">Methods defined here:<br>
-<dl><dt><a name="Metric-compute"><strong>compute</strong></a>(self, dist1: structure_learning.distributions.distribution.Distribution, dist2: structure_learning.distributions.distribution.Distribution)</dt></dl>
+<dl><dt><a name="Metric-compute"><strong>compute</strong></a>(self, **kwargs)</dt></dl>
 
 <hr>
 Data descriptors defined here:<br>
@@ -266,7 +266,7 @@ from&nbsp;the&nbsp;<a href="#Metric">Metric</a>&nbsp;base&nbsp;class&nbsp;and&nb
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="SHD-compute"><strong>compute</strong></a>(self, dags: Union[structure_learning.distributions.distribution.Distribution, structure_learning.data_structures.dag.DAG], true_DAG: structure_learning.data_structures.dag.DAG)</dt></dl>
+<dl><dt><a name="SHD-compute"><strong>compute</strong></a>(self, dags: Union[structure_learning.distributions.distribution.Distribution, structure_learning.data_structures.graph.Graph], true_graph: structure_learning.data_structures.graph.Graph)</dt></dl>
 
 <hr>
 Data descriptors inherited from <a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>:<br>

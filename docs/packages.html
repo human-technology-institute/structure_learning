@@ -6,6 +6,22 @@
         classDiagram
           class structure_learning {
           }
+          class approximators {
+          }
+          class approximator {
+          }
+          class greedy {
+          }
+          class hillclimb {
+          }
+          class mcmc {
+          }
+          class partition_mcmc {
+          }
+          class pc {
+          }
+          class structure_mcmc {
+          }
           class data {
           }
           class data {
@@ -54,24 +70,6 @@
           }
           class proposal {
           }
-          class samplers {
-          }
-          class _greedy {
-          }
-          class greedy {
-          }
-          class hillclimb {
-          }
-          class mcmc {
-          }
-          class partition_mcmc {
-          }
-          class pc {
-          }
-          class sampler {
-          }
-          class structure_mcmc {
-          }
           class scores {
           }
           class bd {
@@ -86,6 +84,41 @@
           }
           class utils {
           }
+          approximators --> greedy
+          approximators --> hillclimb
+          approximators --> mcmc
+          approximators --> partition_mcmc
+          approximators --> structure_mcmc
+          approximator --> data
+          greedy --> approximator
+          greedy --> data
+          greedy --> data_structures
+          greedy --> proposals
+          greedy --> scores
+          hillclimb --> approximator
+          hillclimb --> data
+          hillclimb --> dag
+          hillclimb --> proposals
+          hillclimb --> scores
+          mcmc --> approximator
+          mcmc --> pc
+          mcmc --> data
+          mcmc --> distributions
+          mcmc --> proposals
+          mcmc --> scores
+          partition_mcmc --> approximators
+          partition_mcmc --> data_structures
+          partition_mcmc --> proposals
+          partition_mcmc --> scores
+          pc --> approximator
+          pc --> data
+          pc --> cpdag
+          pc --> dag
+          structure_mcmc --> approximators
+          structure_mcmc --> data_structures
+          structure_mcmc --> priors
+          structure_mcmc --> proposals
+          structure_mcmc --> scores
           data --> data
           data --> synthetic
           synthetic --> data
@@ -105,10 +138,10 @@
           metrics --> data_structures
           metrics --> distributions
           experiments --> experiment
+          experiment --> approximators
           experiment --> data_structures
           experiment --> distributions
           experiment --> metrics
-          experiment --> samplers
           inference --> causal_effects
           causal_effects --> data
           causal_effects --> data_structures
@@ -123,46 +156,6 @@
           graph_proposal --> proposals
           partition_proposal --> partition
           partition_proposal --> proposals
-          samplers --> _greedy
-          samplers --> hillclimb
-          samplers --> mcmc
-          samplers --> partition_mcmc
-          samplers --> structure_mcmc
-          _greedy --> data
-          _greedy --> data_structures
-          _greedy --> proposals
-          _greedy --> scores
-          greedy --> data
-          greedy --> data_structures
-          greedy --> proposals
-          greedy --> sampler
-          greedy --> scores
-          hillclimb --> data
-          hillclimb --> cpdag
-          hillclimb --> dag
-          hillclimb --> proposals
-          hillclimb --> sampler
-          hillclimb --> scores
-          mcmc --> data
-          mcmc --> distributions
-          mcmc --> proposals
-          mcmc --> pc
-          mcmc --> sampler
-          mcmc --> scores
-          partition_mcmc --> data_structures
-          partition_mcmc --> proposals
-          partition_mcmc --> samplers
-          partition_mcmc --> scores
-          pc --> data
-          pc --> cpdag
-          pc --> dag
-          pc --> sampler
-          sampler --> data
-          structure_mcmc --> data_structures
-          structure_mcmc --> priors
-          structure_mcmc --> proposals
-          structure_mcmc --> samplers
-          structure_mcmc --> scores
           scores --> bd
           scores --> bdeu
           scores --> bge

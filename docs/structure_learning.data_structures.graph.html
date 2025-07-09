@@ -185,6 +185,11 @@ Parameters:<br>
 Parameters:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;nodes&nbsp;(list&nbsp;|&nbsp;tuple):&nbsp;List&nbsp;or&nbsp;tuple&nbsp;of&nbsp;node&nbsp;labels.</span></dd></dl>
 
+<dl><dt><a name="Graph-save"><strong>save</strong></a>(self, filename: str, compression='gzip')</dt><dd><span class="code">Saves&nbsp;the&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;a&nbsp;file.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(str):&nbsp;Path&nbsp;to&nbsp;the&nbsp;output&nbsp;file.</span></dd></dl>
+
 <dl><dt><a name="Graph-to_csv"><strong>to_csv</strong></a>(self, filename)</dt><dd><span class="code">Saves&nbsp;the&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;a&nbsp;CSV&nbsp;file.<br>
 &nbsp;<br>
 Parameters:<br>
@@ -281,6 +286,14 @@ Parameters:<br>
 &nbsp;<br>
 Returns:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;bool:&nbsp;True&nbsp;if&nbsp;the&nbsp;graph&nbsp;has&nbsp;a&nbsp;cycle,&nbsp;False&nbsp;otherwise.</span></dd></dl>
+
+<dl><dt><a name="Graph-load"><strong>load</strong></a>(filename: str, compression='gzip') -&gt; Type[~Graph]</dt><dd><span class="code">Loads&nbsp;a&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>&nbsp;from&nbsp;a&nbsp;file.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filename&nbsp;(str):&nbsp;Path&nbsp;to&nbsp;the&nbsp;input&nbsp;file.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Graph">Graph</a>:&nbsp;Loaded&nbsp;<a href="#Graph">Graph</a>&nbsp;<a href="builtins.html#object">object</a>.</span></dd></dl>
 
 <hr>
 Readonly properties defined here:<br>
