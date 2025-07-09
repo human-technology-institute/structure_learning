@@ -87,6 +87,8 @@ class Graph:
                 for k in range(self.dim):
                     if i==k or j==k:
                         continue
+                    if (incidence[i,k] and incidence[k,i]) or (incidence[j,k] and incidence[k,j]):
+                        continue
                     if incidence[i,k] and incidence[j,k] and not (incidence[i,j] or incidence[j,i]):
                         v.add((i,k,j))
         return v

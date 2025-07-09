@@ -27,7 +27,7 @@ Functions:
 from abc import abstractmethod
 from typing import Union, List
 import numpy as np
-from structure_learning.data_structures import DAG
+from structure_learning.data_structures import DAG, Graph
 from structure_learning.distributions import Distribution
 
 class Metric:
@@ -39,7 +39,7 @@ class Metric:
     """
 
     @abstractmethod
-    def compute(self, dist1: Distribution, dist2: Distribution):
+    def compute(self, **kwargs):
         pass
 
 def entropy(P, Q):
@@ -244,7 +244,7 @@ class SHD(Metric):
     from the Metric base class and provides a concrete implementation of the compute method.
     """
 
-    def compute(self, dags: Union[Distribution, DAG], true_DAG: DAG):
+    def compute(self, dags: Union[Distribution, Graph], true_graph: Graph):
         p = None
         if isinstance(dags, DAG):
             dags = [dags.incidence]
@@ -254,9 +254,9 @@ class SHD(Metric):
             except:
                 dags.normalise()
                 p = dags.prop('p')
-            dags = [DAG.from_key(key=dag, nodes=true_DAG.nodes).incidence for dag in dags.particles]
+            dags = [Graph.from_key(key=dag, nodes=true_graph.nodes).incidence for dag in dags.particles]
 
-        return expected_shd(dags, true_DAG.incidence, p)
+        return expected_shd(dags, true_graph.incidence, p)
 
 def rhat(P: list, th: list):
     """

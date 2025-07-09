@@ -1,6 +1,5 @@
 from typing import Union
 import pgmpy
-import graphical_models as gm
 import networkx as nx
 import pandas as pd
 from .sampler import Sampler

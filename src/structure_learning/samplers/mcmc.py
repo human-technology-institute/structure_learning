@@ -181,6 +181,13 @@ class MCMC(Sampler):
             if key not in self._cpdag_sizes:
                 self._cpdag_sizes[key] = len(info['graph'])
             info['weight'] = self._cpdag_sizes[key]
+            if self.result_type == self.RESULT_TYPE_OPAD_PLUS:
+                if info['proposed_state'] is not None:
+                    info['proposed_state'] = info['proposed_state'].to_cpdag()
+                    proposed_key = info['proposed_state'].to_key()
+                    if proposed_key not in self._cpdag_sizes:
+                        self._cpdag_sizes[proposed_key] = len(info['proposed_state'])
+                    info['proposed_state_weight'] = self._cpdag_sizes[proposed_key]
         if self.result_type in (self.RESULT_TYPE_DIST,):
             self.results.update(particle=key, iteration=iteration, data=info.copy())
         elif self.result_type in (self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS):
@@ -245,6 +252,23 @@ class MCMC(Sampler):
         ax.set_xlabel('Iterations')
         ax.set_ylabel('Log score')
         return plot
+
+    def to_cpdag_distribution(self):
+        if self.graph_type == 'cpdag':
+            return self.results
+        elif self.graph_type == 'dag':
+            if self.result_type == self.RESULT_TYPE_ITER:
+                new_results = {}
+                for key, value in self.results.items():
+                    pass
+            elif self.result_type in (self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS):
+                pass
+            elif self.RESULT_TYPE_DIST:
+                pass
+            else:
+                raise Exception("Unsupported result type for CPDAG conversion", self.result_type)
+        else:
+            raise Exception("Unknow graph type", self.graph_type)
     
     def to_distribution(self):
         """

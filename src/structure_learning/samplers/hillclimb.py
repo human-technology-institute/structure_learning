@@ -1,7 +1,6 @@
 from typing import Union
 from collections import deque
 import pgmpy
-import graphical_models as gm
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -9,7 +8,6 @@ from structure_learning.data import Data
 from structure_learning.scores import Score, BGeScore
 from structure_learning.data_structures.dag import DAG
 from structure_learning.proposals import GraphProposal
-from structure_learning.data_structures.cpdag import CPDAG
 from .sampler import Sampler
 
 class HillClimb(Sampler):

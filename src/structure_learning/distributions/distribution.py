@@ -93,7 +93,7 @@ class Distribution:
         Returns:
             (list)          particle data
         """
-        return np.array([v[name] for v in self.particles.values() if name in v])
+        return np.array([v[name] for v in self.particles.values() if name in v and v[name] is not None])
     
     def __contains__(self, particle):
         """
@@ -380,7 +380,10 @@ class MCMCDistribution(Distribution):
             iteration (int):        Iteration number at which the particle was generated.
             data (dict):            Particle data
         """
-        super().update(particle, {'iteration': iteration, 'logp': data['score_current'] if 'logp' not in data else data['logp'], 'prior': data.get('current_state_prior', None) if 'prior' not in data else data['prior'], 'timestamp': data['timestamp']}, iteration=iteration, **kwargs)
+        _data = {'iteration': iteration, 'logp': data['score_current'] if 'logp' not in data else data['logp'], 'prior': data.get('current_state_prior', None) if 'prior' not in data else data['prior'], 'timestamp': data['timestamp']}
+        if 'weight' in data:
+            _data['weight'] = data['weight']
+        super().update(particle, _data, iteration=iteration, **kwargs)
             
         if self.rejected is not None and ('accepted' in data and not data['accepted']):
             if data['proposed_state'] is not None:
