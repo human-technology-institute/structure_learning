@@ -1,0 +1,134 @@
+<!DOCTYPE>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pydoc: module structure_learning.scores.bge</title>
+<link rel="stylesheet" type="text/css" href="_pydoc.css"></head><body>
+                <div style='float:right'>
+                    <div style='text-align:center'>
+                    <a href="index.html">Module Index</a>
+                    : <a href="topics.html">Topics</a>
+                    : <a href="keywords.html">Keywords</a>
+                    </div>
+                    <div>
+                        <form action="get" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Get">
+                        </form>&nbsp;
+                        <form action="search" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Search">
+                        </form>
+                    </div>
+                </div>
+                <div style="clear:both;padding-top:.5em;">
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.scores.html" class="white">scores</a>.bge</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/Users/165421/Documents/code/structure_learning/src/structure_learning/scores/bge.py">/Users/165421/Documents/code/structure_learning/src/structure_learning/scores/bge.py</a></td></tr></table>
+    <p><span class="code">This&nbsp;module&nbsp;implements&nbsp;the&nbsp;BGe&nbsp;(Bayesian&nbsp;Gaussian&nbsp;Equivalent)&nbsp;score&nbsp;for&nbsp;evaluating&nbsp;Bayesian&nbsp;networks.<br>
+&nbsp;<br>
+The&nbsp;BGe&nbsp;score&nbsp;is&nbsp;used&nbsp;to&nbsp;compute&nbsp;the&nbsp;marginal&nbsp;likelihood&nbsp;of&nbsp;a&nbsp;Bayesian&nbsp;network&nbsp;given&nbsp;data.&nbsp;It&nbsp;supports&nbsp;operations<br>
+such&nbsp;as&nbsp;computing&nbsp;the&nbsp;score&nbsp;for&nbsp;the&nbsp;entire&nbsp;graph,&nbsp;individual&nbsp;nodes,&nbsp;and&nbsp;edges.&nbsp;The&nbsp;implementation&nbsp;includes<br>
+parameters&nbsp;for&nbsp;regularization&nbsp;and&nbsp;scoring.<br>
+&nbsp;<br>
+Classes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#BGeScore">BGeScore</a>:&nbsp;Implements&nbsp;the&nbsp;BGe&nbsp;score&nbsp;computation.</span></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="numpy.html">numpy</a><br>
+</td><td class="multicolumn"><a href="pandas.html">pandas</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
+    
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="structure_learning.scores.score.html#Score">structure_learning.scores.score.Score</a>(<a href="abc.html#ABC">abc.ABC</a>)
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="structure_learning.scores.bge.html#BGeScore">BGeScore</a>
+</dt></dl>
+</dd>
+</dl>
+ <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="BGeScore">class <strong>BGeScore</strong></a>(<a href="structure_learning.scores.score.html#Score">structure_learning.scores.score.Score</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#BGeScore">BGeScore</a>(data:&nbsp;Union[structure_learning.data.data.Data,&nbsp;pandas.core.frame.DataFrame])<br>
+&nbsp;<br>
+BGe&nbsp;(Bayesian&nbsp;Gaussian&nbsp;Equivalent)&nbsp;<a href="structure_learning.scores.score.html#Score">Score</a><br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.scores.bge.html#BGeScore">BGeScore</a></dd>
+<dd><a href="structure_learning.scores.score.html#Score">structure_learning.scores.score.Score</a></dd>
+<dd><a href="abc.html#ABC">abc.ABC</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="BGeScore-__init__"><strong>__init__</strong></a>(self, data: Union[structure_learning.data.data.Data, pandas.core.frame.DataFrame])</dt><dd><span class="code">Initialise&nbsp;BGe&nbsp;instance.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;data&nbsp;(Data&nbsp;|&nbsp;pandas.DataFrame):&nbsp;data</span></dd></dl>
+
+<dl><dt><a name="BGeScore-compute"><strong>compute</strong></a>(self, graph: structure_learning.data_structures.graph.Graph)</dt><dd><span class="code">Compute&nbsp;the&nbsp;BGE&nbsp;for&nbsp;the&nbsp;data<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(dict):&nbsp;score&nbsp;and&nbsp;parameters</span></dd></dl>
+
+<dl><dt><a name="BGeScore-compute_node_with_edges"><strong>compute_node_with_edges</strong></a>(self, node: str, parents: list, node_index_map: dict)</dt><dd><span class="code">Compute&nbsp;the&nbsp;BGE&nbsp;for&nbsp;edge(s)<br>
+&nbsp;<br>
+Parameter:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;node&nbsp;(str):&nbsp;node&nbsp;label<br>
+&nbsp;&nbsp;&nbsp;&nbsp;parents&nbsp;(list&nbsp;(str)):&nbsp;node&nbsp;labels&nbsp;of&nbsp;parent&nbsp;nodes<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(dict):&nbsp;score&nbsp;and&nbsp;parameters</span></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>am</strong></dt>
+</dl>
+<dl><dt><strong>parameters</strong></dt>
+</dl>
+<dl><dt><strong>reg_coefficients</strong></dt>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>__abstractmethods__</strong> = frozenset()</dl>
+
+<hr>
+Methods inherited from <a href="structure_learning.scores.score.html#Score">structure_learning.scores.score.Score</a>:<br>
+<dl><dt><a name="BGeScore-compute_node"><strong>compute_node</strong></a>(self, graph: structure_learning.data_structures.graph.Graph, node: str)</dt><dd><span class="code">Implements&nbsp;a&nbsp;score&nbsp;function&nbsp;(e.g.&nbsp;BGe,&nbsp;Marginal&nbsp;Likelihood,&nbsp;etc)&nbsp;for&nbsp;a&nbsp;specific&nbsp;node</span></dd></dl>
+
+<hr>
+Readonly properties inherited from <a href="structure_learning.scores.score.html#Score">structure_learning.scores.score.Score</a>:<br>
+<dl><dt><strong>node_labels</strong></dt>
+</dl>
+<hr>
+Data descriptors inherited from <a href="structure_learning.scores.score.html#Score">structure_learning.scores.score.Score</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+<dl><dt><strong>data</strong></dt>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>Union</strong> = typing.Union<br>
+<strong>lgamma</strong> = &lt;ufunc 'loggamma'&gt;</td></tr></table></div>
+</body></html>

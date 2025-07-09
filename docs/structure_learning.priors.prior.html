@@ -1,0 +1,194 @@
+<!DOCTYPE>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pydoc: module structure_learning.priors.prior</title>
+<link rel="stylesheet" type="text/css" href="_pydoc.css"></head><body>
+                <div style='float:right'>
+                    <div style='text-align:center'>
+                    <a href="index.html">Module Index</a>
+                    : <a href="topics.html">Topics</a>
+                    : <a href="keywords.html">Keywords</a>
+                    </div>
+                    <div>
+                        <form action="get" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Get">
+                        </form>&nbsp;
+                        <form action="search" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Search">
+                        </form>
+                    </div>
+                </div>
+                <div style="clear:both;padding-top:.5em;">
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.priors.html" class="white">priors</a>.prior</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/Users/165421/Documents/code/structure_learning/src/structure_learning/priors/prior.py">/Users/165421/Documents/code/structure_learning/src/structure_learning/priors/prior.py</a></td></tr></table>
+    <p></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="numpy.html">numpy</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
+    
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="builtins.html#object">builtins.object</a>
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="structure_learning.priors.prior.html#Prior">Prior</a>
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="structure_learning.priors.prior.html#CategoricalPrior">CategoricalPrior</a>
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="structure_learning.priors.prior.html#CategoricalEdgePrior">CategoricalEdgePrior</a>
+</dt></dl>
+</dd>
+<dt class="heading-text"><a href="structure_learning.priors.prior.html#UniformPrior">UniformPrior</a>
+</dt></dl>
+</dd>
+</dl>
+</dd>
+</dl>
+ <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="CategoricalEdgePrior">class <strong>CategoricalEdgePrior</strong></a>(<a href="structure_learning.priors.prior.html#CategoricalPrior">CategoricalPrior</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#CategoricalEdgePrior">CategoricalEdgePrior</a>(dist:&nbsp;Union[dict,&nbsp;structure_learning.distributions.distribution.Distribution],&nbsp;blacklist:&nbsp;numpy.ndarray&nbsp;=&nbsp;None,&nbsp;whitelist:&nbsp;numpy.ndarray&nbsp;=&nbsp;None,&nbsp;default_value=0)<br>
+&nbsp;<br>
+<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.priors.prior.html#CategoricalEdgePrior">CategoricalEdgePrior</a></dd>
+<dd><a href="structure_learning.priors.prior.html#CategoricalPrior">CategoricalPrior</a></dd>
+<dd><a href="structure_learning.priors.prior.html#Prior">Prior</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="CategoricalEdgePrior-__init__"><strong>__init__</strong></a>(self, dist: Union[dict, structure_learning.distributions.distribution.Distribution], blacklist: numpy.ndarray = None, whitelist: numpy.ndarray = None, default_value=0)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="CategoricalEdgePrior-compute"><strong>compute</strong></a>(self, dag: structure_learning.data_structures.dag.DAG)</dt></dl>
+
+<hr>
+Methods inherited from <a href="structure_learning.priors.prior.html#Prior">Prior</a>:<br>
+<dl><dt><a name="CategoricalEdgePrior-is_valid_dag"><strong>is_valid_dag</strong></a>(self, dag: structure_learning.data_structures.dag.DAG)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="structure_learning.priors.prior.html#Prior">Prior</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="CategoricalPrior">class <strong>CategoricalPrior</strong></a>(<a href="structure_learning.priors.prior.html#Prior">Prior</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#CategoricalPrior">CategoricalPrior</a>(dist:&nbsp;Union[dict,&nbsp;structure_learning.distributions.distribution.Distribution],&nbsp;blacklist:&nbsp;numpy.ndarray&nbsp;=&nbsp;None,&nbsp;whitelist:&nbsp;numpy.ndarray&nbsp;=&nbsp;None,&nbsp;default_value=0)<br>
+&nbsp;<br>
+<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.priors.prior.html#CategoricalPrior">CategoricalPrior</a></dd>
+<dd><a href="structure_learning.priors.prior.html#Prior">Prior</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="CategoricalPrior-__init__"><strong>__init__</strong></a>(self, dist: Union[dict, structure_learning.distributions.distribution.Distribution], blacklist: numpy.ndarray = None, whitelist: numpy.ndarray = None, default_value=0)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="CategoricalPrior-compute"><strong>compute</strong></a>(self, dag: structure_learning.data_structures.dag.DAG)</dt></dl>
+
+<hr>
+Methods inherited from <a href="structure_learning.priors.prior.html#Prior">Prior</a>:<br>
+<dl><dt><a name="CategoricalPrior-is_valid_dag"><strong>is_valid_dag</strong></a>(self, dag: structure_learning.data_structures.dag.DAG)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="structure_learning.priors.prior.html#Prior">Prior</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="Prior">class <strong>Prior</strong></a>(<a href="builtins.html#object">builtins.object</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#Prior">Prior</a>(blacklist:&nbsp;numpy.ndarray&nbsp;=&nbsp;None,&nbsp;whitelist:&nbsp;numpy.ndarray&nbsp;=&nbsp;None)<br>
+&nbsp;<br>
+<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn">Methods defined here:<br>
+<dl><dt><a name="Prior-__init__"><strong>__init__</strong></a>(self, blacklist: numpy.ndarray = None, whitelist: numpy.ndarray = None)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="Prior-compute"><strong>compute</strong></a>(self, dag: structure_learning.data_structures.dag.DAG)</dt></dl>
+
+<dl><dt><a name="Prior-is_valid_dag"><strong>is_valid_dag</strong></a>(self, dag: structure_learning.data_structures.dag.DAG)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="UniformPrior">class <strong>UniformPrior</strong></a>(<a href="structure_learning.priors.prior.html#Prior">Prior</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code"><a href="#UniformPrior">UniformPrior</a>(blacklist:&nbsp;numpy.ndarray&nbsp;=&nbsp;None,&nbsp;whitelist:&nbsp;numpy.ndarray&nbsp;=&nbsp;None,&nbsp;value=0)<br>
+&nbsp;<br>
+<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.priors.prior.html#UniformPrior">UniformPrior</a></dd>
+<dd><a href="structure_learning.priors.prior.html#Prior">Prior</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="UniformPrior-__init__"><strong>__init__</strong></a>(self, blacklist: numpy.ndarray = None, whitelist: numpy.ndarray = None, value=0)</dt><dd><span class="code">Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</span></dd></dl>
+
+<dl><dt><a name="UniformPrior-compute"><strong>compute</strong></a>(self, dag: structure_learning.data_structures.dag.DAG)</dt></dl>
+
+<hr>
+Methods inherited from <a href="structure_learning.priors.prior.html#Prior">Prior</a>:<br>
+<dl><dt><a name="UniformPrior-is_valid_dag"><strong>is_valid_dag</strong></a>(self, dag: structure_learning.data_structures.dag.DAG)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="structure_learning.priors.prior.html#Prior">Prior</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>Union</strong> = typing.Union</td></tr></table></div>
+</body></html>
