@@ -87,8 +87,6 @@ M = StructureMCMC(max_iter=n_iterations, data=data, score_object='bge') # data i
 # run MCMC
 mcmc_results, acceptance = M.run()
 
-# get chain of graphs
-graphs = M.get_graphs(mcmc_results)
 ```
 
 # Running Partition MCMC
@@ -102,8 +100,6 @@ M = PartitionMCMC(data=data, max_iter=n_iterations, score_object='bge') # data i
 # run MCMC
 mcmc_results, acceptance = M.run()
 
-# get chain of graphs
-graphs = M.get_graphs(mcmc_results)
 ```
 
 # Streamlined experiments
@@ -134,7 +130,7 @@ samplers = [
         }
     }
 ]
-exp = Experiment(experiment_name='test', data=synthetic_data.data, samplers=samplers, ground_truth='true_distribution.npy', metrics=['mae', 'mse', 'rhat', 'kld', 'jsd'], n_threads=4, seed=42)
+exp = Experiment(experiment_name='test', data=data, samplers=samplers, ground_truth='true_distribution.npy', metrics=['mae', 'mse', 'rhat', 'kld', 'jsd'], n_threads=4, seed=42)
 res = exp.run()
 metrics = exp.evaluate()
 ```
