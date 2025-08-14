@@ -1,13 +1,17 @@
 """
+This module implements the GraphProposal class, which generates proposals for graph structures by performing edge operations such as addition, deletion, and reversal.
 
+The GraphProposal class is used in structure learning algorithms to explore the space of possible graph structures. It supports constraints through blacklist and whitelist matrices and calculates acceptance ratios for proposed changes.
+
+Classes:
+    GraphProposal: Generates graph proposals and computes acceptance ratios for structure learning.
 """
+
 from typing import List, Union
 import networkx as nx
 import numpy as np
-from mcmc.utils.graph_utils import create_identity_matrix, create_ones_matrix, \
-    random_index_from_ones, compute_ancestor_matrix, update_matrix
-from mcmc.proposals import StructureLearningProposal
-
+from structure_learning.proposals import StructureLearningProposal
+from structure_learning.data_structures import Graph, DAG
 
 class GraphProposal(StructureLearningProposal):
     """
@@ -22,7 +26,7 @@ class GraphProposal(StructureLearningProposal):
     REVERSE_EDGE = 'reverse_edge'
     operations = [ADD_EDGE, DELETE_EDGE, REVERSE_EDGE, StructureLearningProposal.STAY_STILL]
 
-    def __init__(self, initial_state: Union[np.ndarray, nx.DiGraph], blacklist=None, whitelist=None, seed: int = 32):
+    def __init__(self, initial_state : Union[np.ndarray, nx.DiGraph, DAG], blacklist = None, whitelist = None, seed: int = 32):
         """
         Initialise GraphProposal instance.
 
@@ -31,10 +35,13 @@ class GraphProposal(StructureLearningProposal):
             blacklist (numpy.ndarray): mask for edges to ignore in the proposal
             whitelist (numpy.ndarray): mask for edges to include in the proposal
         """
-        super().__init__(initial_state, blacklist, whitelist, seed)  # initialize the parent class
+        super().__init__(initial_state, blacklist, whitelist, seed) # initialize the parent class
 
-        self.initial_state = nx.adjacency_matrix(initial_state).toarray() if isinstance(initial_state,
-                                                                                        nx.DiGraph) else initial_state
+        if not isinstance(initial_state, DAG):
+            initial_state = nx.adjacency_matrix(initial_state).toarray() if isinstance(initial_state, nx.DiGraph) else initial_state
+            self.initial_state = DAG(incidence=initial_state)
+        else:
+            self.initial_state = initial_state
         self.num_nodes = self.initial_state.shape[1]
         self._max_parents = self.num_nodes - 1
 
@@ -42,8 +49,8 @@ class GraphProposal(StructureLearningProposal):
         self._proposed_state_neighborhood = -1
 
         # Matrices used in further computations
-        self._fullmatrix = create_ones_matrix(self.num_nodes)
-        self._Ematrix = create_identity_matrix(self.num_nodes)
+        self._fullmatrix = np.ones((self.num_nodes,self.num_nodes)).astype(int)
+        self._Ematrix = np.identity(self.num_nodes).astype(int)
 
         if blacklist is None:
             self.blacklist = np.zeros((self.num_nodes, self.num_nodes))
@@ -51,7 +58,9 @@ class GraphProposal(StructureLearningProposal):
         if whitelist is None:
             self.whitelist = np.zeros((self.num_nodes, self.num_nodes))
 
-    def propose(self, current_state):
+        self._rescore_nodes = []
+
+    def propose(self):
         """
         Propose a DAG.
 
@@ -60,32 +69,31 @@ class GraphProposal(StructureLearningProposal):
             (str): operation that generated the proposed graph
         """
         # add the whitelist to the current incidence matrix
-        current_state = update_matrix(current_state, current_state + self.whitelist) # TODO: change to whitelisting -> update_matrix is a silly name. Is this even correct to modify the current state
+        current_state = self.current_state.incidence + self.whitelist
 
         # compute all possible neighbours
-        num_neighbours, del_indx_mat, add_indx_mat, rev_indx_mat, num_deletion, num_addition, num_reversal = self._compute_nbhood(
-            current_state)
+        num_neighbours, del_indx_mat, add_indx_mat, rev_indx_mat, num_deletion, num_addition, num_reversal = self._compute_nbhood(current_state)
 
         # set the number of neighbours
         self._current_state_neighborhood = num_neighbours
         # Randomly sample an operation
-        operation = self._rng.choice(self.operations, size=1,
-                                     p=[num_addition / num_neighbours, num_deletion / num_neighbours,
-                                        num_reversal / num_neighbours, 1 / num_neighbours])
+        operation = self._rng.choice(self.operations, size=1, p=[num_addition/num_neighbours, num_deletion/num_neighbours, num_reversal/num_neighbours, 1/num_neighbours])
 
         # initialise new_incidence as zeros NxN
-        proposed_state = np.zeros((self.num_nodes, self.num_nodes))
+        self.proposed_state = np.zeros((self.num_nodes, self.num_nodes))
 
         if operation == self.ADD_EDGE:
-            proposed_state = self._propose_neighbor_by_addition(add_indx_mat, current_state)
+            self.proposed_state = self._propose_neighbor_by_addition(add_indx_mat, current_state)
         elif operation == self.DELETE_EDGE:
-            proposed_state = self._propose_neighbor_by_deletion(del_indx_mat, current_state)
+            self.proposed_state = self._propose_neighbor_by_deletion(del_indx_mat, current_state)
         elif operation == self.REVERSE_EDGE:
-            proposed_state = self._propose_neighbor_by_reverse(rev_indx_mat, current_state)
+            self.proposed_state = self._propose_neighbor_by_reverse(rev_indx_mat, current_state)
         elif operation == self.STAY_STILL:
-            proposed_state = current_state
+            self.proposed_state = self.current_state.incidence
         else:
             raise Exception(f"The operation '{operation}' is not valid!")
+        
+        self.proposed_state = DAG(incidence=self.proposed_state, nodes=self.current_state.nodes)
 
         self.operation = operation
 
@@ -93,36 +101,34 @@ class GraphProposal(StructureLearningProposal):
         self._prob_Gcurr_Gprop_f()
         self._prob_Gprop_Gcurr_f()
 
-        return {"logqratio": np.log(self._prob_Gcurr_Gprop) - np.log(self._prob_Gprop_Gcurr),
-                "theta_prop": proposed_state,
-                "operation": self.operation}
+        return self.proposed_state, operation
 
-    def compute_acceptance_ratio(self, current_state_score, proposed_state_score):
+    def compute_acceptance_ratio(self, current_state_score, proposed_state_score, current_state_prior=0, proposed_state_prior=0):
         """
         Calculate log acceptance ratio.
 
         Returns:
             (float)
         """
-        #TODO: REMOVE as this is redunant - not sure why there are so many exception handling
+
         try:
-            numerator = proposed_state_score + np.log(self._prob_Gcurr_Gprop)
+            numerator = proposed_state_score + np.log(self._prob_Gcurr_Gprop) + proposed_state_prior
         except Exception as e:
             print(e)
             return -np.inf
 
         try:
-            denominator = current_state_score + np.log(self._prob_Gprop_Gcurr)
+            denominator = current_state_score + np.log(self._prob_Gprop_Gcurr) + current_state_prior
         except Exception as e:
             print(e)
             return -np.inf
 
-        return min(0, numerator - denominator)
+        return  min(0, numerator - denominator)
 
     def get_nodes_to_rescore(self) -> List[str]:
         return self._rescore_nodes
 
-    def _propose_neighbor_by_addition(self, index_mat: np.ndarray, incidence: np.ndarray):
+    def _propose_neighbor_by_addition(self, index_mat : np.ndarray, incidence : np.ndarray):
         """
         Propose new graph by adding an edge.
 
@@ -134,7 +140,7 @@ class GraphProposal(StructureLearningProposal):
             (numpy.ndarray): adjacency matrix of new graph
         """
         try:
-            r, c = random_index_from_ones(index_mat)
+            r, c = self.__random_index_from_ones(index_mat)
         except Exception as e:
             print("Incidence matrix")
             print(incidence)
@@ -150,7 +156,7 @@ class GraphProposal(StructureLearningProposal):
 
         return new_incidence
 
-    def _propose_neighbor_by_reverse(self, index_mat: np.ndarray, incidence: np.ndarray):
+    def _propose_neighbor_by_reverse(self, index_mat : np.ndarray, incidence : np.ndarray):
         """
         Propose new graph by reversing an edge.
 
@@ -162,7 +168,7 @@ class GraphProposal(StructureLearningProposal):
             (numpy.ndarray): adjacency matrix of new graph
         """
         try:
-            r, c = random_index_from_ones(index_mat)
+            r, c = self.__random_index_from_ones(index_mat)
         except Exception as e:
             print("Incidence matrix")
             print(incidence)
@@ -179,7 +185,7 @@ class GraphProposal(StructureLearningProposal):
 
         return new_incidence
 
-    def _propose_neighbor_by_deletion(self, index_mat: np.ndarray, incidence: np.ndarray):
+    def _propose_neighbor_by_deletion(self, index_mat : np.ndarray, incidence : np.ndarray ):
         """
         Propose new graph by deleting an edge.
 
@@ -191,7 +197,7 @@ class GraphProposal(StructureLearningProposal):
             (numpy.ndarray): adjacency matrix of new graph
         """
         try:
-            r, c = random_index_from_ones(index_mat)
+            r, c = self.__random_index_from_ones(index_mat)
         except Exception as e:
             print("Incidence matrix")
             print(incidence)
@@ -207,7 +213,7 @@ class GraphProposal(StructureLearningProposal):
 
         return new_incidence
 
-    def _compute_nbhood(self, incidence: np.ndarray):
+    def _compute_nbhood(self, incidence : np.ndarray):
         """
         Computes neighbor graphs obtainable by edge deletion, addition, and reversal.
 
@@ -223,26 +229,27 @@ class GraphProposal(StructureLearningProposal):
             (int): number of neighboring graphs obtainable by edge addition
             (int): number of neighboring graphs obtainable by edge reversal
         """
-        ancestor = compute_ancestor_matrix(incidence)
+        ancestor = DAG.compute_ancestor_matrix(adj_matrix=incidence)
 
         # 1.) Number of neighbour graphs obtained by edge deletions
         deletion = incidence.copy() - self.whitelist
         num_deletion = np.sum(deletion)
 
         # 2.) Number of neighbour graphs obtained by edge additions
-        add = self._fullmatrix - self._Ematrix - incidence - ancestor - self.blacklist
+        add = self._fullmatrix - self._Ematrix - incidence  - ancestor  - self.blacklist
 
         add[add < 0] = 0
         try:
-            indx = np.where(np.sum(incidence, axis=0) > self._max_parents - 1)[0][0]
-            add[:, indx] = 0
-            num_addition = np.sum(add)  # eliminate cycles
+            indx = np.where( np.sum(incidence, axis = 0) > self._max_parents - 1 )[0][0]
+            add[:,indx] = 0
+            num_addition = np.sum(add)# eliminate cycles
         except:
             num_addition = np.sum(add)
 
         # 3.) Number of neighbour graphs obtained by edge reversals
-        reversal = (incidence - self.whitelist) - ((incidence - self.whitelist).T @ ancestor).T - self.blacklist.T
-        reversal[reversal < 0] = 0  # replace all negative values by zero
+        # reversal = (incidence - self.whitelist) - ((incidence - self.whitelist).T @ ancestor).T - self.blacklist.T
+        reversal = (incidence - self.whitelist) - np.matmul(ancestor.T, (incidence - self.whitelist)) - self.blacklist.T
+        reversal[reversal < 0] = 0 # replace all negative values by zero
 
         try:
             reversal[indx, :] = 0
@@ -251,7 +258,7 @@ class GraphProposal(StructureLearningProposal):
             num_reversal = np.sum(reversal)
 
         # Total number of neighbour graphs
-        currentnbhood = num_deletion + num_addition + 1 + num_reversal
+        currentnbhood =  num_deletion + num_addition + 1 + num_reversal
 
         return currentnbhood, deletion, add, reversal, num_deletion, num_addition, num_reversal
 
@@ -262,11 +269,11 @@ class GraphProposal(StructureLearningProposal):
         Returns:
             (float): transition probability Q(G_curr|G_prop)
         """
-        num_neigh, _, _, _, _, _, _ = self._compute_nbhood(self.proposed_state)
+        num_neigh, _, _, _ , _, _, _ = self._compute_nbhood(self.proposed_state.incidence)
         self._proposed_state_neighborhood = num_neigh
 
         # Q(G_curr -> G_prop) = 1 / (number of neighbors of G_prop)
-        self._prob_Gcurr_Gprop = 1 / self._proposed_state_neighborhood
+        self._prob_Gcurr_Gprop = 1/self._proposed_state_neighborhood
 
         return self._prob_Gcurr_Gprop
 
@@ -281,3 +288,19 @@ class GraphProposal(StructureLearningProposal):
         self._prob_Gprop_Gcurr = 1 / self._current_state_neighborhood
 
         return self._prob_Gprop_Gcurr
+
+    def __random_index_from_ones(self, matrix : np.ndarray):
+        """
+        Return a random index where the matrix element is 1 (edge).
+
+        Parameters:
+            matrix (numpy.ndarray): matrix
+
+        Returns:
+            (numpy.ndarray): index
+        """
+        ones_indices = np.argwhere(matrix == 1)
+        if len(ones_indices) == 0:
+            return None  # Return None if there are no 1s in the matrix.
+        random_choice = self._rng.choice(len(ones_indices))
+        return ones_indices[random_choice]

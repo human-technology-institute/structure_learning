@@ -2,8 +2,7 @@
 
 """
 from abc import ABC, abstractmethod
-from typing import Any, TypeVar, Tuple, List
-import networkx as nx
+from typing import TypeVar, Tuple, List
 import numpy as np
 
 State = TypeVar("State")
@@ -14,6 +13,7 @@ class StructureLearningProposal(ABC):
         propose() -> graph : numpy.ndarray, operation : str
         compute_acceptance_ratio() -> float
     """
+    INITIAL = 'initial'
     STAY_STILL = 'stay_still'
 
     operations = [STAY_STILL]
@@ -36,10 +36,14 @@ class StructureLearningProposal(ABC):
         self._rng = np.random.default_rng(seed=seed)
 
     @abstractmethod
-    def propose(self, current_state) -> dict:
+    def propose(self) -> Tuple[State, str]:
         """
         Propose a DAG
         """
+        pass
+
+    @abstractmethod
+    def compute_acceptance_ratio(self, current_state_score, proposed_state_score, current_state_prior=0, proposed_state_prior=0) -> float:
         pass
 
     @abstractmethod

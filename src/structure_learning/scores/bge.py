@@ -1,47 +1,52 @@
 """
+This module implements the BGe (Bayesian Gaussian Equivalent) score for evaluating Bayesian networks.
 
+The BGe score is used to compute the marginal likelihood of a Bayesian network given data. It supports operations
+such as computing the score for the entire graph, individual nodes, and edges. The implementation includes
+parameters for regularization and scoring.
+
+Classes:
+    BGeScore: Implements the BGe score computation.
 """
+
+from typing import Union
 import pandas as pd
 import numpy as np
 from scipy.special import loggamma as lgamma
-from mcmc.scores import Score
-from mcmc.utils.graph_utils import find_parents
-
+from structure_learning.scores import Score
+from structure_learning.data_structures import Graph
+from structure_learning.data import Data
 
 class BGeScore(Score):
     """
     BGe (Bayesian Gaussian Equivalent) Score
     """
-    def __init__(self, data : pd.DataFrame, incidence : np.ndarray, is_log_space = True):
+    def __init__(self, data : Union[Data, pd.DataFrame]):
         """
         Initialise BGe instance.
 
         Parameters:
-            data (pandas.DataFrame): data
-            incidence (numpy.nparray): graph adjacency matrix
+            data (Data | pandas.DataFrame): data
         """
-        super().__init__(data, incidence, "BGe Score", is_log_space)
+        super().__init__(data)
 
         self._num_cols = data.shape[1] # number of variables
         self._num_obvs = data.shape[0] # number of observations
         self._mu0 = np.zeros(self._num_cols)
 
-        # summary statistics
-        mean_data = np.mean(data, axis=0)
-
         # Scoring parameters.
-        self._am = 1   # Kevin Murphy' (KM): kappa prior
-        self._aw = self._num_cols + self._am + 1 # Kevin Murphy' (KM): ni - degrees of freedom - prior
+        self._am = 1
+        self._aw = self._num_cols + self._am + 1
         T0scale = self._am * (self._aw - self._num_cols - 1) / (self._am + 1)
         self._T0 = T0scale * np.eye(self._num_cols)
         self._TN = (
-            self._T0 + (self._num_obvs - 1) * np.cov(data.T) + ((self._am * self._num_obvs) / (self._am + self._num_obvs))
+            self._T0 + (self._num_obvs - 1) * np.cov(data.values.T) + ((self._am * self._num_obvs) / (self._am + self._num_obvs))
             * np.outer(
-                (self._mu0 - mean_data), (self._mu0 - mean_data)
+                (self._mu0 - np.mean(data.values, axis=0)), (self._mu0 - np.mean(data.values, axis=0))
             )
         )
 
-        self._awpN = self._aw + self._num_obvs # ni_n
+        self._awpN = self._aw + self._num_obvs
         self._constscorefact = - (self._num_obvs / 2) * np.log(np.pi) + 0.5 * np.log(self._am / (self._am + self._num_obvs))
         self._scoreconstvec = np.zeros(self._num_cols)
         for i in range(self._num_cols):
@@ -53,33 +58,32 @@ class BGeScore(Score):
                 + (awp + i) / 2 * np.log(T0scale)
             )
 
-        self._is_log_space = is_log_space
         self._t = T0scale
         self._parameters = {}
         self._reg_coefficients = {}
 
-    def compute(self, adj_mat):
+    def compute(self, graph: Graph):
         """
         Compute the BGE for the data
-        Parameters:
-            adj_mat: adjacency matrix to be evaluated
 
         Returns:
             (dict): score and parameters
         """
+        if Graph.has_cycle(graph):
+            return {'score': -np.inf}
+        
         total_log_ml = 0
         parameters = {}  # Dictionary to store the parameters for each node
 
-        self.incidence= adj_mat
         # Loop through each node in the graph
         for node in self.node_labels:
 
-            log_ml_node = self.compute_node( node )['score']
+            log_ml_node = self.compute_node(graph, node)['score']
 
             # Save the parameters for the node
             parameters[node] = {
                 'score' : log_ml_node,
-                'parents': find_parents(self.incidence, self.node_label_to_index[node])
+                'parents': graph.find_parents(node)
             }
 
             total_log_ml += log_ml_node
@@ -94,7 +98,7 @@ class BGeScore(Score):
         }
         return score
 
-    def compute_node_with_edges(self, node : str, parents: list):
+    def compute_node_with_edges(self, node : str, parents: list, node_index_map: dict):
         """
         Compute the BGE for edge(s)
 
@@ -106,9 +110,8 @@ class BGeScore(Score):
             (dict): score and parameters
         """
         parameters = {}  # Dictionary to store the parameters for each node
-
-        node_indx = self.node_label_to_index[node]
-        parentnodes = [self.node_label_to_index[i]  for i in parents] # get index of parents labels
+        node_indx = node_index_map[node]
+        parentnodes = [node_index_map[p] for p in parents] # get index of parents labels
         num_parents = len(parentnodes) # number of parents
 
         awpNd2 = (self._awpN - self._num_cols + num_parents + 1) / 2
@@ -162,70 +165,3 @@ class BGeScore(Score):
     @reg_coefficients.setter
     def reg_coefficients(self, coefficients):
         self._reg_coefficients = coefficients
-
-class WeightedBGeScore(BGeScore):
-    """
-    Weighted BGe Score
-    """
-    def __init__(self, data : pd.DataFrame, incidence : np.ndarray, penalty_coefficient = 0.01, is_log_space = True):
-        """
-        Initialise WeightedBGeScore object
-
-        Parameters:
-            data (pandas.DataFrame): data
-            incidence (numpy.ndarray): graph adjacency matrix
-            penalty_coefficient (float): penalty coefficient (default=0.01)
-        """
-        self.penalty_coefficient = penalty_coefficient
-        super().__init__(data, incidence, is_log_space)
-
-    def calculate_complexity_penalty(self):
-        """
-        Calculate the complexity penalty based on the number of edges in the graph.
-
-        Returns:
-            (float): complexity penalty
-        """
-        num_edges = np.sum(self.incidence > 0)  # Assuming the incidence matrix is binary
-        complexity_penalty = self.penalty_coefficient * num_edges
-        return complexity_penalty
-
-    def calculate_node_complexity_penalty(self, num_parents):
-        """
-        Calculate the complexity penalty based on the number of parents a node has.
-
-        Returns:
-            (float): complexity penalty
-        """
-        complexity_penalty = self.penalty_coefficient * num_parents
-        return complexity_penalty
-
-    def compute(self):
-        """
-        Compute BGe score
-
-        Returns:
-            (dict): score and parameters
-        """
-
-        score = super().compute()
-        # calculate and subtract the complexity penalty
-        complexity_penalty = self.calculate_complexity_penalty()
-        score['total_log_ml'] -= complexity_penalty
-
-        return score
-
-    def compute_node_with_edges(self, node : str, parents: list):
-        """
-        Compute BGe score for a node
-
-        Returns:
-            (dict): score and parameters
-        """
-        score = super().compute_node_with_edges(node, parents)
-
-        # Calculate and subtract the node-specific complexity penalty
-        complexity_penalty = self.calculate_node_complexity_penalty(len(parents))
-        score['score'] -= complexity_penalty
-
-        return score
