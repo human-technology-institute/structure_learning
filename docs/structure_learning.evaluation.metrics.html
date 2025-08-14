@@ -1,0 +1,325 @@
+<!DOCTYPE>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pydoc: module structure_learning.evaluation.metrics</title>
+<link rel="stylesheet" type="text/css" href="_pydoc.css"></head><body>
+                <div style='float:right'>
+                    <div style='text-align:center'>
+                    <a href="index.html">Module Index</a>
+                    : <a href="topics.html">Topics</a>
+                    : <a href="keywords.html">Keywords</a>
+                    </div>
+                    <div>
+                        <form action="get" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Get">
+                        </form>&nbsp;
+                        <form action="search" style='display:inline;'>
+                        <input type=text name=key size=15>
+                        <input type=submit value="Search">
+                        </form>
+                    </div>
+                </div>
+                <div style="clear:both;padding-top:.5em;">
+<table class="heading">
+<tr class="heading-text decor">
+<td class="title">&nbsp;<br><strong class="title"><a href="structure_learning.html" class="white">structure_learning</a>.<a href="structure_learning.evaluation.html" class="white">evaluation</a>.metrics</strong></td>
+<td class="extra"><a href=".">index</a><br><a href="file:/Users/165421/Documents/code/structure_learning/src/structure_learning/evaluation/metrics.py">/Users/165421/Documents/code/structure_learning/src/structure_learning/evaluation/metrics.py</a></td></tr></table>
+    <p><span class="code">This&nbsp;module&nbsp;provides&nbsp;various&nbsp;metrics&nbsp;for&nbsp;evaluating&nbsp;distributions&nbsp;and&nbsp;graphs.<br>
+&nbsp;<br>
+It&nbsp;includes&nbsp;implementations&nbsp;of&nbsp;metrics&nbsp;such&nbsp;as&nbsp;KL&nbsp;Divergence,&nbsp;Jensen-Shannon&nbsp;Divergence,<br>
+Mean&nbsp;Squared&nbsp;Error,&nbsp;Mean&nbsp;Absolute&nbsp;Error,&nbsp;Expected&nbsp;Structural&nbsp;Hamming&nbsp;Distance,&nbsp;and&nbsp;<a href="#RHat">RHat</a>.<br>
+These&nbsp;metrics&nbsp;are&nbsp;used&nbsp;to&nbsp;compare&nbsp;distributions&nbsp;or&nbsp;evaluate&nbsp;the&nbsp;similarity&nbsp;between&nbsp;graphs.<br>
+&nbsp;<br>
+Classes:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#Metric">Metric</a>:&nbsp;Abstract&nbsp;base&nbsp;class&nbsp;for&nbsp;metrics.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#KLD">KLD</a>:&nbsp;Computes&nbsp;the&nbsp;KL&nbsp;Divergence&nbsp;between&nbsp;two&nbsp;distributions.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#JSD">JSD</a>:&nbsp;Computes&nbsp;the&nbsp;Jensen-Shannon&nbsp;Divergence&nbsp;between&nbsp;two&nbsp;distributions.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#MSE">MSE</a>:&nbsp;Computes&nbsp;the&nbsp;Mean&nbsp;Squared&nbsp;Error&nbsp;between&nbsp;two&nbsp;distributions.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#MAE">MAE</a>:&nbsp;Computes&nbsp;the&nbsp;Mean&nbsp;Absolute&nbsp;Error&nbsp;between&nbsp;two&nbsp;distributions.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#SHD">SHD</a>:&nbsp;Computes&nbsp;the&nbsp;Expected&nbsp;Structural&nbsp;Hamming&nbsp;Distance&nbsp;between&nbsp;graphs.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#RHat">RHat</a>:&nbsp;Computes&nbsp;the&nbsp;<a href="#RHat">RHat</a>&nbsp;metric&nbsp;for&nbsp;multiple&nbsp;distributions.<br>
+&nbsp;<br>
+Functions:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;entropy:&nbsp;Computes&nbsp;the&nbsp;entropy&nbsp;between&nbsp;two&nbsp;distributions.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;kl_divergence:&nbsp;Computes&nbsp;the&nbsp;KL&nbsp;divergence&nbsp;between&nbsp;two&nbsp;distributions.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;jensen_shannon_divergence:&nbsp;Computes&nbsp;the&nbsp;Jensen-Shannon&nbsp;divergence&nbsp;between&nbsp;two&nbsp;distributions.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mean_squared_error:&nbsp;Computes&nbsp;the&nbsp;mean&nbsp;squared&nbsp;error&nbsp;between&nbsp;two&nbsp;distributions.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mean_absolute_error:&nbsp;Computes&nbsp;the&nbsp;mean&nbsp;absolute&nbsp;error&nbsp;between&nbsp;two&nbsp;distributions.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;expected_shd:&nbsp;Computes&nbsp;the&nbsp;Expected&nbsp;Structural&nbsp;Hamming&nbsp;Distance.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;rhat:&nbsp;Computes&nbsp;the&nbsp;<a href="#RHat">RHat</a>&nbsp;metric&nbsp;for&nbsp;the&nbsp;provided&nbsp;distributions&nbsp;and&nbsp;measurements.</span></p>
+<p>
+<table class="section">
+<tr class="decor pkg-content-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Modules</strong></td></tr>
+    
+<tr><td class="decor pkg-content-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><table><tr><td class="multicolumn"><a href="numpy.html">numpy</a><br>
+</td><td class="multicolumn"></td><td class="multicolumn"></td><td class="multicolumn"></td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor index-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Classes</strong></td></tr>
+    
+<tr><td class="decor index-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl>
+<dt class="heading-text"><a href="builtins.html#object">builtins.object</a>
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>
+</dt><dd>
+<dl>
+<dt class="heading-text"><a href="structure_learning.evaluation.metrics.html#JSD">JSD</a>
+</dt><dt class="heading-text"><a href="structure_learning.evaluation.metrics.html#KLD">KLD</a>
+</dt><dt class="heading-text"><a href="structure_learning.evaluation.metrics.html#MAE">MAE</a>
+</dt><dt class="heading-text"><a href="structure_learning.evaluation.metrics.html#MSE">MSE</a>
+</dt><dt class="heading-text"><a href="structure_learning.evaluation.metrics.html#RHat">RHat</a>
+</dt><dt class="heading-text"><a href="structure_learning.evaluation.metrics.html#SHD">SHD</a>
+</dt></dl>
+</dd>
+</dl>
+</dd>
+</dl>
+ <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="JSD">class <strong>JSD</strong></a>(<a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code">Computes&nbsp;the&nbsp;Jensen-Shannon&nbsp;Divergence&nbsp;(<a href="#JSD">JSD</a>)&nbsp;between&nbsp;two&nbsp;distributions.<br>
+&nbsp;<br>
+This&nbsp;class&nbsp;implements&nbsp;the&nbsp;<a href="#JSD">JSD</a>&nbsp;metric,&nbsp;which&nbsp;measures&nbsp;the&nbsp;similarity&nbsp;between<br>
+two&nbsp;probability&nbsp;distributions.&nbsp;It&nbsp;inherits&nbsp;from&nbsp;the&nbsp;<a href="#Metric">Metric</a>&nbsp;base&nbsp;class&nbsp;and<br>
+provides&nbsp;a&nbsp;concrete&nbsp;implementation&nbsp;of&nbsp;the&nbsp;compute&nbsp;method.<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.evaluation.metrics.html#JSD">JSD</a></dd>
+<dd><a href="structure_learning.evaluation.metrics.html#Metric">Metric</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="JSD-compute"><strong>compute</strong></a>(self, dist1: structure_learning.distributions.distribution.Distribution, dist2: structure_learning.distributions.distribution.Distribution)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="KLD">class <strong>KLD</strong></a>(<a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code">Computes&nbsp;the&nbsp;KL&nbsp;Divergence&nbsp;(<a href="#KLD">KLD</a>)&nbsp;between&nbsp;two&nbsp;distributions.<br>
+&nbsp;<br>
+This&nbsp;class&nbsp;implements&nbsp;the&nbsp;<a href="#KLD">KLD</a>&nbsp;metric,&nbsp;which&nbsp;measures&nbsp;the&nbsp;difference&nbsp;between<br>
+two&nbsp;probability&nbsp;distributions.&nbsp;It&nbsp;inherits&nbsp;from&nbsp;the&nbsp;<a href="#Metric">Metric</a>&nbsp;base&nbsp;class&nbsp;and<br>
+provides&nbsp;a&nbsp;concrete&nbsp;implementation&nbsp;of&nbsp;the&nbsp;compute&nbsp;method.<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.evaluation.metrics.html#KLD">KLD</a></dd>
+<dd><a href="structure_learning.evaluation.metrics.html#Metric">Metric</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="KLD-compute"><strong>compute</strong></a>(self, dist1: structure_learning.distributions.distribution.Distribution, dist2: structure_learning.distributions.distribution.Distribution)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="MAE">class <strong>MAE</strong></a>(<a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code">Computes&nbsp;the&nbsp;Mean&nbsp;Absolute&nbsp;Error&nbsp;(<a href="#MAE">MAE</a>)&nbsp;between&nbsp;two&nbsp;distributions.<br>
+&nbsp;<br>
+This&nbsp;class&nbsp;implements&nbsp;the&nbsp;<a href="#MAE">MAE</a>&nbsp;metric,&nbsp;which&nbsp;measures&nbsp;the&nbsp;average&nbsp;absolute&nbsp;difference<br>
+between&nbsp;two&nbsp;probability&nbsp;distributions.&nbsp;It&nbsp;inherits&nbsp;from&nbsp;the&nbsp;<a href="#Metric">Metric</a>&nbsp;base&nbsp;class&nbsp;and<br>
+provides&nbsp;a&nbsp;concrete&nbsp;implementation&nbsp;of&nbsp;the&nbsp;compute&nbsp;method.<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.evaluation.metrics.html#MAE">MAE</a></dd>
+<dd><a href="structure_learning.evaluation.metrics.html#Metric">Metric</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="MAE-compute"><strong>compute</strong></a>(self, dist1: structure_learning.distributions.distribution.Distribution, dist2: structure_learning.distributions.distribution.Distribution)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="MSE">class <strong>MSE</strong></a>(<a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code">Computes&nbsp;the&nbsp;Mean&nbsp;Squared&nbsp;Error&nbsp;(<a href="#MSE">MSE</a>)&nbsp;between&nbsp;two&nbsp;distributions.<br>
+&nbsp;<br>
+This&nbsp;class&nbsp;implements&nbsp;the&nbsp;<a href="#MSE">MSE</a>&nbsp;metric,&nbsp;which&nbsp;measures&nbsp;the&nbsp;average&nbsp;squared&nbsp;difference<br>
+between&nbsp;two&nbsp;probability&nbsp;distributions.&nbsp;It&nbsp;inherits&nbsp;from&nbsp;the&nbsp;<a href="#Metric">Metric</a>&nbsp;base&nbsp;class&nbsp;and<br>
+provides&nbsp;a&nbsp;concrete&nbsp;implementation&nbsp;of&nbsp;the&nbsp;compute&nbsp;method.<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.evaluation.metrics.html#MSE">MSE</a></dd>
+<dd><a href="structure_learning.evaluation.metrics.html#Metric">Metric</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="MSE-compute"><strong>compute</strong></a>(self, dist1: structure_learning.distributions.distribution.Distribution, dist2: structure_learning.distributions.distribution.Distribution)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="Metric">class <strong>Metric</strong></a>(<a href="builtins.html#object">builtins.object</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code">Abstract&nbsp;base&nbsp;class&nbsp;for&nbsp;metrics.<br>
+&nbsp;<br>
+This&nbsp;class&nbsp;serves&nbsp;as&nbsp;a&nbsp;blueprint&nbsp;for&nbsp;all&nbsp;metric&nbsp;implementations.&nbsp;It&nbsp;defines<br>
+the&nbsp;structure&nbsp;and&nbsp;behavior&nbsp;that&nbsp;all&nbsp;derived&nbsp;metric&nbsp;classes&nbsp;must&nbsp;follow.<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn">Methods defined here:<br>
+<dl><dt><a name="Metric-compute"><strong>compute</strong></a>(self, **kwargs)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="RHat">class <strong>RHat</strong></a>(<a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code">Computes&nbsp;the&nbsp;<a href="#RHat">RHat</a>&nbsp;metric&nbsp;for&nbsp;multiple&nbsp;distributions.<br>
+&nbsp;<br>
+This&nbsp;class&nbsp;implements&nbsp;the&nbsp;<a href="#RHat">RHat</a>&nbsp;metric,&nbsp;which&nbsp;is&nbsp;used&nbsp;to&nbsp;assess&nbsp;the&nbsp;convergence<br>
+of&nbsp;multiple&nbsp;distributions.&nbsp;It&nbsp;inherits&nbsp;from&nbsp;the&nbsp;<a href="#Metric">Metric</a>&nbsp;base&nbsp;class&nbsp;and&nbsp;provides<br>
+a&nbsp;concrete&nbsp;implementation&nbsp;of&nbsp;the&nbsp;compute&nbsp;method.<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.evaluation.metrics.html#RHat">RHat</a></dd>
+<dd><a href="structure_learning.evaluation.metrics.html#Metric">Metric</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="RHat-compute"><strong>compute</strong></a>(self, dists: List[structure_learning.distributions.distribution.Distribution], prop='logp')</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table> <p>
+<table class="section">
+<tr class="decor title-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><a name="SHD">class <strong>SHD</strong></a>(<a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>)</td></tr>
+    
+<tr><td class="decor title-decor" rowspan=2><span class="code">&nbsp;&nbsp;&nbsp;</span></td>
+<td class="decor title-decor" colspan=2><span class="code">Computes&nbsp;the&nbsp;Expected&nbsp;Structural&nbsp;Hamming&nbsp;Distance&nbsp;(<a href="#SHD">SHD</a>)&nbsp;between&nbsp;graphs.<br>
+&nbsp;<br>
+This&nbsp;class&nbsp;implements&nbsp;the&nbsp;<a href="#SHD">SHD</a>&nbsp;metric,&nbsp;which&nbsp;measures&nbsp;the&nbsp;expected&nbsp;structural<br>
+difference&nbsp;between&nbsp;a&nbsp;posterior&nbsp;approximation&nbsp;and&nbsp;a&nbsp;ground-truth&nbsp;graph.&nbsp;It&nbsp;inherits<br>
+from&nbsp;the&nbsp;<a href="#Metric">Metric</a>&nbsp;base&nbsp;class&nbsp;and&nbsp;provides&nbsp;a&nbsp;concrete&nbsp;implementation&nbsp;of&nbsp;the&nbsp;compute&nbsp;method.<br>&nbsp;</span></td></tr>
+<tr><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt>Method resolution order:</dt>
+<dd><a href="structure_learning.evaluation.metrics.html#SHD">SHD</a></dd>
+<dd><a href="structure_learning.evaluation.metrics.html#Metric">Metric</a></dd>
+<dd><a href="builtins.html#object">builtins.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="SHD-compute"><strong>compute</strong></a>(self, dags: Union[structure_learning.distributions.distribution.Distribution, structure_learning.data_structures.graph.Graph], true_graph: structure_learning.data_structures.graph.Graph)</dt></dl>
+
+<hr>
+Data descriptors inherited from <a href="structure_learning.evaluation.metrics.html#Metric">Metric</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><span class="code">dictionary&nbsp;for&nbsp;instance&nbsp;variables</span></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><span class="code">list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object</span></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table class="section">
+<tr class="decor functions-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Functions</strong></td></tr>
+    
+<tr><td class="decor functions-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><dl><dt><a name="-entropy"><strong>entropy</strong></a>(P, Q)</dt></dl>
+ <dl><dt><a name="-expected_shd"><strong>expected_shd</strong></a>(chain_list: List[numpy.ndarray], true_DAG: numpy.ndarray, p: List = None)</dt><dd><span class="code">Compute&nbsp;the&nbsp;Expected&nbsp;Structural&nbsp;Hamming&nbsp;Distance.<br>
+&nbsp;<br>
+This&nbsp;function&nbsp;computes&nbsp;the&nbsp;Expected&nbsp;<a href="#SHD">SHD</a>&nbsp;between&nbsp;a&nbsp;posterior&nbsp;approximation<br>
+given&nbsp;as&nbsp;a&nbsp;collection&nbsp;of&nbsp;samples&nbsp;from&nbsp;the&nbsp;posterior,&nbsp;and&nbsp;the&nbsp;ground-truth<br>
+graph&nbsp;used&nbsp;in&nbsp;the&nbsp;original&nbsp;data&nbsp;generation&nbsp;process.<br>
+Code&nbsp;from:<br>
+<a href="https://github.com/tristandeleu/jax-dag-gflownet/blob/master/dag_gflownet/utils/metrics.py">https://github.com/tristandeleu/jax-dag-gflownet/blob/master/dag_gflownet/utils/metrics.py</a><br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;chain_list&nbsp;(list&nbsp;(numpy.ndarray)):&nbsp;&nbsp;Posterior&nbsp;approximation.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;must&nbsp;have&nbsp;size&nbsp;`(B,&nbsp;N,&nbsp;N)`,&nbsp;where&nbsp;`B`&nbsp;is&nbsp;the<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;number&nbsp;of&nbsp;sample&nbsp;graphs&nbsp;from&nbsp;the&nbsp;posterior&nbsp;approximation,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;`N`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;variables&nbsp;in&nbsp;the&nbsp;graphs.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;true_DAG&nbsp;(numpy.ndarray):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Adjacency&nbsp;matrix&nbsp;of&nbsp;the&nbsp;ground-truth&nbsp;graph.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;array&nbsp;must&nbsp;have&nbsp;size&nbsp;`(N,&nbsp;N)`,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;`N`&nbsp;is&nbsp;the&nbsp;number&nbsp;of&nbsp;variables&nbsp;in&nbsp;the&nbsp;graph.<br>
+&nbsp;<br>
+Returns:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(float):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;Expected&nbsp;<a href="#SHD">SHD</a>.</span></dd></dl>
+ <dl><dt><a name="-get_metric"><strong>get_metric</strong></a>(metric: str)</dt></dl>
+ <dl><dt><a name="-jensen_shannon_divergence"><strong>jensen_shannon_divergence</strong></a>(P: list, Q: list, epsilon: float = 1e-10)</dt><dd><span class="code">Compute&nbsp;the&nbsp;jensen_shannon_divergence&nbsp;between&nbsp;two&nbsp;distributions.<br>
+Requires&nbsp;that&nbsp;the&nbsp;two&nbsp;distributions&nbsp;have&nbsp;the&nbsp;same&nbsp;length.</span></dd></dl>
+ <dl><dt><a name="-kl_divergence"><strong>kl_divergence</strong></a>(P: list, Q: list, epsilon: float = 1e-10)</dt><dd><span class="code">Computes&nbsp;the&nbsp;KL&nbsp;divergence&nbsp;between&nbsp;two&nbsp;distributions.<br>
+Requires&nbsp;that&nbsp;the&nbsp;two&nbsp;distributions&nbsp;have&nbsp;the&nbsp;same&nbsp;length&nbsp;and&nbsp;keys.</span></dd></dl>
+ <dl><dt><a name="-mean_absolute_error"><strong>mean_absolute_error</strong></a>(P: list, Q: list)</dt><dd><span class="code">Compute&nbsp;mean&nbsp;absolute&nbsp;error.</span></dd></dl>
+ <dl><dt><a name="-mean_squared_error"><strong>mean_squared_error</strong></a>(P: list, Q: list)</dt><dd><span class="code">Compute&nbsp;mean&nbsp;squared&nbsp;error.</span></dd></dl>
+ <dl><dt><a name="-rhat"><strong>rhat</strong></a>(P: list, th: list)</dt><dd><span class="code">Compute&nbsp;rhat&nbsp;metric&nbsp;for&nbsp;the&nbsp;provided&nbsp;distributions&nbsp;and&nbsp;measurement.<br>
+&nbsp;<br>
+Parameters:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;P&nbsp;(list):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;distributions&nbsp;(must&nbsp;be&nbsp;normalised)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;th&nbsp;(list):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scores/measurements</span></dd></dl>
+</td></tr></table><p>
+<table class="section">
+<tr class="decor data-decor heading-text">
+<td class="section-title" colspan=3>&nbsp;<br><strong class="bigsection">Data</strong></td></tr>
+    
+<tr><td class="decor data-decor"><span class="code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td><td>&nbsp;</td>
+<td class="singlecolumn"><strong>List</strong> = typing.List<br>
+<strong>Union</strong> = typing.Union</td></tr></table></div>
+</body></html>
