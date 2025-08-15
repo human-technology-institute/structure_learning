@@ -110,6 +110,7 @@ class MCMC(Approximator):
             self.results = OPAD(plus=True)
         self._start_time = time.time()
         self._cpdag_sizes = {}
+        self._cpdags = {}
         self._to_string = f"MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
         self.iteration = 0
         if not (0 <= burn_in < 1):
@@ -175,9 +176,13 @@ class MCMC(Approximator):
             iteration (int): Current iteration number.
             info (dict): Information about the current iteration.
         """
-        info['graph'] = info['graph'] if self.graph_type=='dag' else info['graph'].to_cpdag(blocklist=self.blacklist)
         key = info['graph'].to_key()
         if self.graph_type=='cpdag':
+            if key not in self._cpdags:
+                cpdag = info['graph'] = info['graph'].to_cpdag(blocklist=self.blacklist)
+                key = info['graph'].to_key()
+            else:
+                key = cpdag = self._cpdags[key]
             if key not in self._cpdag_sizes:
                 self._cpdag_sizes[key] = len(info['graph'])
             info['weight'] = self._cpdag_sizes[key]
