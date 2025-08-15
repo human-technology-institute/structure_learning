@@ -175,7 +175,7 @@ class MCMC(Approximator):
             iteration (int): Current iteration number.
             info (dict): Information about the current iteration.
         """
-        info['graph'] = info['graph'] if self.graph_type=='dag' else info['graph'].to_cpdag(blocklist=blacklist)
+        info['graph'] = info['graph'] if self.graph_type=='dag' else info['graph'].to_cpdag(blocklist=self.blacklist)
         key = info['graph'].to_key()
         if self.graph_type=='cpdag':
             if key not in self._cpdag_sizes:
@@ -183,7 +183,7 @@ class MCMC(Approximator):
             info['weight'] = self._cpdag_sizes[key]
             if self.result_type == self.RESULT_TYPE_OPAD_PLUS:
                 if info['proposed_state'] is not None:
-                    info['proposed_state'] = info['proposed_state'].to_cpdag(blocklist=blacklist)
+                    info['proposed_state'] = info['proposed_state'].to_cpdag(blocklist=self.blacklist)
                     proposed_key = info['proposed_state'].to_key()
                     if proposed_key not in self._cpdag_sizes:
                         self._cpdag_sizes[proposed_key] = len(info['proposed_state'])
