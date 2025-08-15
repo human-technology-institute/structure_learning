@@ -180,16 +180,24 @@ class MCMC(Approximator):
         if self.graph_type=='cpdag':
             if key not in self._cpdags:
                 cpdag = info['graph'] = info['graph'].to_cpdag(blocklist=self.blacklist)
-                key = info['graph'].to_key()
+                cpdag_key = info['graph'].to_key()
+                self._cpdags[key] = cpdag_key
+                key = cpdag_key
             else:
-                key = cpdag = self._cpdags[key]
+                key = self._cpdags[key]
             if key not in self._cpdag_sizes:
                 self._cpdag_sizes[key] = len(info['graph'])
             info['weight'] = self._cpdag_sizes[key]
             if self.result_type == self.RESULT_TYPE_OPAD_PLUS:
                 if info['proposed_state'] is not None:
-                    info['proposed_state'] = info['proposed_state'].to_cpdag(blocklist=self.blacklist)
                     proposed_key = info['proposed_state'].to_key()
+                    if proposed_key not in self._cpdags:
+                        info['proposed_state'] = info['proposed_state'].to_cpdag(blocklist=self.blacklist)
+                        cpdag_key = info['proposed_state'].to_key()
+                        self._cpdags[proposed_key] = cpdag_key
+                        proposed_key = cpdag_key
+                    else:
+                        proposed_key = self._cpdags[proposed_key]
                     if proposed_key not in self._cpdag_sizes:
                         self._cpdag_sizes[proposed_key] = len(info['proposed_state'])
                     info['proposed_state_weight'] = self._cpdag_sizes[proposed_key]
