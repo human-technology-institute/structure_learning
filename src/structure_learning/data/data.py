@@ -19,7 +19,7 @@ from collections import UserDict
 from typing import Any
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import KFold
 from pathlib import Path
 
@@ -161,6 +161,24 @@ class Data:
         variables = variables if variables is not None else self.variables
         # only normalise continuous variables
         variables = [variable for variable in variables if variable in self.variables and self.variable_types[variable]==self.CONTINUOUS_TYPE]
+        x = _scaler.fit_transform(self.values[variables])
+        transformed_data = self.__copy__()
+        transformed_data.values.loc[:,variables] = x
+        transformed_data._scaler = _scaler
+        return transformed_data
+    
+    def min_max_scale(self, variables: List = None):
+        """
+        Scale the specified variables in the dataset to a range of [0, 1].
+
+        Parameters:
+            variables (List, optional): List of variable names to scale. Defaults to all continuous variables.
+
+        Returns:
+            Data: A new Data object with scaled variables.
+        """
+        _scaler = MinMaxScaler()
+        variables = variables if variables is not None else self.variables
         x = _scaler.fit_transform(self.values[variables])
         transformed_data = self.__copy__()
         transformed_data.values.loc[:,variables] = x
