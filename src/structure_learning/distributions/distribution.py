@@ -232,7 +232,7 @@ class Distribution:
         """
         k, v = self.hist(prop=prop)
         idx = np.argsort(v)
-        return np.array(k)[idx][-n:]
+        return np.array(k)[idx][-n:][::-1]  # Return the top N particles in descending order
 
     # arithmetic
     def __copy__(self):
