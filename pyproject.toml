@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools >= 61.0"]
+requires = ["setuptools >= 61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,18 +8,19 @@ version = "1.0.0"
 description = "Structure learning algorithms for Bayesian networks."
 requires-python = ">= 3.10"
 dependencies = [
-  "numpy",
-  "pandas",
-  "scipy",
-  "scikit-learn",
-  "matplotlib",
-  "networkx",
-  "seaborn",
-  "torch",
-  "pgmpy",
-  "compress_pickle",
-  "pygraphviz",
-  "cliquepicking"
+  "numpy>=1.20.0",
+  "pandas>=1.3.0",
+  "scipy>=1.7.0",
+  "scikit-learn>=1.0.0",
+  "matplotlib>=3.5.0",
+  "networkx>=2.6.0",
+  "seaborn>=0.11.0",
+  "torch>=1.10.0",
+  "pgmpy>=0.1.0",
+  "compress_pickle>=2.0.0",
+  "pygraphviz>=1.10",
+  "cliquepicking>=0.3.0",
+  "graphical-models>=0.1a1"
 ]
 readme = "README.md"
 license = {file = "LICENSE"}
@@ -27,4 +28,20 @@ authors = [
     {name = "Kristofer Delas Peñas", email = "kristofer.delaspenas@uts.edu.au"},
     {name = "Roman Marchant", email = "roman.marchant@uts.edu.au"},
     {name = "Catarina Pinto Moreira"}
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.0.0",
+  "pytest-cov>=4.0.0",
+  "black>=22.0.0",
+  "flake8>=5.0.0",
+  "mypy>=0.990",
+  "pre-commit>=2.20.0",
+  "jupyter>=1.0.0",
+  "ipdb>=0.13.0"
+]
+docs = [
+  "sphinx>=5.0.0",
+  "sphinx-rtd-theme>=1.0.0"
 ]
