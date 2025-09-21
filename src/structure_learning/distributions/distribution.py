@@ -16,7 +16,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import seaborn as sns
 from structure_learning.scores import Score
-from structure_learning.data_structures import DAG
+from structure_learning.data_structures import DAG, Graph
 
 D = TypeVar('Distribution')
 class Distribution:
@@ -420,7 +420,7 @@ class MCMCDistribution(Distribution):
         """
         dist = MCMCDistribution()
         for iteration, data in iterates.items():
-            particle = data['graph'].to_key()
+            particle = data['graph'].to_key() if isinstance(data['graph'], Graph) else data['graph']
             dist.update(particle=particle, iteration=iteration, data=data)
         dist.normalise()
         return dist
