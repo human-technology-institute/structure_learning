@@ -237,10 +237,10 @@ class Distribution:
     # arithmetic
     def __copy__(self):
         """
-        Create a shallow copy of the current distribution.
+        Create a copy of the current distribution.
 
         Returns:
-            Distribution: A shallow copy of the distribution.
+            Distribution: A copy of the distribution.
         """
         dclone = Distribution()
         dclone.particles = deepcopy(self.particles)
@@ -283,7 +283,7 @@ class Distribution:
         return dsub
         
     @classmethod
-    def compute_distribution(cls, data: pd.DataFrame, score: Score, graph_type='dag'):
+    def compute_distribution(cls, data: pd.DataFrame, score: Score, graph_type='dag', blocklist:np.ndarray=None) -> Type['D']:
         """
         Compute a distribution from data and a scoring function.
 
@@ -305,7 +305,7 @@ class Distribution:
         for dag in dags:
             particle = dag.to_key()
             if graph_type=='cpdag':
-                particle = dag.to_cpdag().to_key()
+                particle = dag.to_cpdag(blocklist=blocklist).to_key()
             if particle not in particles:
                 scorer.graph = dag
                 particles[particle] = scorer.compute(dag)['score']
