@@ -559,7 +559,8 @@ class Graph:
         Returns:
             str | list: Labels of nodes connected to relevant edges under the specified operation, or an error message.
         """
-        g1, g2 = self.incidence, other.incidence
+        g1, g2 = self.incidence.astype(int), other.incidence.astype(int)
+        diff = g1 - g2
         if set(self.nodes) != set(other.nodes):
             raise Exception("The graphs have different set of nodes")
         
@@ -568,26 +569,26 @@ class Graph:
             return "[ERROR] Graphs are not the same size"
 
         if operation == 'add_edge':
-            diff = np.where((g1 == 0) & (g2 != 0))
-            if len(diff[0]) > 0:
-                return node_idx[diff[1][0]]
+            added_edges = np.where(diff < 0)
+            if len(added_edges[0]) > 0:
+                return [(node_idx[r],node_idx[c]) for r,c in zip(added_edges[0], added_edges[1])]
 
             return "[ERROR] No edge added"
 
         if operation == 'delete_edge':
-            diff = np.where((g1 != 0) & (g2 == 0))
-            if len(diff[0]) > 0:
-                return node_idx[diff[1][0]]
+            deleted_edges = np.where(diff > 0)
+            if len(deleted_edges[0]) > 0:
+                return [(node_idx[r],node_idx[c]) for r,c in zip(deleted_edges[0], deleted_edges[1])]
 
             return "[ERROR] No edge deleted"
 
         if operation == 'reverse_edge':
-            added_edges = np.where((g1 == 0) & (g2 != 0))
-            deleted_edges = np.where((g1 != 0) & (g2 == 0))
-            reversed_edges = list(set(zip(added_edges[1], added_edges[0])) & set(zip(deleted_edges[0], deleted_edges[1])))[0]
+            added_edges = np.where(diff < 0)
+            deleted_edges = np.where(diff > 0)
+            reversed_edges = list(set(zip(added_edges[1], added_edges[0])) & set(zip(deleted_edges[0], deleted_edges[1])))
 
             if reversed_edges:
-                return [node_idx[reversed_edges[0]], node_idx[reversed_edges[1]]]
+                return [(node_idx[r],node_idx[c]) for r,c in reversed_edges]
 
             return "[ERROR] No edge reversed"
 
