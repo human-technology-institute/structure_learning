@@ -425,6 +425,37 @@ class MCMCDistribution(Distribution):
         dist.normalise()
         return dist
     
+    def to_iterates(self):
+        """
+        Convert an MCMCDistribution to iteration data.
+
+        Returns:
+            dict: A dictionary where keys are iteration numbers and values are data about the particles.
+        """
+        iterates = {}
+        for particle, data in self.particles.items():
+            for iteration, timestamp in zip(data['iteration'], data['timestamp']):
+                iterates[iteration] = {
+                    'graph': particle,
+                    'current_state': particle,
+                    'score_current': data['logp'],
+                    'timestamp': timestamp,
+                    'current_state_prior': data.get('prior', None),
+                    'freq': data['freq'],
+                }
+
+        if self.rejected is not None:
+            for particle, data in self.rejected.particles.items():
+                for iteration, timestamp in zip(data['iteration'], data['timestamp']):
+                    iterates[iteration].update({
+                        'proposed_state': particle,
+                        'score_proposed': data['logp'],
+                        'timestamp': timestamp,
+                        'proposed_state_prior': data.get('prior', None),
+                        'freq': data['freq'],
+                    })
+        return iterates
+    
     def __copy__(self):
         """
         Create a shallow copy of the current distribution.
@@ -544,3 +575,6 @@ class OPAD(MCMCDistribution):
         dclone.rejected = copy(self.rejected)
         dclone.normalise()
         return dclone
+    
+    def to_iterates(self):
+        raise NotImplementedError("OPAD distributions cannot be converted to iterates.")
