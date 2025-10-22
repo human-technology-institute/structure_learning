@@ -40,7 +40,7 @@ class CPDAG(Graph):
         self.dags = None
 
     @classmethod
-    def from_dag(cls, dag):
+    def from_dag(cls, dag, blocklist=None):
         """
         Create a CPDAG from a DAG.
 
@@ -50,7 +50,7 @@ class CPDAG(Graph):
         Returns:
             CPDAG: Completed Partially Directed Acyclic Graph.
         """
-        return dag.to_cpdag()
+        return dag.to_cpdag(blocklist=blocklist)
 
     def __contains__(self, dag):
         """

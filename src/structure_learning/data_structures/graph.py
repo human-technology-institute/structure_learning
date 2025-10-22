@@ -560,13 +560,13 @@ class Graph:
             str | list: Labels of nodes connected to relevant edges under the specified operation, or an error message.
         """
         g1, g2 = self.incidence.astype(int), other.incidence.astype(int)
-        diff = g1 - g2
         if set(self.nodes) != set(other.nodes):
             raise Exception("The graphs have different set of nodes")
         
         node_idx = {idx:node for idx,node in enumerate(self.nodes)}
         if g1.shape != g2.shape:
             return "[ERROR] Graphs are not the same size"
+        diff = g1 - g2
 
         if operation == 'add_edge':
             added_edges = np.where(diff < 0)

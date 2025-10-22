@@ -145,7 +145,7 @@ class Distribution:
             v = np.array(v)/sum(v)
         return k, v
 
-    def plot(self, prop='freq', sort=True, normalise=False, limit=-1, ax=None):
+    def plot(self, prop='freq', sort=True, normalise=False, limit=-1, ax=None, showxticklabels=False):
         """
         Plot a histogram of the particles in the distribution.
 
@@ -172,7 +172,7 @@ class Distribution:
         bars = sns.barplot(x=particles[-limit:], y=count[-limit:], dodge=True, ax=ax)
         ax.set_xlabel('Particles')
         ax.set_ylabel('Proportion')
-        ax.set_xticklabels(particles[-limit:], rotation=90)
+        ax.set_xticklabels(particles[-limit:] if showxticklabels else [], rotation=90)
         return bars, particles[-limit:], count[-limit:]
     
     @classmethod
@@ -565,10 +565,10 @@ class OPAD(MCMCDistribution):
 
     def __copy__(self):
         """
-        Create a shallow copy of the current distribution.
+        Create a copy of the current distribution.
 
         Returns:
-            Distribution: A shallow copy of the distribution.
+            Distribution: A copy of the distribution.
         """
         dclone = OPAD(plus=self.plus)
         dclone.particles = deepcopy(self.particles)
@@ -577,4 +577,6 @@ class OPAD(MCMCDistribution):
         return dclone
     
     def to_iterates(self):
-        raise NotImplementedError("OPAD distributions cannot be converted to iterates.")
+        if not self.plus:
+            return super(MCMCDistribution, self).to_iterates()
+        raise NotImplementedError("OPAD+ distributions cannot be converted to iterates.")
