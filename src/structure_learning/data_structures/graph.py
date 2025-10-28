@@ -519,11 +519,10 @@ class Graph:
         Plot a networkx graph.
 
         Parameters:
-            title (str): Title of the plot.
-            figsize (tuple): Size of the figure.
-            node_size (int): Size of the nodes.
-            node_color (str): Color of the nodes.
-            k (int): Distance between nodes in the layout.
+            filename (str): Path to save the plot image. If None, the plot is not saved.
+            text (str): Additional text to display on the plot.
+            edge_colors (dict): Dictionary mapping edges to colors.
+            edge_weights (dict): Dictionary mapping edges to weights.
         """
         G = self.to_nx()
         G_gvz = nx.nx_agraph.to_agraph(G)
