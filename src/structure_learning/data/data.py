@@ -94,6 +94,7 @@ class Data:
             for var,type in variable_types.items():
                 self.variable_types[var] = type
    
+        self._scaler = None
         self.values = pd.DataFrame(values, columns=self.variables) if isinstance(values, np.ndarray) else values
 
     @property
@@ -135,6 +136,7 @@ class Data:
             Data: A copy of the Data object.
         """
         clone = Data(self.values.copy(), self.variables.copy(), self.variable_types.copy())
+        clone._scaler = self._scaler
         return clone
     
     @property
@@ -148,25 +150,28 @@ class Data:
         return self.values.shape
     
     def normalise(self, variables: List = None):
+        return self.standardise(variables)
+    
+    def standardise(self, variables: List = None):
         """
-        Normalize the specified variables in the dataset.
+        Standardise the specified variables in the dataset.
 
         Parameters:
-            variables (List, optional): List of variable names to normalize. Defaults to all continuous variables.
+            variables (List, optional): List of variable names to standardise. Defaults to all continuous variables.
 
         Returns:
-            Data: A new Data object with normalized variables.
+            Data: A new Data object with standardised variables.
         """
         _scaler = StandardScaler()
         variables = variables if variables is not None else self.variables
-        # only normalise continuous variables
+        # only standardise continuous variables
         variables = [variable for variable in variables if variable in self.variables and self.variable_types[variable]==self.CONTINUOUS_TYPE]
         x = _scaler.fit_transform(self.values[variables])
         transformed_data = self.__copy__()
         transformed_data.values.loc[:,variables] = x
         transformed_data._scaler = _scaler
         return transformed_data
-    
+
     def min_max_scale(self, variables: List = None):
         """
         Scale the specified variables in the dataset to a range of [0, 1].
