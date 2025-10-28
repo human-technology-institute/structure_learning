@@ -11,7 +11,6 @@ from typing import TypeVar
 import networkx as nx
 import numpy as np
 import pandas as pd
-import graphical_models as gm
 from .graph import Graph
 
 D = TypeVar('DAG')
@@ -24,7 +23,7 @@ class DAG(Graph):
         nodes (list): List of node labels.
     """
 
-    def __init__(self, incidence=None, nodes=None):
+    def __init__(self, incidence=None, nodes=None, weights=None):
         """
         Initialize a DAG instance.
 
@@ -35,7 +34,7 @@ class DAG(Graph):
         Raises:
             Exception: If the adjacency matrix contains cycles.
         """
-        super().__init__(incidence, nodes)
+        super().__init__(incidence, nodes, weights)
         if self.has_cycle(self.incidence):
             raise Exception('Cycle found in adjacency matrix')
         
@@ -55,17 +54,6 @@ class DAG(Graph):
         if data is not None:
             weights, colors = self.fit(data)
         return super().plot(filename=filename, text=text, edge_colors=colors, edge_weights=weights)
-
-    def to_cpdag_old(self):
-        """
-        Convert the DAG to a CPDAG.
-
-        Returns:
-            CPDAG: Completed Partially Directed Acyclic Graph.
-        """
-        from .cpdag import CPDAG
-        DAG_gm = gm.DAG.from_amat(self.incidence)
-        return CPDAG(incidence=DAG_gm.cpdag().to_amat()[0], nodes=self.nodes)
     
     def to_cpdag(self, blocklist: np.ndarray = None, verbose=False):
         """
