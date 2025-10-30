@@ -77,9 +77,9 @@ class PartitionMCMC(MCMC):
                     self.initial_state[self.initial_state < 0] = 0
                     self.initial_state = self.initial_state.astype(bool)
                 if whitelist is not None:
-                    self.initial_state[whitelist > 0] = True
+                    self.initial_state.incidence[whitelist > 0] = True
                 if blacklist is not None:
-                    self.initial_state[blacklist > 0] = False
+                    self.initial_state.incidence[blacklist > 0] = False
             if isinstance(self.initial_state, np.ndarray):
                 self.initial_state = OrderedPartition.from_numpy(self.initial_state, list(self.score_object.data.columns if self.score_object else data.columns))
             elif isinstance(self.initial_state, Graph):
