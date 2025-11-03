@@ -97,14 +97,14 @@ class CPDAG(Graph):
     def enumerate_dags(self):
         import cliquepicking as cp
         from .dag import DAG 
-        nodes = {node:idx for idx, node in enumerate(self.nodes)}
+        nodes = {node:idx+1 for idx, node in enumerate(self.nodes)}
         edges = [(nodes[u], nodes[v]) for u, v in self.edges]
 
         dags = cp.mec_list_dags(edges)
         for dag in dags:
             incidence = np.zeros((len(self.nodes), len(self.nodes)), dtype=bool)
             for u, v in dag:
-                incidence[u, v] = True
+                incidence[u-1, v-1] = True
             g = DAG(incidence=incidence, nodes=self.nodes)
             yield g
 
