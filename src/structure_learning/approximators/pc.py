@@ -17,7 +17,8 @@ class PC(Approximator):
 
     def run(self):
         if self.results is None:
-            self._estimator = pgmpy.estimators.PC(data=self.data.values)
+            from pgmpy.estimators import PC as pgmpyPC
+            self._estimator = pgmpyPC(data=self.data.values)
             
             cpdag = self._estimator.estimate(ci_test=self.ci_test, significance_level=self.significance_level)
 
