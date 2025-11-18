@@ -168,7 +168,7 @@ class Data:
         variables = [variable for variable in variables if variable in self.variables and self.variable_types[variable]==self.CONTINUOUS_TYPE]
         x = _scaler.fit_transform(self.values[variables])
         transformed_data = self.__copy__()
-        transformed_data.values[variables] = transformed_data.values[variables].astype(float)
+        transformed_data.values.loc[:,variables] = transformed_data.values.loc[:,variables].astype(float)
         transformed_data.values.loc[:,variables] = x
         transformed_data._scaler = _scaler
         return transformed_data
