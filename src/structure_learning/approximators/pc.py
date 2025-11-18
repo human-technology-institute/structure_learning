@@ -1,5 +1,4 @@
 from typing import Union
-import pgmpy
 import networkx as nx
 import pandas as pd
 from .approximator import Approximator
