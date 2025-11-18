@@ -514,7 +514,7 @@ class Graph:
         return cls.from_pandas(pd.read_csv(filename))
 
     # visualisation
-    def plot(self, filename=None, text=None, edge_colors: dict = None, edge_weights: dict = None):
+    def plot(self, filename=None, text=None, edge_colors: dict = None, edge_weights: dict = None, node_clusters: dict = None):
         """
         Plot a networkx graph.
 
@@ -541,6 +541,9 @@ class Graph:
                         edge.attr['arrowhead'] = 'tee' if edge_colors[(self.nodes[r], self.nodes[c])]=="#FE5600" else 'vee'
                     if edge_weights is not None:
                         edge.attr['penwidth'] = 5*np.abs(edge_weights[(self.nodes[r], self.nodes[c])] if (self.nodes[r], self.nodes[c]) in edge_weights else edge_weights[(self.nodes[c], self.nodes[r])])
+        if node_clusters is not None:
+            for cluster_id, nodes in node_clusters.items():
+                G_gvz.add_subgraph(nodes, name=f'Cluster {cluster_id}', style='filled', color='lightgrey')
         G_gvz.layout('dot')
         if filename is not None:
             G_gvz.draw(filename, format='png')
