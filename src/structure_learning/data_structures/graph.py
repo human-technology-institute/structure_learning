@@ -528,6 +528,9 @@ class Graph:
         G_gvz = nx.nx_agraph.to_agraph(G)
         if text is not None:
             G_gvz.add_node('info',label=text, shape='note', style='filled', fillcolor='lightgrey')
+        if edge_weights is not None:
+            w = [abs(v) for v in edge_weights.values()]
+            w_min, w_max = min(w), max(w)
         for r,c in zip(*np.nonzero(self.incidence)):
             if  G_gvz.has_edge(self.nodes[r], self.nodes[c]):
                 edge = G_gvz.get_edge(self.nodes[r], self.nodes[c])
@@ -540,7 +543,7 @@ class Graph:
                         edge.attr['color'] = edge_colors[(self.nodes[r], self.nodes[c])]
                         edge.attr['arrowhead'] = 'tee' if edge_colors[(self.nodes[r], self.nodes[c])]=="#FE5600" else 'vee'
                     if edge_weights is not None:
-                        edge.attr['penwidth'] = min(max_penwidth, max_penwidth*np.abs(edge_weights[(self.nodes[r], self.nodes[c])] if (self.nodes[r], self.nodes[c]) in edge_weights else edge_weights[(self.nodes[c], self.nodes[r])]))
+                        edge.attr['penwidth'] = (max_penwidth - 1)*(np.abs(edge_weights[(self.nodes[r], self.nodes[c])] if (self.nodes[r], self.nodes[c]) in edge_weights else edge_weights[(self.nodes[c], self.nodes[r])]) - w_min)/(w_max - w_min) + 1
         if node_clusters is not None:
             for cluster_id, nodes in node_clusters.items():
                 G_gvz.add_subgraph(nodes, name=f'Cluster {cluster_id}', style='filled', color='lightgrey')
