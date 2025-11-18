@@ -514,7 +514,7 @@ class Graph:
         return cls.from_pandas(pd.read_csv(filename))
 
     # visualisation
-    def plot(self, filename=None, text=None, edge_colors: dict = None, edge_weights: dict = None, node_clusters: dict = None, max_penwidth: int =5):
+    def plot(self, filename=None, text=None, edge_colors: dict = None, edge_weights: dict = None, node_clusters: dict = None, max_penwidth: int =5, show_weights: bool = False):
         """
         Plot a networkx graph.
 
@@ -543,7 +543,9 @@ class Graph:
                         edge.attr['color'] = edge_colors[(self.nodes[r], self.nodes[c])]
                         edge.attr['arrowhead'] = 'tee' if edge_colors[(self.nodes[r], self.nodes[c])]=="#FE5600" else 'vee'
                     if edge_weights is not None:
-                        edge.attr['penwidth'] = (max_penwidth - 1)*(np.abs(edge_weights[(self.nodes[r], self.nodes[c])] if (self.nodes[r], self.nodes[c]) in edge_weights else edge_weights[(self.nodes[c], self.nodes[r])]) - w_min)/(w_max - w_min) + 1
+                        if (self.nodes[r], self.nodes[c]) in edge_weights and show_weights:
+                            edge.attr['label'] = str(round(edge_weights[(self.nodes[r], self.nodes[c])], 2))
+                        edge.attr['penwidth'] = (max_penwidth - 1)*(np.abs(edge_weights[(self.nodes[r], self.nodes[c])] if (self.nodes[r], self.nodes[c]) in edge_weights else edge_weights[(self.nodes[c], self.nodes[r])]) - w_min + 1e-7)/(w_max - w_min + 1e-7) + 1
         if node_clusters is not None:
             for cluster_id, nodes in node_clusters.items():
                 G_gvz.add_subgraph(nodes, name=f'Cluster {cluster_id}', style='filled', color='lightgrey')
