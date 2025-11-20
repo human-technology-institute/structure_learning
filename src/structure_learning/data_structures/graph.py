@@ -545,6 +545,7 @@ class Graph:
                     if edge_weights is not None:
                         if (self.nodes[r], self.nodes[c]) in edge_weights and show_weights:
                             edge.attr['label'] = str(round(edge_weights[(self.nodes[r], self.nodes[c])], 2))
+                            edge.attr['fontsize'] = 8
                         edge.attr['penwidth'] = (max_penwidth - 1)*(np.abs(edge_weights[(self.nodes[r], self.nodes[c])] if (self.nodes[r], self.nodes[c]) in edge_weights else edge_weights[(self.nodes[c], self.nodes[r])]) - w_min + 1e-7)/(w_max - w_min + 1e-7) + 1
         if node_clusters is not None:
             for cluster_id, nodes in node_clusters.items():
