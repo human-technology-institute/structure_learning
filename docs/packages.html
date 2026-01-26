@@ -10,6 +10,8 @@
           }
           class approximator {
           }
+          class dibs {
+          }
           class greedy {
           }
           class hillclimb {
@@ -90,6 +92,10 @@
           approximators --> partition_mcmc
           approximators --> structure_mcmc
           approximator --> data
+          dibs --> approximator
+          dibs --> data
+          dibs --> data_structures
+          dibs --> distributions
           greedy --> approximator
           greedy --> data
           greedy --> data_structures

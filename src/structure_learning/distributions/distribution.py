@@ -16,7 +16,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import seaborn as sns
 from structure_learning.scores import Score
-from structure_learning.data_structures import DAG
+from structure_learning.data_structures import DAG, Graph
 
 D = TypeVar('Distribution')
 class Distribution:
@@ -145,7 +145,7 @@ class Distribution:
             v = np.array(v)/sum(v)
         return k, v
 
-    def plot(self, prop='freq', sort=True, normalise=False, limit=-1, ax=None):
+    def plot(self, prop='freq', sort=True, normalise=False, limit=-1, ax=None, showxticklabels=False):
         """
         Plot a histogram of the particles in the distribution.
 
@@ -172,7 +172,7 @@ class Distribution:
         bars = sns.barplot(x=particles[-limit:], y=count[-limit:], dodge=True, ax=ax)
         ax.set_xlabel('Particles')
         ax.set_ylabel('Proportion')
-        ax.set_xticklabels(particles[-limit:], rotation=90)
+        ax.set_xticklabels(particles[-limit:] if showxticklabels else [], rotation=90)
         return bars, particles[-limit:], count[-limit:]
     
     @classmethod
@@ -232,15 +232,15 @@ class Distribution:
         """
         k, v = self.hist(prop=prop)
         idx = np.argsort(v)
-        return np.array(k)[idx][-n:]
+        return np.array(k)[idx][-n:][::-1]  # Return the top N particles in descending order
 
     # arithmetic
     def __copy__(self):
         """
-        Create a shallow copy of the current distribution.
+        Create a copy of the current distribution.
 
         Returns:
-            Distribution: A shallow copy of the distribution.
+            Distribution: A copy of the distribution.
         """
         dclone = Distribution()
         dclone.particles = deepcopy(self.particles)
@@ -283,7 +283,7 @@ class Distribution:
         return dsub
         
     @classmethod
-    def compute_distribution(cls, data: pd.DataFrame, score: Score, graph_type='dag'):
+    def compute_distribution(cls, data: pd.DataFrame, score: Score, graph_type='dag', blocklist:np.ndarray=None) -> Type['D']:
         """
         Compute a distribution from data and a scoring function.
 
@@ -305,7 +305,7 @@ class Distribution:
         for dag in dags:
             particle = dag.to_key()
             if graph_type=='cpdag':
-                particle = dag.to_cpdag().to_key()
+                particle = dag.to_cpdag(blocklist=blocklist).to_key()
             if particle not in particles:
                 scorer.graph = dag
                 particles[particle] = scorer.compute(dag)['score']
@@ -420,10 +420,41 @@ class MCMCDistribution(Distribution):
         """
         dist = MCMCDistribution()
         for iteration, data in iterates.items():
-            particle = data['graph'].to_key()
+            particle = data['graph'].to_key() if isinstance(data['graph'], Graph) else data['graph']
             dist.update(particle=particle, iteration=iteration, data=data)
         dist.normalise()
         return dist
+    
+    def to_iterates(self):
+        """
+        Convert an MCMCDistribution to iteration data.
+
+        Returns:
+            dict: A dictionary where keys are iteration numbers and values are data about the particles.
+        """
+        iterates = {}
+        for particle, data in self.particles.items():
+            for iteration, timestamp in zip(data['iteration'], data['timestamp']):
+                iterates[iteration] = {
+                    'graph': particle,
+                    'current_state': particle,
+                    'score_current': data['logp'],
+                    'timestamp': timestamp,
+                    'current_state_prior': data.get('prior', None),
+                    'freq': data['freq'],
+                }
+
+        if self.rejected is not None:
+            for particle, data in self.rejected.particles.items():
+                for iteration, timestamp in zip(data['iteration'], data['timestamp']):
+                    iterates[iteration].update({
+                        'proposed_state': particle,
+                        'score_proposed': data['logp'],
+                        'timestamp': timestamp,
+                        'proposed_state_prior': data.get('prior', None),
+                        'freq': data['freq'],
+                    })
+        return iterates
     
     def __copy__(self):
         """
@@ -534,13 +565,18 @@ class OPAD(MCMCDistribution):
 
     def __copy__(self):
         """
-        Create a shallow copy of the current distribution.
+        Create a copy of the current distribution.
 
         Returns:
-            Distribution: A shallow copy of the distribution.
+            Distribution: A copy of the distribution.
         """
         dclone = OPAD(plus=self.plus)
         dclone.particles = deepcopy(self.particles)
         dclone.rejected = copy(self.rejected)
         dclone.normalise()
         return dclone
+    
+    def to_iterates(self):
+        if not self.plus:
+            return super(MCMCDistribution, self).to_iterates()
+        raise NotImplementedError("OPAD+ distributions cannot be converted to iterates.")

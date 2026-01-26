@@ -37,7 +37,7 @@
             undirected_edges : list
             enumerate_dags()
             enumerate_dags_old(generate)
-            from_dag(dag)
+            from_dag(dag, blocklist)
             plot(filename, text, data: pd.DataFrame)
           }
           class CategoricalEdgePrior {
@@ -81,19 +81,31 @@
             variable_types
             variables : NoneType, list
             k_fold(k, shuffle, seed)
+            min_max_scale(variables: List)
             normalise(variables: List)
+          }
+          class DiBS {
+            data
+            interv_mask : NoneType
+            joint : bool
+            n_particles : int
+            non_linear : bool
+            seed : NoneType, ndarray
+            steps : int
+            config()
+            run()
           }
           class Distribution {
             logp
             p : ndarray
             particles : dict
             clear()
-            compute_distribution(data: pd.DataFrame, score: Score, graph_type)
+            compute_distribution(data: pd.DataFrame, score: Score, graph_type, blocklist: np.ndarray) Type['D']
             copy()
             hist(prop, normalise)
             load(filename: str, compression)
             normalise(prop, log)
-            plot(prop, sort, normalise, limit, ax)
+            plot(prop, sort, normalise, limit, ax, showxticklabels)
             plot_multiple(dists: List[Type['D']], prop, normalise, limit, ax, labels)
             prop(name)
             save(filename: str, compression)
@@ -265,11 +277,18 @@
             particles : dict
             rejected : NoneType
             from_iterates(iterates: dict)
+            to_iterates()
             to_opad(plus)
             update(particle, data, iteration)
           }
+          class MEP {
+            compute(dist: Distribution)
+          }
           class MSE {
             compute(dist1: Distribution, dist2: Distribution)
+          }
+          class MarginalAncestorProbabilities {
+            compute(dist: Distribution)
           }
           class Metric {
             compute()*
@@ -282,6 +301,7 @@
             from_mcmc(dist: Distribution, plus)
             normalise()
             plot(prop, sort, normalise, limit)
+            to_iterates()
             update(particle, data, iteration, normalise)
           }
           class OrderedPartition {
@@ -390,6 +410,9 @@
           class RHat {
             compute(dists: List[Distribution], prop)
           }
+          class RHat_edge {
+            compute(dists: List[Distribution])
+          }
           class SHD {
             compute(dags: Union[Distribution, Graph], true_graph: Graph)
           }
@@ -450,6 +473,7 @@
             value : int
             compute(dag: DAG)
           }
+          DiBS --|> Approximator
           GreedySearch --|> Approximator
           HillClimb --|> Approximator
           MCMC --|> Approximator
@@ -464,8 +488,11 @@
           JSD --|> Metric
           KLD --|> Metric
           MAE --|> Metric
+          MEP --|> Metric
           MSE --|> Metric
+          MarginalAncestorProbabilities --|> Metric
           RHat --|> Metric
+          RHat_edge --|> Metric
           SHD --|> Metric
           CategoricalEdgePrior --|> CategoricalPrior
           CategoricalPrior --|> Prior
@@ -476,6 +503,7 @@
           BDeuScore --|> Score
           BGeScore --|> Score
           Data --* Approximator : data
+          Data --* DiBS : data
           Data --* SyntheticDataset : data
           Data --* Score : _data
           CPDAG --* MCMC : pc_graph

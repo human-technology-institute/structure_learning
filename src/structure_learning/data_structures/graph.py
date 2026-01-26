@@ -493,9 +493,7 @@ class Graph:
         self.to_pandas().to_csv(filename)
 
     def __copy__(self):
-        g = Graph()
-        g.incidence = self.incidence.copy()
-        g.nodes = self.nodes.copy()
+        g = self.__class__(incidence=self.incidence.copy(), nodes=self.nodes.copy())
         g.weights = self.weights.copy() if self.weights is not None else None
         return g 
     
@@ -516,21 +514,23 @@ class Graph:
         return cls.from_pandas(pd.read_csv(filename))
 
     # visualisation
-    def plot(self, filename=None, text=None, edge_colors: dict = None, edge_weights: dict = None):
+    def plot(self, filename=None, text=None, edge_colors: dict = None, edge_weights: dict = None, node_clusters: dict = None, max_penwidth: int =5, show_weights: bool = False):
         """
         Plot a networkx graph.
 
         Parameters:
-            title (str): Title of the plot.
-            figsize (tuple): Size of the figure.
-            node_size (int): Size of the nodes.
-            node_color (str): Color of the nodes.
-            k (int): Distance between nodes in the layout.
+            filename (str): Path to save the plot image. If None, the plot is not saved.
+            text (str): Additional text to display on the plot.
+            edge_colors (dict): Dictionary mapping edges to colors.
+            edge_weights (dict): Dictionary mapping edges to weights.
         """
         G = self.to_nx()
         G_gvz = nx.nx_agraph.to_agraph(G)
         if text is not None:
             G_gvz.add_node('info',label=text, shape='note', style='filled', fillcolor='lightgrey')
+        if edge_weights is not None:
+            w = [abs(v) for v in edge_weights.values()]
+            w_min, w_max = min(w), max(w)
         for r,c in zip(*np.nonzero(self.incidence)):
             if  G_gvz.has_edge(self.nodes[r], self.nodes[c]):
                 edge = G_gvz.get_edge(self.nodes[r], self.nodes[c])
@@ -543,7 +543,13 @@ class Graph:
                         edge.attr['color'] = edge_colors[(self.nodes[r], self.nodes[c])]
                         edge.attr['arrowhead'] = 'tee' if edge_colors[(self.nodes[r], self.nodes[c])]=="#FE5600" else 'vee'
                     if edge_weights is not None:
-                        edge.attr['penwidth'] = 5*np.abs(edge_weights[(self.nodes[r], self.nodes[c])] if (self.nodes[r], self.nodes[c]) in edge_weights else edge_weights[(self.nodes[c], self.nodes[r])])
+                        if (self.nodes[r], self.nodes[c]) in edge_weights and show_weights:
+                            edge.attr['label'] = str(round(edge_weights[(self.nodes[r], self.nodes[c])], 2))
+                            edge.attr['fontsize'] = 8
+                        edge.attr['penwidth'] = (max_penwidth - 1)*(np.abs(edge_weights[(self.nodes[r], self.nodes[c])] if (self.nodes[r], self.nodes[c]) in edge_weights else edge_weights[(self.nodes[c], self.nodes[r])]) - w_min + 1e-7)/(w_max - w_min + 1e-7) + 1
+        if node_clusters is not None:
+            for cluster_id, nodes in node_clusters.items():
+                G_gvz.add_subgraph(nodes, name=f'Cluster {cluster_id}', style='filled', color='lightgrey')
         G_gvz.layout('dot')
         if filename is not None:
             G_gvz.draw(filename, format='png')
@@ -561,35 +567,36 @@ class Graph:
         Returns:
             str | list: Labels of nodes connected to relevant edges under the specified operation, or an error message.
         """
-        g1, g2 = self.incidence, other.incidence
+        g1, g2 = self.incidence.astype(int), other.incidence.astype(int)
         if set(self.nodes) != set(other.nodes):
             raise Exception("The graphs have different set of nodes")
         
         node_idx = {idx:node for idx,node in enumerate(self.nodes)}
         if g1.shape != g2.shape:
             return "[ERROR] Graphs are not the same size"
+        diff = g1 - g2
 
         if operation == 'add_edge':
-            diff = np.where((g1 == 0) & (g2 != 0))
-            if len(diff[0]) > 0:
-                return node_idx[diff[1][0]]
+            added_edges = np.where(diff < 0)
+            if len(added_edges[0]) > 0:
+                return [(node_idx[r],node_idx[c]) for r,c in zip(added_edges[0], added_edges[1])]
 
             return "[ERROR] No edge added"
 
         if operation == 'delete_edge':
-            diff = np.where((g1 != 0) & (g2 == 0))
-            if len(diff[0]) > 0:
-                return node_idx[diff[1][0]]
+            deleted_edges = np.where(diff > 0)
+            if len(deleted_edges[0]) > 0:
+                return [(node_idx[r],node_idx[c]) for r,c in zip(deleted_edges[0], deleted_edges[1])]
 
             return "[ERROR] No edge deleted"
 
         if operation == 'reverse_edge':
-            added_edges = np.where((g1 == 0) & (g2 != 0))
-            deleted_edges = np.where((g1 != 0) & (g2 == 0))
-            reversed_edges = list(set(zip(added_edges[1], added_edges[0])) & set(zip(deleted_edges[0], deleted_edges[1])))[0]
+            added_edges = np.where(diff < 0)
+            deleted_edges = np.where(diff > 0)
+            reversed_edges = list(set(zip(added_edges[1], added_edges[0])) & set(zip(deleted_edges[0], deleted_edges[1])))
 
             if reversed_edges:
-                return [node_idx[reversed_edges[0]], node_idx[reversed_edges[1]]]
+                return [(node_idx[r],node_idx[c]) for r,c in reversed_edges]
 
             return "[ERROR] No edge reversed"
 

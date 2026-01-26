@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "structure_learning"
 version = "1.0.0"
 description = "Structure learning algorithms for Bayesian networks."
-requires-python = ">= 3.10"
+requires-python = ">= 3.9"
 dependencies = [
   "numpy",
   "pandas",

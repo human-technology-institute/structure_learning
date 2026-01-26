@@ -21,7 +21,7 @@ class CPDAG(Graph):
         dags (list): List of DAGs represented by the CPDAG.
     """
 
-    def __init__(self, incidence=None, nodes=None):
+    def __init__(self, incidence=None, nodes=None, weights=None):
         """
         Initialize a CPDAG instance.
 
@@ -29,7 +29,7 @@ class CPDAG(Graph):
             incidence (numpy.ndarray): Adjacency matrix of the graph.
             nodes (list): List of node labels.
         """
-        super().__init__(incidence, nodes)
+        super().__init__(incidence, nodes, weights)
         self.undirected_edges = list()
         self._undirected_edges_idx = list()
         rows, cols = np.nonzero(np.tril(incidence & incidence.T, 0))
@@ -40,7 +40,7 @@ class CPDAG(Graph):
         self.dags = None
 
     @classmethod
-    def from_dag(cls, dag):
+    def from_dag(cls, dag, blocklist=None):
         """
         Create a CPDAG from a DAG.
 
@@ -50,7 +50,18 @@ class CPDAG(Graph):
         Returns:
             CPDAG: Completed Partially Directed Acyclic Graph.
         """
-        return dag.to_cpdag()
+        return dag.to_cpdag(blocklist=blocklist)
+    
+    def contains(self, dag, blocklist=None):
+        """
+        Check if a DAG is represented by the CPDAG. 
+        Parameters:
+            dag (DAG): Directed Acyclic Graph.  
+            blocklist (list): List of edges to block.
+        Returns:
+            bool: True if the DAG is represented by the CPDAG, False otherwise.
+        """
+        return dag.to_cpdag(blocklist=blocklist) == self
 
     def __contains__(self, dag):
         """
@@ -86,75 +97,23 @@ class CPDAG(Graph):
     def enumerate_dags(self):
         import cliquepicking as cp
         from .dag import DAG 
-        nodes = {node:idx for idx, node in enumerate(self.nodes)}
+        nodes = {node:idx+1 for idx, node in enumerate(self.nodes)}
         edges = [(nodes[u], nodes[v]) for u, v in self.edges]
 
         dags = cp.mec_list_dags(edges)
         for dag in dags:
             incidence = np.zeros((len(self.nodes), len(self.nodes)), dtype=bool)
             for u, v in dag:
-                incidence[u, v] = True
+                incidence[u-1, v-1] = True
             g = DAG(incidence=incidence, nodes=self.nodes)
             yield g
 
-    def enumerate_dags_old(self, generate=True):
-        """
-        Enumerate all DAGs represented by the CPDAG.
-
-        Parameters:
-            generate (bool): Whether to generate DAG instances.
-
-        Yields:
-            Graph: DAG instances represented by the CPDAG.
-        """
-        from .dag import DAG 
-        dim = len(self.undirected_edges)
-        if dim == 0:
-            self._n_dags = 1
-            g = DAG(incidence=self.incidence, nodes=self.nodes)
-            self.dags = [g]
-            yield g
-        else:
-            if self.dags is None:
-                self._n_dags = 0
-                if generate:
-                    self.dags = []
-                fstr = "{0:0" + str(dim) + "b}"
-                v_structures = self.v_structures()
-                for i in range(2**dim):
-                    binstr = fstr.format(i)
-                    incidence = self.incidence.copy()
-                    for j, flip in enumerate(binstr):
-                        r, c = self._undirected_edges_idx[j]
-                        if flip == "1":
-                            incidence[r, c] = False
-                        else:
-                            incidence[c, r] = False
-                    if not Graph.has_cycle(incidence):
-                        g = DAG(incidence=incidence, nodes=self.nodes)
-                        if g.v_structures() != v_structures:
-                            continue
-                        self._n_dags += 1
-                        if generate:
-                            self.dags.append(g)
-                            yield g
-
-    def __len_old__(self):
-        """
-        Get the number of DAGs represented by the CPDAG.
-
-        Returns:
-            int: Number of DAGs.
-        """
-        [g for g in self.enumerate_dags()]
-        return self._n_dags
-
-    def plot(self, filename=None, text=None, data: pd.DataFrame=None):
+    def plot(self, filename=None, text=None, data: pd.DataFrame=None, node_clusters: dict = None, max_penwidth: int =5, show_weights: bool = False):
 
         if data is None:
             return super().plot(filename=filename, text=text)
         else:
             dags = [dag for dag in self.enumerate_dags()]
             weights, colors = dags[0].fit(data=data)
-            return super().plot(filename=filename, text=text, edge_colors=colors, edge_weights=weights)
+            return super().plot(filename=filename, text=text, edge_colors=colors, edge_weights=weights, node_clusters=node_clusters, max_penwidth=max_penwidth, show_weights=show_weights)
         

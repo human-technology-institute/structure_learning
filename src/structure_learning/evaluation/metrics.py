@@ -13,6 +13,8 @@ Classes:
     MAE: Computes the Mean Absolute Error between two distributions.
     SHD: Computes the Expected Structural Hamming Distance between graphs.
     RHat: Computes the RHat metric for multiple distributions.
+    MEP: Computes the Marginal Edge Probabilities from a distribution.
+    MarginalAncestorProbabilities: Computes the Marginal Ancestor Probabilities from a distribution.
 
 Functions:
     entropy: Computes the entropy between two distributions.
@@ -22,10 +24,15 @@ Functions:
     mean_absolute_error: Computes the mean absolute error between two distributions.
     expected_shd: Computes the Expected Structural Hamming Distance.
     rhat: Computes the RHat metric for the provided distributions and measurements.
+    marginal_edge_probabilities: Computes the marginal edge probabilities from a distribution.
+    rhat_edge: Computes the RHat metric for edge probabilities across multiple distributions.
+    marginal_ancestor_probabilities: Computes the marginal ancestor probabilities from a distribution.
 """
 
 from abc import abstractmethod
 from typing import Union, List
+from functools import reduce
+import tqdm
 import numpy as np
 from structure_learning.data_structures import DAG, Graph
 from structure_learning.distributions import Distribution
@@ -298,6 +305,120 @@ class RHat(Metric):
 
         return rhat(P, th)
 
+def marginal_edge_probabilities(dist: Distribution):
+    """
+    Compute marginal edge probabilities from a distribution.
+
+    Parameters:
+        dist (Distribution):  Distribution over graphs.
+
+    Returns:
+        numpy.ndarray:       Marginal edge probability matrix.
+    """
+    def fn(arg1, arg2):
+        term1 = arg1
+        if isinstance(arg1, tuple):
+            p = arg1[1]['p']
+            term1 = np.array([p if x=='1' else 0 for x in arg1[0]])
+
+        if isinstance(arg2, tuple):
+            p = arg2[1]['p']
+            term2 = np.array([p if x=='1' else 0 for x in arg2[0]])
+
+        return term1 + term2
+
+    from functools import reduce
+    mep = reduce(fn, tqdm.tqdm(dist.particles.items()))
+    mep = np.concatenate((mep, [0]))
+    n = int(np.sqrt(len(mep)))
+    return mep.reshape(n,n+1)[:n, :n]
+
+class MEP(Metric):
+    """
+    Computes the Marginal Edge Probabilities (MEP) from a distribution.
+    This class implements the MEP metric, which calculates the marginal probabilities
+    of edges in a graph based on a given distribution. It inherits from the Metric base class
+    and provides a concrete implementation of the compute method."""
+    def compute(self, dist: Distribution):
+        """
+        Compute marginal edge probabilities from a distribution.
+
+        Parameters:
+            dist (Distribution):  Distribution over graphs.
+        """
+        return marginal_edge_probabilities(dist)
+
+def marginal_ancestor_probabilities(dist: Distribution):
+    """
+    Compute marginal ancestor probabilities from a distribution.
+
+    Parameters:
+        dist (Distribution):  Distribution over graphs. 
+
+    Returns:
+        numpy.ndarray:       Marginal ancestor probability matrix.
+    """
+    def fn(acc, args):
+        k, v = args
+        n = len(k.split())
+        dag = DAG.from_key(key=k, nodes=list(range(n)))
+        return acc + DAG.compute_ancestor_matrix(dag.incidence).T*v['p']
+
+    return reduce(fn, dist.particles.items(), 0)
+
+class MarginalAncestorProbabilities(Metric):
+    """
+    Computes the Marginal Ancestor Probabilities from a distribution.
+    This class implements the Marginal Ancestor Probabilities metric, which calculates
+    the marginal probabilities of ancestor relationships in a graph based on a given distribution. 
+    It inherits from the Metric base class and provides a concrete implementation of the compute method.
+    """
+    def compute(self, dist: Distribution):
+        """
+        Compute marginal ancestor probabilities from a distribution.
+
+        Parameters:
+            dist (Distribution):  Distribution over graphs.
+        """
+        return marginal_ancestor_probabilities(dist)
+
+def rhat_edge(dists: List[Distribution]):
+    """
+    Compute rhat metric for edge probabilities across multiple distributions.
+
+    Parameters:
+        dists (list):       distributions (must be normalised)
+
+    Returns:
+        numpy.ndarray:     R-hat values for each edge.
+    """ 
+    mep = map(marginal_edge_probabilities, dists)
+
+    means = np.array(mep)
+    var = means - means**2
+
+    B = np.var(means, axis=0)
+    W = np.mean(var, axis=0)
+
+    v = W + B
+    R_hat = np.sqrt(v/W)
+    return R_hat
+
+class RHat_edge(Metric):
+    """
+    Computes the RHat metric for edge probabilities across multiple distributions.
+    This class implements the RHat metric for edge probabilities, which assesses the convergence
+    of edge probabilities across multiple distributions. It inherits from the Metric base class and
+    provides a concrete implementation of the compute method.
+    """
+    def compute(self, dists: List[Distribution]):
+        """
+        Compute rhat metric for edge probabilities across multiple distributions.
+        Parameters:
+            dists (list):       distributions (must be normalised)
+        """
+        return rhat_edge(dists)
+
 _metrics = {
     'kl': KLD,
     'kld': KLD,
@@ -312,10 +433,25 @@ _metrics = {
     'shd': SHD,
     'SHD': SHD,
     'rhat': RHat,
-    'RHat': RHat
+    'RHat': RHat,
+    'marginal_edge_probabilities': MEP,
+    'MEP': MEP,
+    'marginal_ancestor_probabilities': MarginalAncestorProbabilities,
+    'MarginalAncestorProbabilities': MarginalAncestorProbabilities,
+    'rhat_edge': RHat_edge,
+    'RHat_edge': RHat_edge
 }
 
 def get_metric(metric: str):
+    """
+    Retrieve a metric instance by its name.
+    
+    Parameters:
+        metric (str):   Name of the metric.
+        
+    Returns:
+        Metric:         Instance of the requested metric.
+    """
     if metric not in _metrics:
         raise Exception('Metric not found,', metric)
     return _metrics[metric]()
