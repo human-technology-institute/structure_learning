@@ -219,20 +219,29 @@ class Distribution:
         ax.legend(title='Samplers')
         return bars, a
     
-    def top(self, prop='freq', n=1):
+    def top(self, prop='freq', n=1, mass=None):
         """
         Retrieve the top N particles based on a specified property.
 
         Parameters:
             prop (str): The property to sort by (default is 'freq').
             n (int): The number of top particles to retrieve.
+            mass (float): If specified and prop='p', return the top particles with combined mass greater than this value.
 
         Returns:
             np.ndarray: Array of the top N particles.
         """
         k, v = self.hist(prop=prop)
         idx = np.argsort(v)
-        return np.array(k)[idx][-n:][::-1]  # Return the top N particles in descending order
+        if mass is None or prop != 'p':
+            return np.array(k)[idx][-n:][::-1]  # Return the top N particles in descending order
+        else:
+            sorted_v = np.array(v)[idx[::-1]]
+            cumulative_mass = np.cumsum(sorted_v)
+            selected_idx = mass > cumulative_mass
+            if 0 < mass < 1:
+                selected_idx[np.count_nonzero(selected_idx)+1] = True  # Ensure at least one particle is selected
+            return np.array(k)[idx[::-1][selected_idx]]
 
     # arithmetic
     def __copy__(self):
@@ -296,6 +305,9 @@ class Distribution:
             Distribution: The computed distribution.
         """
         dags = DAG.generate_all_dags(len(data.columns), list(data.columns))
+        if blocklist is not None:
+            dags = [dag for dag in dags if not (dag.incidence*blocklist).any()]
+            
         if graph_type=='cpdag':
             cpdags = {}
 
