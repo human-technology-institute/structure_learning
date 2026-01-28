@@ -242,6 +242,20 @@ class Distribution:
             if 0 < mass < 1:
                 selected_idx[np.count_nonzero(selected_idx)+1] = True  # Ensure at least one particle is selected
             return np.array(k)[idx[::-1][selected_idx]]
+        
+    def sample(self, size=1):
+        """
+        Sample particles from the distribution based on their probabilities.
+
+        Parameters:
+            size (int): The number of particles to sample.
+
+        Returns:
+            list: List of sampled particles.
+        """
+        particles = list(self.particles.keys())
+        probs = self.prop('p')
+        return np.random.choice(particles, size=size, p=probs).tolist()
 
     # arithmetic
     def __copy__(self):
