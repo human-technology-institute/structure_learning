@@ -15,6 +15,7 @@ import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 import seaborn as sns
+import heapq
 from structure_learning.scores import Score
 from structure_learning.data_structures import DAG, Graph
 
@@ -606,3 +607,53 @@ class OPAD(MCMCDistribution):
         if not self.plus:
             return super(MCMCDistribution, self).to_iterates()
         raise NotImplementedError("OPAD+ distributions cannot be converted to iterates.")
+
+class FixedSizeDistribution(OPAD):
+    
+    def __init__(self, particles: Iterable = [], logp: Iterable = [], theta: Dict = [], max_size: int = 1000000):
+        super().__init__(particles, logp, theta, False)
+        self.max_size = max_size
+        self._top_particles = []
+
+        # build min-heap
+        for particle, data in self.particles.items():
+            score = data['logp']
+            heapdata = (score, particle)
+
+            if len(self._top_particles) < self.max_size:
+                heapq.heappush(self._top_particles, heapdata)
+            else:
+                heapq.heappushpop(self._top_particles, heapdata)
+
+        # rebuild particles dict
+        self._particles = {}
+        for score, particle in self._top_particles:
+            self._particles[particle] = self.particles[particle]
+
+        self.particles = self._particles
+
+    def update(self, particle, data, iteration, normalise=False):
+
+        _data = {'iteration': iteration, 'logp': data['score_current'] if 'logp' not in data else data['logp'], 'prior': data.get('current_state_prior', None) if 'prior' not in data else data['prior'], 'timestamp': data['timestamp']}
+        if 'weight' in data:
+            _data['weight'] = data['weight']
+
+        super().update(particle, _data, iteration=iteration, normalise=False)
+        # maintain fixed size
+        if len(self.particles) > self.max_size:
+            # remove particle with lowest score
+            min_score, min_particle = heapq.heappop(self._top_particles)
+            del self.particles[min_particle]
+
+            
+        if data['proposed_state'] is not None:
+            particle = data['proposed_state'].to_key()
+            super().update(particle, {'logp': data['score_proposed'], 'iteration': iteration, 'timestamp': data['timestamp'], 'prior': data.get('proposed_state_prior', None)}, iteration=iteration, normalise=False)
+            # maintain fixed size
+            if len(self.particles) > self.max_size:
+                # remove particle with lowest score
+                min_score, min_particle = heapq.heappop(self._top_particles)
+                del self.particles[min_particle]
+
+        if normalise:
+            self.normalise()
