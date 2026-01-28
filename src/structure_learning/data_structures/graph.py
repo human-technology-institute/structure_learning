@@ -8,6 +8,7 @@ It also includes utility methods for checking graph properties like cycles and p
 
 from typing import Union, List, Tuple, Type, TypeVar
 import re
+import os
 import networkx as nx
 from matplotlib import pyplot as plt
 import numpy as np
@@ -405,6 +406,8 @@ class Graph:
                 s = "".join(map(str, self.incidence.flatten().astype(int)))
                 key = re.sub("(.{" + num_nodes + "})", "\\1 ", s)
                 key = key if key[-1] != " " else key[:-1]
+            elif type == 'packedbits':
+                key = tuple(np.packbits(self.incidence))
             else:
                 raise Exception("Unsupported key type")
         return key
@@ -433,6 +436,9 @@ class Graph:
             # Convert the list of lists to a numpy array
             array = np.array(int_list)
             return cls(incidence=array.reshape(num_nodes, num_nodes), nodes=nodes)
+        elif type == 'packedbits':
+            incidence = np.unpackbits(key, count=num_nodes*num_nodes)
+            return cls(incidence=incidence.reshape((num_nodes, num_nodes)), nodes=nodes)
         else:
             raise Exception("Unsupported key type")
         return None
@@ -514,7 +520,7 @@ class Graph:
         return cls.from_pandas(pd.read_csv(filename))
 
     # visualisation
-    def plot(self, filename=None, text=None, edge_colors: dict = None, edge_weights: dict = None, node_clusters: dict = None, max_penwidth: int =5, show_weights: bool = False):
+    def plot(self, filename=None, text=None, edge_colors: dict = None, edge_weights: dict = None, node_clusters: dict = None, max_penwidth: int =5, show_weights: bool = False, aspect_ratio: float = -1.0, size=8.0):
         """
         Plot a networkx graph.
 
@@ -526,11 +532,23 @@ class Graph:
         """
         G = self.to_nx()
         G_gvz = nx.nx_agraph.to_agraph(G)
+        # G_gvz.graph_attr['size'] = f"7,5"
+        # G_gvz.graph_attr['page'] = 11.0,8.0
+        G_gvz.graph_attr['ratio'] = 'compress'
+        G_gvz.graph_attr['spines'] = 'curved'
         if text is not None:
             G_gvz.add_node('info',label=text, shape='note', style='filled', fillcolor='lightgrey')
         if edge_weights is not None:
             w = [abs(v) for v in edge_weights.values()]
             w_min, w_max = min(w), max(w)
+        for node in self.nodes:
+            G_gvz.get_node(node).attr['width'] = 1.8
+            G_gvz.get_node(node).attr['height'] = 0.8
+            # G_gvz.get_node(node).attr['fontsize'] = "7pt"
+            G_gvz.get_node(node).attr['fontname'] = "Helvetica"
+            G_gvz.get_node(node).attr['fixedsize'] = "true"
+            # if node in ["Belonging", "NAPLAN", "Conduct Problems", "School Completion"]:
+            #     G_gvz.get_node(node).attr['group'] = 'target'
         for r,c in zip(*np.nonzero(self.incidence)):
             if  G_gvz.has_edge(self.nodes[r], self.nodes[c]):
                 edge = G_gvz.get_edge(self.nodes[r], self.nodes[c])
@@ -541,7 +559,7 @@ class Graph:
                 else:
                     if edge_colors is not None and ((self.nodes[r], self.nodes[c]) in edge_colors and (self.nodes[c], self.nodes[r]) not in edge_colors):
                         edge.attr['color'] = edge_colors[(self.nodes[r], self.nodes[c])]
-                        edge.attr['arrowhead'] = 'tee' if edge_colors[(self.nodes[r], self.nodes[c])]=="#FE5600" else 'vee'
+                        edge.attr['arrowhead'] = 'tee' if edge_colors[(self.nodes[r], self.nodes[c])]=="#FE5600" else 'normal'
                     if edge_weights is not None:
                         if (self.nodes[r], self.nodes[c]) in edge_weights and show_weights:
                             edge.attr['label'] = str(round(edge_weights[(self.nodes[r], self.nodes[c])], 2))
@@ -551,8 +569,12 @@ class Graph:
             for cluster_id, nodes in node_clusters.items():
                 G_gvz.add_subgraph(nodes, name=f'Cluster {cluster_id}', style='filled', color='lightgrey')
         G_gvz.layout('dot')
+        # G_gvz.graph_attr['dpi'] = 300
+        # G_gvz.graph_attr['fontsize'] = "7px"
+        G_gvz.graph_attr['margin'] = "0,0"
         if filename is not None:
-            G_gvz.draw(filename, format='png')
+            ext = os.path.splitext(filename)[1][1:]
+            G_gvz.draw(filename, format=ext)
         return G_gvz
 
     # utils
