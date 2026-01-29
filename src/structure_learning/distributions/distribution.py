@@ -610,8 +610,8 @@ class OPAD(MCMCDistribution):
 
 class FixedSizeDistribution(OPAD):
     
-    def __init__(self, particles: Iterable = [], logp: Iterable = [], theta: Dict = [], max_size: int = 1000000):
-        super().__init__(particles, logp, theta, False)
+    def __init__(self, particles: Iterable = [], logp: Iterable = [], theta: Dict = [], plus: bool = True, max_size: int = 1000000):
+        super().__init__(particles, logp, theta, plus)
         self.max_size = max_size
         self._top_particles = []
 
@@ -638,24 +638,26 @@ class FixedSizeDistribution(OPAD):
         if 'weight' in data:
             _data['weight'] = data['weight']
 
+        seen = particle in self.particles
         super().update(particle, _data, iteration=iteration, normalise=False)
         # print('Adding particle:', particle, len(self.particles), len(self._top_particles))
-        if particle not in self.particles:
-                score = data['score_current']
-                heapdata = (score, particle)
+        if not seen:
+            score = data['score_current']
+            heapdata = (score, particle)
 
-                if len(self._top_particles) < self.max_size:
-                    heapq.heappush(self._top_particles, heapdata)
-                else:
-                    min_score, min_particle = heapq.heappushpop(self._top_particles, heapdata)
-                    del self.particles[min_particle]
-                    # print('Removing particle:', min_particle, len(self.particles), len(self._top_particles))
+            if len(self._top_particles) < self.max_size:
+                heapq.heappush(self._top_particles, heapdata)
+            else:
+                min_score, min_particle = heapq.heappushpop(self._top_particles, heapdata)
+                del self.particles[min_particle]
+                # print('Removing particle:', min_particle, len(self.particles), len(self._top_particles))
             
-        if data['proposed_state'] is not None:
+        if self.plus and ('accepted' in data and not data['accepted']) and data['proposed_state'] is not None:
             particle = data['proposed_state'].to_key()
+            seen = particle in self.particles
             super().update(particle, {'logp': data['score_proposed'], 'iteration': iteration, 'timestamp': data['timestamp'], 'prior': data.get('proposed_state_prior', None)}, iteration=iteration, normalise=False)
             # print('Adding particle:', particle, len(self.particles), len(self._top_particles))
-            if particle not in self.particles:
+            if not seen:
                 score = data['score_proposed']
                 heapdata = (score, particle)
 
