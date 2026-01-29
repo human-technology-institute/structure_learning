@@ -36,6 +36,7 @@ class MCMC(Approximator):
     RESULT_TYPE_OPAD_PLUS = 'opad+'
     RESULT_TYPE_ITER = 'iterates'
     RESULT_TYPE_TRUNC = 'truncated'
+    RESULT_TYPE_TRUNC_PLUS = 'truncated+'
 
     def __init__(self, data: pd.DataFrame, initial_state: State, max_iter: int = 30000, score_object: Union[str, Score] = None,
                  proposal_object: Union[str, StructureLearningProposal] = None, 
@@ -114,6 +115,8 @@ class MCMC(Approximator):
             self.results = OPAD(plus=True)
         elif result_type == MCMC.RESULT_TYPE_TRUNC:
             self.results = FixedSizeDistribution(max_size=max_dist_size)
+        elif result_type == MCMC.RESULT_TYPE_TRUNC_PLUS:
+            self.results = FixedSizeDistribution(max_size=max_dist_size, plus=True)
         self._start_time = time.time()
         self._cpdag_sizes = {}
         self._cpdags = {}
@@ -149,7 +152,7 @@ class MCMC(Approximator):
                 break
 
             if self.iteration>0 and self.iteration%intervals==0 and intervals > 0:
-                if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS):
+                if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS, self.RESULT_TYPE_TRUNC_PLUS):
                     self.results.normalise()
                 results.append((self.results.copy(), self.n_accepted/self.max_iter))
 
@@ -160,7 +163,7 @@ class MCMC(Approximator):
             tqdm_bar.update(1)
         tqdm_bar.close()
 
-        if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS, self.RESULT_TYPE_TRUNC):
+        if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS, self.RESULT_TYPE_TRUNC, self.RESULT_TYPE_TRUNC_PLUS):
             self.results.normalise()
         return self.results if intervals < 0 else results, self.n_accepted/self.max_iter
 
@@ -209,7 +212,7 @@ class MCMC(Approximator):
                     info['proposed_state_weight'] = self._cpdag_sizes[proposed_key]
         if self.result_type in (self.RESULT_TYPE_DIST,):
             self.results.update(particle=key, iteration=iteration, data=info.copy())
-        elif self.result_type in (self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS, self.RESULT_TYPE_TRUNC):
+        elif self.result_type in (self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS, self.RESULT_TYPE_TRUNC, self.RESULT_TYPE_TRUNC_PLUS):
             self.results.update(particle=key, iteration=iteration, data=info.copy(), normalise=False)
         elif self.result_type == 'iterates':
             self.results[iteration] = info

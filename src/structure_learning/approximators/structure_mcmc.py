@@ -123,7 +123,8 @@ class StructureMCMC(MCMC):
         else:
             is_accepted = False
             proposed_state_prior = current_state_prior
-            acceptance_prob = proposed_state_score = 0
+            acceptance_prob = 0
+            proposed_state_score = current_state_score
 
         return {'graph': current_state, 'current_state': current_state, 'proposed_state': proposed_state, 'score_current': current_state_score,
                 'proposed_state_prior': proposed_state_prior, 'current_state_prior': current_state_prior,
