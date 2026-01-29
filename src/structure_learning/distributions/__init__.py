@@ -1,1 +1,1 @@
-from .distribution import Distribution, MCMCDistribution, OPAD
+from .distribution import Distribution, MCMCDistribution, OPAD, FixedSizeDistribution

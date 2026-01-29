@@ -639,21 +639,32 @@ class FixedSizeDistribution(OPAD):
             _data['weight'] = data['weight']
 
         super().update(particle, _data, iteration=iteration, normalise=False)
-        # maintain fixed size
-        if len(self.particles) > self.max_size:
-            # remove particle with lowest score
-            min_score, min_particle = heapq.heappop(self._top_particles)
-            del self.particles[min_particle]
+        # print('Adding particle:', particle, len(self.particles), len(self._top_particles))
+        if particle not in self.particles:
+                score = data['score_current']
+                heapdata = (score, particle)
 
+                if len(self._top_particles) < self.max_size:
+                    heapq.heappush(self._top_particles, heapdata)
+                else:
+                    min_score, min_particle = heapq.heappushpop(self._top_particles, heapdata)
+                    del self.particles[min_particle]
+                    # print('Removing particle:', min_particle, len(self.particles), len(self._top_particles))
             
         if data['proposed_state'] is not None:
             particle = data['proposed_state'].to_key()
             super().update(particle, {'logp': data['score_proposed'], 'iteration': iteration, 'timestamp': data['timestamp'], 'prior': data.get('proposed_state_prior', None)}, iteration=iteration, normalise=False)
-            # maintain fixed size
-            if len(self.particles) > self.max_size:
-                # remove particle with lowest score
-                min_score, min_particle = heapq.heappop(self._top_particles)
-                del self.particles[min_particle]
+            # print('Adding particle:', particle, len(self.particles), len(self._top_particles))
+            if particle not in self.particles:
+                score = data['score_proposed']
+                heapdata = (score, particle)
+
+                if len(self._top_particles) < self.max_size:
+                    heapq.heappush(self._top_particles, heapdata)
+                else:
+                    min_score, min_particle = heapq.heappushpop(self._top_particles, heapdata)
+                    del self.particles[min_particle]
+                    # print('Removing particle:', min_particle, len(self.particles), len(self._top_particles))
 
         if normalise:
             self.normalise()
