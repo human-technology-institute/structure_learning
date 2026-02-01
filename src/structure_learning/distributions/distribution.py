@@ -626,13 +626,7 @@ class FixedSizeDistribution(OPAD):
 
         # build min-heap
         for particle, data in self.particles.items():
-            score = data['logp']
-            heapdata = (score, particle)
-
-            if len(self._top_particles) < self.max_size:
-                heapq.heappush(self._top_particles, heapdata)
-            else:
-                heapq.heappushpop(self._top_particles, heapdata)
+            self.__update_heap__((data['logp'], particle))
 
         # rebuild particles dict
         self._particles = {}
@@ -640,6 +634,18 @@ class FixedSizeDistribution(OPAD):
             self._particles[particle] = self.particles[particle]
 
         self.particles = self._particles
+
+    def __update_heap__(self, heapdata):  
+        """
+        Update the min-heap of top particles with new heapdata.
+        Parameters:
+            heapdata (tuple): A tuple containing (score, particle).
+        """
+        if len(self._top_particles) < self.max_size:
+            heapq.heappush(self._top_particles, heapdata)
+        else:
+            _, min_particle = heapq.heappushpop(self._top_particles, heapdata)
+            return min_particle
 
     def update(self, particle, data, iteration, normalise=False):
         """
@@ -655,30 +661,21 @@ class FixedSizeDistribution(OPAD):
         super().update(particle, data, iteration=iteration, normalise=False)
         
         if not seen:
-            score = data['score_current']
-            heapdata = (score, particle)
+            particle_to_remove = self.__update_heap__((data['score_current'], particle))
 
-            if len(self._top_particles) < self.max_size:
-                heapq.heappush(self._top_particles, heapdata)
-            else:
-                _, min_particle = heapq.heappushpop(self._top_particles, heapdata)
-                del self.particles[min_particle]
+            if particle_to_remove is not None:
+                del self.particles[particle_to_remove]
                 
-            
         if self.plus and ('accepted' in data and not data['accepted']) and data['proposed_state'] is not None:
             self._add_rejected_particles_()
             particle2 = data['proposed_state'].to_key()
             seen = particle2 in self.particles
             
             if not seen and particle != particle2:
-                score = data['score_proposed']
-                heapdata = (score, particle2)
+                particle_to_remove = self.__update_heap__((data['score_proposed'], particle2))
 
-                if len(self._top_particles) < self.max_size:
-                    heapq.heappush(self._top_particles, heapdata)
-                else:
-                    _, min_particle = heapq.heappushpop(self._top_particles, heapdata)
-                    del self.particles[min_particle]
+                if particle_to_remove is not None:
+                    del self.particles[particle_to_remove]
 
         if normalise:
             self.normalise()
