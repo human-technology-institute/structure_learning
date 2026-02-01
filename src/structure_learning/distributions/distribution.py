@@ -284,9 +284,8 @@ class Distribution:
             Distribution: The resulting distribution after addition.
         """
         dsum = self.__copy__()
-        for particle, data in other.particles.items():
-            dsum.update(particle, data, iteration=data.get('iteration', []), normalise=False)
-            dsum.particles[particle]['freq'] = data['freq'] + (0 if particle not in self else self.particles[particle]['freq'])
+        dist = {k:(v if k not in dsum else {k2:(v2 if k2!='freq' else v2+dsum.particles[k]['freq']) for k2,v2 in v.items()}) for k,v in other.particles.items()}
+        dsum.update(dist)
         dsum.normalise()
         return dsum
 
@@ -521,7 +520,6 @@ class OPAD(MCMCDistribution):
         """
         if self.plus: # add rejected to particles
             if len(self.rejected) > 0:
-                print('Adding rejected particles')
                 for particle, data in self.rejected.particles.items():
                     super(MCMCDistribution, self).update(particle, data)
                 self.rejected.clear()
@@ -609,8 +607,19 @@ class OPAD(MCMCDistribution):
         raise NotImplementedError("OPAD+ distributions cannot be converted to iterates.")
 
 class FixedSizeDistribution(OPAD):
-    
+    """
+    This class implements a fixed-size distribution that retains only the top N particles based on their scores.
+    """
     def __init__(self, particles: Iterable = [], logp: Iterable = [], theta: Dict = [], plus: bool = True, max_size: int = 1000000):
+        """
+        Initialise FixedSizeDistribution.
+        Parameters:
+            particles (Iterable):       List of particles to add in the distribution
+            logp (Iterable):            Scores (log probabilities) of the particles
+            theta (Dict):               Additional particles data
+            plus (bool):                If True, include rejected particles in the OPAD distribution.
+            max_size (int):             Maximum number of particles to retain in the distribution.
+        """
         super().__init__(particles, logp, theta, plus)
         self.max_size = max_size
         self._top_particles = []
@@ -633,14 +642,18 @@ class FixedSizeDistribution(OPAD):
         self.particles = self._particles
 
     def update(self, particle, data, iteration, normalise=False):
-
-        _data = {'iteration': iteration, 'logp': data['score_current'] if 'logp' not in data else data['logp'], 'prior': data.get('current_state_prior', None) if 'prior' not in data else data['prior'], 'timestamp': data['timestamp']}
-        if 'weight' in data:
-            _data['weight'] = data['weight']
+        """
+        Add new particles to the FixedSizeDistribution and optionally renormalise.
+        Parameters:
+            particle (Hashable): The particle to add.
+            iteration (int): The iteration number at which the particle was generated.
+            data (dict): Data associated with the particle.
+            normalise (bool): If True, renormalise the distribution after adding the particle.
+        """
 
         seen = particle in self.particles
-        super().update(particle, _data, iteration=iteration, normalise=False)
-        # print('Adding particle:', particle, len(self.particles), len(self._top_particles))
+        super().update(particle, data, iteration=iteration, normalise=False)
+        
         if not seen:
             score = data['score_current']
             heapdata = (score, particle)
@@ -648,25 +661,24 @@ class FixedSizeDistribution(OPAD):
             if len(self._top_particles) < self.max_size:
                 heapq.heappush(self._top_particles, heapdata)
             else:
-                min_score, min_particle = heapq.heappushpop(self._top_particles, heapdata)
+                _, min_particle = heapq.heappushpop(self._top_particles, heapdata)
                 del self.particles[min_particle]
-                # print('Removing particle:', min_particle, len(self.particles), len(self._top_particles))
+                
             
         if self.plus and ('accepted' in data and not data['accepted']) and data['proposed_state'] is not None:
-            particle = data['proposed_state'].to_key()
-            seen = particle in self.particles
-            super().update(particle, {'logp': data['score_proposed'], 'iteration': iteration, 'timestamp': data['timestamp'], 'prior': data.get('proposed_state_prior', None)}, iteration=iteration, normalise=False)
-            # print('Adding particle:', particle, len(self.particles), len(self._top_particles))
-            if not seen:
+            self._add_rejected_particles_()
+            particle2 = data['proposed_state'].to_key()
+            seen = particle2 in self.particles
+            
+            if not seen and particle != particle2:
                 score = data['score_proposed']
-                heapdata = (score, particle)
+                heapdata = (score, particle2)
 
                 if len(self._top_particles) < self.max_size:
                     heapq.heappush(self._top_particles, heapdata)
                 else:
-                    min_score, min_particle = heapq.heappushpop(self._top_particles, heapdata)
+                    _, min_particle = heapq.heappushpop(self._top_particles, heapdata)
                     del self.particles[min_particle]
-                    # print('Removing particle:', min_particle, len(self.particles), len(self._top_particles))
 
         if normalise:
             self.normalise()
