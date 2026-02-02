@@ -369,6 +369,21 @@ class Distribution:
         with open(filename, 'rb') as f:
             import compress_pickle as pickle
             return pickle.load(f, compression=compression)
+        
+    def to_hdf5(self, filename: str):
+        import hdfdict
+
+        hdfdict.dump(self.particles, filename)
+
+    @classmethod
+    def from_hdf5(cls, filename: str):
+        import hdfdict
+
+        particles = hdfdict.load(filename)
+        dist = cls()
+        dist.particles = particles
+        return dist
+
 
 class TrueDistribution(Distribution):
 
