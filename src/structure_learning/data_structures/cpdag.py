@@ -108,12 +108,12 @@ class CPDAG(Graph):
             g = DAG(incidence=incidence, nodes=self.nodes)
             yield g
 
-    def plot(self, filename=None, text=None, data: pd.DataFrame=None, node_clusters: dict = None, max_penwidth: int =5, show_weights: bool = False):
+    def plot(self, filename=None, text=None, data: pd.DataFrame=None, node_clusters: dict = None, max_penwidth: int =5, show_weights: bool = False, aspect_ratio: float = -1.0):
 
         if data is None:
-            return super().plot(filename=filename, text=text)
+            return super().plot(filename=filename, text=text, aspect_ratio=aspect_ratio, node_clusters=node_clusters)
         else:
             dags = [dag for dag in self.enumerate_dags()]
             weights, colors = dags[0].fit(data=data)
-            return super().plot(filename=filename, text=text, edge_colors=colors, edge_weights=weights, node_clusters=node_clusters, max_penwidth=max_penwidth, show_weights=show_weights)
+            return super().plot(filename=filename, text=text, edge_colors=colors, edge_weights=weights, node_clusters=node_clusters, max_penwidth=max_penwidth, show_weights=show_weights, aspect_ratio=aspect_ratio)
         
