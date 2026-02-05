@@ -335,8 +335,6 @@ class CausalEffects:
     def plot(self, effects, weights, edges):
         effects = np.asarray(effects)
         weights = np.asarray(weights).reshape(-1)
-        #effects_reshaped = pd.DataFrame(np.reshape(effects, (-1, np.prod(effects.shape[1:]))), columns=[(node1, node2) for node1 in self.data.columns for node2 in self.data.columns])
-        #effects_reshaped['weights'] = weights.flatten()
         effects_reshaped = pd.DataFrame(effects.reshape(effects.shape[0], -1),
             columns=[(node1, node2) for node1 in self.data.columns for node2 in self.data.columns])
         effects_reshaped['weights'] = weights
@@ -346,7 +344,6 @@ class CausalEffects:
         plt.xlabel('Causal Effect')
         plt.ylabel('Density')
         plt.title('Pairwise Causal Effects')
-        #plt.legend([f"{edge[0]} -> {edge[1]}" for edge in edges])
 
     def do(self, intervention: List[Union[int, str]], do_value: float = 1.0, multiply: bool = False) -> np.ndarray:
         """
@@ -380,13 +377,14 @@ class CausalEffects:
         
         # infer T per DAG
         K = len(adj_matrix)
-        T_list = [est_params[k][0]['beta'].shape[0] for k in range(K)]  # T_k
+        T_list = [est_params[k][0]['beta'].shape[0] for k in range(K)]  
 
         if K == 1 and isinstance(self.graphs, DAG):
             T = T_list[0]
-            weights_draws = np.ones(T, dtype=float) / T  # parameter-only uncertainty
+            # parameter-only uncertainty
+            weights_draws = np.ones(T, dtype=float) / T  
         else:
-            # mixed: repeat each p(G_k) equally across its T_k parameter draws
+            # mixed: repeat each p(G_k) equally across its T parameter draws
             weights_draws = np.concatenate([
                 np.full(T_list[k], weights[k] / T_list[k], dtype=float)
                 for k in range(K)
@@ -413,7 +411,7 @@ class CausalEffects:
         elif isinstance(self.graphs, MCMCDistribution):
             adj_matrix = [DAG.from_key(key=g, nodes=list(self.data.columns)).incidence for g in self.graphs.particles]
             #adj_matrix = [DAG.from_key(key=g, nodes=list(self.data.columns)).incidence for g in sorted(self.graphs.particles.items(),key=lambda kv: kv[1]['p'],reverse=True)[:max_dags]]
-            weights = np.asarray(self.graphs.prop('p'), dtype=float) #np.expand_dims(self.graphs.prop('p'), (1,2))
+            weights = np.asarray(self.graphs.prop('p'), dtype=float)
             #weights = np.expand_dims(sorted(self.graphs.prop('p'),reverse=True)[:max_dags], (1,2))
         else:
             adj_matrix = [g.incidence for g in self.graphs]
