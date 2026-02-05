@@ -58,7 +58,7 @@ class Graph:
         Returns:
             tuple: Shape of the adjacency matrix (rows, columns).
         """
-        return (len(self.nodes),len(self.nodes))
+        return self.incidence.shape if self.incidence is not None else (0, 0)
 
     @property
     def edges(self):
