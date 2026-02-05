@@ -98,7 +98,7 @@ def gibbs_probit(X, y, n_iter=2000, burn_in=500):
     
     return beta_samples
 
-def estimate_hybrid_dag(adj_matrix, data, domains, n_iter=2000, burn_in=500):
+def estimate_hybrid_dag(adj_matrix, data, domains, n_iter=5000, burn_in=2000):
     """
     Given:
       - adj_matrix: (n x n) adjacency (0/1) of a DAG,
@@ -198,53 +198,101 @@ def denormalise_probit_sample(beta_norm, child_idx, parent_idxs, mus, sds):
     )
     return intercept_orig, slopes_orig
 
-def simulate_do_effects(adj_matrix, intervention, est_params, domains, data, do_value=1.0, multiply=False):
+def simulate_do_effects(adj_matrix, intervention, est_params, domains, data, do_value=1.0, multiply=False, sds = None, tol=1e-8):
     """
-    Perform do-intervention simulations on raw data, injecting noise at each step.
+    Perform do-intervention simulations on standardised data, injecting noise at each step.
+    - Continuous variables are on z-scale (mean 0, sd 1).
+    - Binary variables are 0/1.
+    
     est_params[j] should contain:
       - 'beta_mean': array [intercept, slopes...]
       - optional 'sigma2_mean' for continuous nodes
     do_value: if multiply=False, adds do_value to Xi; if multiply=True, multiplies Xi by do_value
     multiply: boolean flag to apply do_value as multiplier instead of additive shift
+
+    Continuous effects are rescaled back to original units;
+    binary effects are left as probability differences.
     """
     if isinstance(adj_matrix, np.ndarray):
         adj_matrix = [adj_matrix]
         est_params = [est_params]
     effects = []
+
     for idx,m in enumerate(adj_matrix):
         G = nx.DiGraph(m)
         topo = list(nx.topological_sort(G))
         n = m.shape[0]
         N = data.shape[0]
-        effect_matrix = np.zeros((n, n))
+
+        any_node = 0
+        T = est_params[idx][any_node]['beta'].shape[0]
+
         baseline_means = data.mean(axis=0)
-        for i in range(n):
-            if i not in intervention:
-                continue
-            data_do = data.copy()
-            # apply intervention: additive or multiplicative
-            if multiply:
-                data_do[:, i] = data_do[:, i] * do_value
-            else:
-                data_do[:, i] = data_do[:, i] + do_value
-            # propagate through children with noise
-            for j in topo:
-                if j == i:
+
+        for t in range(T):
+            effect_matrix = np.zeros((n, n))
+
+            for i in range(n):
+                if i not in intervention:
                     continue
-                parents = list(G.predecessors(j))
-                beta = est_params[idx][j]['beta'].mean(axis=0)
-                X = data_do[:, parents] if parents else np.zeros((N, 0))
-                mu = beta[0] + (X @ beta[1:])
-                if domains[j] == 'continuous':
-                    # add Gaussian noise with estimated sigma
-                    sigma = np.sqrt(est_params[idx][j].get('sigma2', [1.0])).mean()
-                    data_do[:, j] = mu + np.random.normal(scale=sigma, size=N)
+
+                data_do = data.copy()
+                
+                # Distinct values of variable i
+                vals = np.unique(np.round(data[:, i], 8))
+
+                # Two-level (binary-like) variable: set to low or high level 
+                if isinstance(do_value,str) and vals.size == 2:  
+                    low_val, high_val = vals.min(), vals.max() 
+                    mode = do_value.lower() 
+                    if mode == 'high': 
+                        # do(X_i = high) 
+                        data_do[:, i] = high_val 
+                    elif mode == 'low': 
+                        # do(X_i = low) 
+                        data_do[:, i] = low_val
+                    else: 
+                        raise ValueError("Invalid do_value for binary-like variable. Use 'high' or 'low'.")
+                    
+                # Continuous variable: Numeric intervention (shift or scale)
                 else:
-                    # sample latent z ~ N(mu,1) and threshold
-                    z = np.random.normal(loc=mu, scale=1.0, size=N)
-                    data_do[:, j] = (z > 0).astype(int)
-            effect_matrix[i, :] = data_do.mean(axis=0) - baseline_means
-        effects.append(effect_matrix)
+                    if multiply:
+                        data_do[:, i] = data_do[:, i] * do_value
+                    else:
+                        data_do[:, i] = data_do[:, i] + do_value/sds[i]
+
+                # propagate through children with noise
+                for j in topo:
+                    if j == i:
+                        continue
+                    parents = list(G.predecessors(j))
+
+                    beta = est_params[idx][j]['beta'][t, :]
+                    X = data_do[:, parents] if parents else np.zeros((N, 0))
+                    mu = beta[0] + (X @ beta[1:])
+
+                    if domains[j] == 'continuous':
+                        # add Gaussian noise with estimated sigma
+                        sigma2_draws = est_params[idx][j].get('sigma2', None)
+                        if sigma2_draws is None:
+                            sigma = 1.0
+                        else:
+                            sigma = float(np.sqrt(sigma2_draws[t]))
+                        data_do[:, j] = mu + np.random.normal(scale=sigma, size=N)
+                    else:
+                        # sample latent z ~ N(mu,1) and threshold
+                        z = np.random.normal(loc=mu, scale=1.0, size=N)
+                        data_do[:, j] = (z > 0).astype(int)
+
+                delta = data_do.mean(axis=0) - baseline_means 
+                effect_matrix[i, :] = delta                
+                # Rescaling effects if sds provided:
+                if sds is not None:
+                    for j in range(n):
+                        if domains[j] == 'continuous':
+                            effect_matrix[i, j] *= sds[j]
+            effects.append(effect_matrix)
+    
     return np.array(effects)
     
 class CausalEffects:
@@ -260,6 +308,10 @@ class CausalEffects:
         self.data = data
         self.domains = [data.variable_types[v] for v in data.columns]
 
+        # Standardise internally (continuous only; binary left 0/1)
+        self.data_norm, self.mus, self.sds = normalise_data(self.data.values, self.domains)
+
+
     def beeps(self, edges: List[tuple] = None, plot: bool = False):
         """
         Compute pairwise causal effects using the BEEPS algorithm.
@@ -271,7 +323,7 @@ class CausalEffects:
             raise ValueError("No graph provided for causal effects computation.")
         graphs = self.graphs if isinstance(self.graphs, list) else ([self.graphs] if isinstance(self.graphs, DAG) else [DAG.from_key(key=g, nodes=list(self.data.columns)) for g in self.graphs.particles])
         weights = 1. if not isinstance(self.graphs, MCMCDistribution) else self.graphs.prop('p')
-        effects = sumu.Beeps(dags=[g.incidence for g in graphs], data=self.data.values.values).sample_pairwise()
+        effects = sumu.beeps(dags=[g.incidence for g in graphs], data=self.data.values.values).sample_pairwise()
         node_to_index = {node:idx for idx,node in enumerate(self.data.columns)}
         if plot:
             if edges is None:
@@ -281,14 +333,20 @@ class CausalEffects:
         return effects, weights
     
     def plot(self, effects, weights, edges):
-        effects_reshaped = pd.DataFrame(np.reshape(effects, (-1, np.product(effects.shape[1:]))), columns=[(node1, node2) for node1 in self.data.columns for node2 in self.data.columns])
-        effects_reshaped['weights'] = weights.flatten()
+        effects = np.asarray(effects)
+        weights = np.asarray(weights).reshape(-1)
+        #effects_reshaped = pd.DataFrame(np.reshape(effects, (-1, np.prod(effects.shape[1:]))), columns=[(node1, node2) for node1 in self.data.columns for node2 in self.data.columns])
+        #effects_reshaped['weights'] = weights.flatten()
+        effects_reshaped = pd.DataFrame(effects.reshape(effects.shape[0], -1),
+            columns=[(node1, node2) for node1 in self.data.columns for node2 in self.data.columns])
+        effects_reshaped['weights'] = weights
         effects_melt = pd.melt(effects_reshaped, value_vars=edges, value_name='param', var_name='edge', id_vars='weights')
+        effects_melt['edge_str'] = effects_melt['edge'].apply(lambda x: f"{x[0]} -> {x[1]}")
         sns.kdeplot(data=effects_melt, x='param', weights='weights', hue='edge', fill=True, common_norm=False)
         plt.xlabel('Causal Effect')
         plt.ylabel('Density')
         plt.title('Pairwise Causal Effects')
-        plt.legend([f"{edge[0]} -> {edge[1]}" for edge in edges])
+        #plt.legend([f"{edge[0]} -> {edge[1]}" for edge in edges])
 
     def do(self, intervention: List[Union[int, str]], do_value: float = 1.0, multiply: bool = False) -> np.ndarray:
         """
@@ -318,14 +376,28 @@ class CausalEffects:
         """
         est_params, adj_matrix, weights = self.estimate_effects()
         intervention_idx = [self.data.variables.index(i) for i in intervention] if len(intervention) > 0 and isinstance(intervention[0], str) else intervention
-        effects = simulate_do_effects(adj_matrix, intervention_idx, est_params, self.domains, self.data.values.values, do_value, multiply)
+        effects = simulate_do_effects(adj_matrix, intervention_idx, est_params, self.domains, self.data_norm, do_value, multiply, self.sds)
+        
+        # infer T per DAG
+        K = len(adj_matrix)
+        T_list = [est_params[k][0]['beta'].shape[0] for k in range(K)]  # T_k
 
+        if K == 1 and isinstance(self.graphs, DAG):
+            T = T_list[0]
+            weights_draws = np.ones(T, dtype=float) / T  # parameter-only uncertainty
+        else:
+            # mixed: repeat each p(G_k) equally across its T_k parameter draws
+            weights_draws = np.concatenate([
+                np.full(T_list[k], weights[k] / T_list[k], dtype=float)
+                for k in range(K)
+            ])
+        
         if plot:
             if edges is None:
                 edges = [(node1, node2) for node1 in intervention for node2 in self.data.columns if node1 != node2]
-            self.plot(effects, weights, edges)
-        return effects, weights
-    
+            self.plot(effects, weights_draws, edges)
+        return effects, weights_draws
+     
     def estimate_effects(self, n_iter=2000, burn_in=500):
         """
         Estimate the effects of interventions using Gibbs sampling.
@@ -337,12 +409,14 @@ class CausalEffects:
         """        
         if isinstance(self.graphs, DAG):
             adj_matrix = [self.graphs.incidence]
-            weights = 1.
+            weights = np.array([1.0], dtype=float) 
         elif isinstance(self.graphs, MCMCDistribution):
             adj_matrix = [DAG.from_key(key=g, nodes=list(self.data.columns)).incidence for g in self.graphs.particles]
-            weights = np.expand_dims(self.graphs.prop('p'), (1,2))
+            #adj_matrix = [DAG.from_key(key=g, nodes=list(self.data.columns)).incidence for g in sorted(self.graphs.particles.items(),key=lambda kv: kv[1]['p'],reverse=True)[:max_dags]]
+            weights = np.asarray(self.graphs.prop('p'), dtype=float) #np.expand_dims(self.graphs.prop('p'), (1,2))
+            #weights = np.expand_dims(sorted(self.graphs.prop('p'),reverse=True)[:max_dags], (1,2))
         else:
             adj_matrix = [g.incidence for g in self.graphs]
             weights = 1.
-        data_values = self.data.values.values
+        data_values = self.data_norm
         return estimate_hybrid_dag(adj_matrix, data_values, self.domains, n_iter, burn_in), adj_matrix, weights

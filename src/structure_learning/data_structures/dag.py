@@ -43,7 +43,7 @@ class DAG(Graph):
         from pgmpy.models import LinearGaussianBayesianNetwork
         colors = {}
         model = LinearGaussianBayesianNetwork(list(self.edges))
-        model.fit(data.values)
+        model.fit(data)
         weights = {(var, cpd.variable):cpd.beta[idx+1] for cpd in model.get_cpds() for idx,var in enumerate(cpd.evidence)}
         for edge,weight in weights.items():
             colors[(edge[0], edge[1])] = "#FE5600" if weight < 0 else "#5984FF"
