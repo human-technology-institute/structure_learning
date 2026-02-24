@@ -42,7 +42,7 @@ class MCMC(Approximator):
                  proposal_object: Union[str, StructureLearningProposal] = None, 
                  pc_init: bool = True, pc_significance_level = 0.01, pc_ci_test = 'pearsonr',
                  blacklist: np.ndarray = None, whitelist: np.ndarray = None, seed: int = None, 
-                 result_type: str = RESULT_TYPE_DIST, graph_type='dag', burn_in: float = 0.1, max_dist_size: int = 100000):
+                 result_type: str = RESULT_TYPE_DIST, graph_type='dag', burn_in: float = 0.1, max_dist_size: int = 100000, verbose=True):
         """
         Initialize the MCMC instance.
 
@@ -75,6 +75,7 @@ class MCMC(Approximator):
         if seed is None:
             seed = np.random.randint(100000)
         self.seed = seed
+        self.verbose = verbose
         self._rng = np.random.default_rng(seed=seed)
         self._trace = []
 
@@ -146,7 +147,8 @@ class MCMC(Approximator):
             Tuple[dict, float]: Results of the simulation and acceptance ratio.
         """
         results = []
-        tqdm_bar = tqdm(total=self.max_iter, desc='MCMC iterations', unit='iter')
+        if self.verbose:
+            tqdm_bar = tqdm(total=self.max_iter, desc='MCMC iterations', unit='iter')
         while True:
             if self.iteration > self.max_iter:
                 break
@@ -160,8 +162,10 @@ class MCMC(Approximator):
             if self.iteration >= self.burn_in:
                 self.update_results(self.iteration, result)
             self.iteration += 1
-            tqdm_bar.update(1)
-        tqdm_bar.close()
+            if self.verbose:
+                tqdm_bar.update(1)
+        if self.verbose:
+            tqdm_bar.close()
 
         if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS, self.RESULT_TYPE_TRUNC, self.RESULT_TYPE_TRUNC_PLUS):
             self.results.normalise()
