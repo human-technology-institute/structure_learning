@@ -45,35 +45,127 @@ Mean Absolute Error (MAE) calculates the average absolute difference between pre
 Rhat is a convergence diagnostic metric for MCMC chains. It evaluates the consistency of multiple chains and helps determine whether the chains have converged to the target distribution.
 
 # Installation
-## Dependencies
-This code depends on the following libraries: `numpy`, `scipy`, `scikit-learn`, `pandas`, `matplotlib`, `torch`, `networkx`, `pcalg`, `igraph`, and `graphviz`.
 
-## Via conda
-For convenience, the file `conda_environment.yml` can be used to resolve these dependencies: `conda env create -f conda_environment.yml`.
+## System Requirements
 
-Activate the conda environment and add the path to `structure_learning/src` to be able to import the MCMC modules.
+This package requires **Graphviz** to be installed on your system before installing the Python dependencies.
 
-## Via pip
+**macOS:**
+```bash
+brew install graphviz
+```
 
-Alternatively, you can set up a virtual environment using `venv` and then build and install the package using pip. Follow these steps:
+**Ubuntu/Debian:**
+```bash
+sudo apt-get update
+sudo apt-get install graphviz graphviz-dev
+```
 
-1. **Create a virtual environment**:
-```sh
+**CentOS/RHEL/Fedora:**
+```bash
+sudo yum install graphviz graphviz-devel  # CentOS/RHEL
+# or
+sudo dnf install graphviz graphviz-devel  # Fedora
+```
+
+## For Users
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd structure_learning
+
+# Install system dependencies
+brew install graphviz  # macOS
+# or: sudo apt-get install graphviz graphviz-dev  # Linux
+
+# Set environment variables for pygraphviz (macOS with Homebrew)
+export CPPFLAGS="-I/opt/homebrew/include"
+export LDFLAGS="-L/opt/homebrew/lib"
+
+# Install the package
+pip install .
+```
+
+## For Developers
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd structure_learning
+
+# Install system dependencies (see above)
+brew install graphviz  # macOS example
+
+# Set environment variables for pygraphviz (macOS with Homebrew)
+export CPPFLAGS="-I/opt/homebrew/include"
+export LDFLAGS="-L/opt/homebrew/lib"
+
+# Create and activate virtual environment
 python -m venv venv
-source venv/bin/activate
+source venv/bin/activate  # Linux/macOS
+# or: venv\Scripts\activate  # Windows
+
+# Install in development mode with dev dependencies
+pip install -r requirements-dev.txt
+pip install -e .
+
+# Verify installation
+python -c "import structure_learning; print('✅ Installation successful!')"
+
+# Run tests (optional)
+python -m pytest src/structure_learning/tests/ -v
 ```
 
-2. **Navigate to the directory `structure_learning`. Execute the following commands:**
-```sh
-pip install -q build
-python -m build
+## Using as a Git Submodule
+
+For development within another project:
+
+```bash
+# In your main project
+git submodule add <repository-url> libs/structure_learning
+cd libs/structure_learning
+
+# Install dependencies
+brew install graphviz  # or appropriate for your system
+
+# Set environment variables for pygraphviz (macOS with Homebrew)
+export CPPFLAGS="-I/opt/homebrew/include"
+export LDFLAGS="-L/opt/homebrew/lib"
+
+pip install -e .
 ```
 
-If successful, you should have `structure_learning-1.0.0-py3-none-any.whl` and `structure_learning-1.0.0.tar.gz` inside `dist`.
-Finally, run
+## Troubleshooting
 
-```sh
-pip install dist/structure_learning-1.0.0-py3-none-any.whl
+**Error: `fatal error: 'graphviz/cgraph.h' file not found`**
+
+This means pygraphviz can't find the Graphviz headers. Try:
+
+**macOS (Homebrew):**
+```bash
+export CPPFLAGS="-I/opt/homebrew/include"
+export LDFLAGS="-L/opt/homebrew/lib"
+pip install pygraphviz
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo apt-get install graphviz graphviz-dev
+pip install pygraphviz
+```
+
+**Linux (CentOS/RHEL):**
+```bash
+sudo yum install graphviz graphviz-devel
+pip install pygraphviz
+```
+
+**Import Error: `ModuleNotFoundError`**
+
+Make sure you installed in development mode:
+```bash
+pip install -e .
 ```
 
 # Running Structure MCMC
