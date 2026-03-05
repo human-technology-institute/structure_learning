@@ -4,14 +4,16 @@ This module defines the DAG class (Directed Acyclic Graph).
 Classes:
     DAG: Inherits from Graph and provides methods for DAG manipulation and generation.
 """
-
+from typing import Union
 import itertools
 from math import comb
 from typing import TypeVar
 import networkx as nx
 import numpy as np
 import pandas as pd
+from structure_learning.data import Data
 from .graph import Graph
+
 
 D = TypeVar('DAG')
 class DAG(Graph):
@@ -38,17 +40,17 @@ class DAG(Graph):
         if self.has_cycle(self.incidence):
             raise Exception('Cycle found in adjacency matrix')
         
-    def fit(self, data: pd.DataFrame):  
+    def fit(self, data: Union[pd.DataFrame, Data]):  
         from pgmpy.models import LinearGaussianBayesianNetwork
         colors = {}
         model = LinearGaussianBayesianNetwork(list(self.edges))
-        model.fit(data.values)
+        model.fit(data.values if isinstance(data, Data) else data)
         weights = {(var, cpd.variable):cpd.beta[idx+1] for cpd in model.get_cpds() for idx,var in enumerate(cpd.evidence)}
         for edge,weight in weights.items():
             colors[(edge[0], edge[1])] = "#FE5600" if weight < 0 else "#5984FF"
         return weights, colors
         
-    def plot(self, filename=None, text=None, data: pd.DataFrame=None, node_clusters: dict = None, max_penwidth: int =5, show_weights: bool = False, aspect_ratio: float = -1.0):
+    def plot(self, filename=None, text=None, data: Union[pd.DataFrame, Data]=None, node_clusters: dict = None, max_penwidth: int =5, show_weights: bool = False, aspect_ratio: float = -1.0):
         
         weights, colors = None, None
         if data is not None:

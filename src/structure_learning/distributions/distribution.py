@@ -94,7 +94,7 @@ class Distribution:
         Returns:
             (list)          particle data
         """
-        return np.array([v[name] for v in self.particles.values() if name in v and v[name] is not None])
+        return np.array([self.particles[k].get(name, None) for k in self.particles])
     
     def __contains__(self, particle):
         """
@@ -384,6 +384,26 @@ class Distribution:
         dist.particles = particles
         return dist
 
+    # truncate in case of large distributions, keep only top n
+    @classmethod
+    def truncate(cls, dist: Type['D'], n=100, prop='p'):
+        """
+        Truncate a distribution to keep only the top N particles.
+
+        Parameters:
+            dist (Distribution): The distribution to truncate.
+            n (int): The number of top particles to keep.
+
+        Returns:
+            Distribution: The truncated distribution.
+        """
+        top_particles = dist.top(prop=prop, n=n)
+        truncated_dist = cls()
+        for particle in top_particles:
+            truncated_dist.particles[particle] = dist.particles[particle]
+        # Override normalise to do nothing since we are keeping the top particles
+        truncated_dist.normalise = lambda: truncated_dist  
+        return truncated_dist
 
 class TrueDistribution(Distribution):
 

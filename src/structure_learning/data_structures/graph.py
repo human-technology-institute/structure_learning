@@ -13,7 +13,6 @@ import networkx as nx
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
-import pygraphviz as pgv
 
 G = TypeVar('Graph')
 class Graph:
