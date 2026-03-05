@@ -204,11 +204,10 @@ def simulate_do_effects(adj_matrix, intervention, est_params, domains, data, do_
     - Continuous variables are on z-scale (mean 0, sd 1).
     - Binary variables are 0/1.
     
-    est_params[j] should contain:
-      - 'beta_mean': array [intercept, slopes...]
-      - optional 'sigma2_mean' for continuous nodes
-    do_value: if multiply=False, adds do_value to Xi; if multiply=True, multiplies Xi by do_value
-    multiply: boolean flag to apply do_value as multiplier instead of additive shift
+    est_params[idx][j] should contain:
+    - 'beta': posterior samples of regression coefficients,
+            shape (T, 1 + #parents) where column 0 is the intercept
+    - 'sigma2': posterior samples of variance (continuous nodes only), shape (T,)
 
     Continuous effects are rescaled back to original units;
     binary effects are left as probability differences.
@@ -237,29 +236,18 @@ def simulate_do_effects(adj_matrix, intervention, est_params, domains, data, do_
                     continue
 
                 data_do = data.copy()
-                
-                # Distinct values of variable i
-                vals = np.unique(np.round(data[:, i], 8))
 
                 # Two-level (binary-like) variable: set to low or high level 
-                if isinstance(do_value,str) and vals.size == 2:  
-                    low_val, high_val = vals.min(), vals.max() 
-                    mode = do_value.lower() 
-                    if mode == 'high': 
-                        # do(X_i = high) 
-                        data_do[:, i] = high_val 
-                    elif mode == 'low': 
-                        # do(X_i = low) 
-                        data_do[:, i] = low_val
-                    else: 
-                        raise ValueError("Invalid do_value for binary-like variable. Use 'high' or 'low'.")
-                    
+                if domains[i] == "binary":
+                    if do_value not in (0, 1):
+                        raise ValueError(
+                            f"For binary variable {i}, do_value must be 0 or 1."
+                        )
+                    data_do[:, i] = int(do_value)
+
                 # Continuous variable: Numeric intervention (shift or scale)
                 else:
-                    if multiply:
-                        data_do[:, i] = data_do[:, i] * do_value
-                    else:
-                        data_do[:, i] = data_do[:, i] + do_value/sds[i]
+                    data_do[:, i] = data_do[:, i] + do_value/sds[i]
 
                 # propagate through children with noise
                 for j in topo:
