@@ -67,12 +67,12 @@ class Distribution:
         self.p = self.prop(prop)
         prior = self.prop('prior')
         if len(prior) == 0:
-            prior = 1
+            prior = 0
         if log:
             self.p = self.p + prior
             self.p = np.exp(self.p - np.max(self.p))
         else:
-            self.p = self.p*np.exp(prior)
+            self.p = np.multiply(self.p, np.exp(prior))
         
         keys = list(self.particles.keys())
         weights = np.array([(1. if 'weight' not in self.particles[particle] else self.particles[particle]['weight']) for particle in keys])
@@ -335,7 +335,7 @@ class Distribution:
             if particle not in particles:
                 scorer.graph = dag
                 particles[particle] = scorer.compute(dag)['score']
-                particle_weights[particle] = {'weight': 1}
+                particle_weights[particle] = {'weight': 1, 'prior': 0}
             else:
                 particle_weights[particle]['weight'] += 1
 

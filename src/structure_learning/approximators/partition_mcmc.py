@@ -122,6 +122,7 @@ class PartitionMCMC(MCMC):
         G, DAG_score = DAG(incidence=sample['incidence'], nodes=self.node_labels), sample['logscore']
         result = {
             'graph': G, 'score_current': DAG_score, 'operation': 'initial', 'accepted' : False, 'pscore_current' : self.current_state_score, 'pscore_proposed' : -1,
+            'proposed_state_prior': 0, 'current_state_prior': 0,
             'acceptance_prob' : -1, 'proposed_state': None, 'score_proposed': -1, 'timestamp': time.time() - self._start_time
         }
 
@@ -180,6 +181,7 @@ class PartitionMCMC(MCMC):
 
             result = {
                 'graph': G, 'score_current': DAG_score, 'operation': operation, 'accepted' : is_accepted, 'pscore_current' : self.current_state_score, 'pscore_proposed' : proposed_state_score,
+                'proposed_state_prior': 0, 'current_state_prior': 0,
                 'acceptance_prob' : acceptance_prob, 'proposed_state': proposed_G, 'score_proposed': proposed_DAG_score, 'timestamp': time.time() - self._start_time
             }
 
