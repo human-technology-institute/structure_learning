@@ -285,7 +285,7 @@ class Graph:
         if len(incidence) != len(nodes):
             raise Exception("The number of node labels must match the dimensions of the graph")
 
-        return Graph(incidence=incidence, nodes=nodes)
+        return cls(incidence=incidence, nodes=nodes)
     
     @classmethod
     def from_pandas(cls, graph: pd.DataFrame) -> Type[G]:
@@ -301,7 +301,7 @@ class Graph:
         nodes = list(graph.columns)
         if set(nodes) != set(graph.index):
             raise Exception("Column and index names should be similar")
-        return Graph.from_numpy(graph.loc[nodes, nodes].values, nodes)
+        return cls.from_numpy(graph.loc[nodes, nodes].values, nodes)
     
     @classmethod
     def from_nx(cls, graph: nx.DiGraph) -> Type[G]:
@@ -316,7 +316,7 @@ class Graph:
         """
         incidence = graph.to_numpy_array()
         nodes = list(graph.nodes)
-        return Graph(incidence=incidence, nodes=nodes)
+        return cls(incidence=incidence, nodes=nodes)
     
     def to_numpy(self, return_node_labels=False):
         """
@@ -519,7 +519,7 @@ class Graph:
         return cls.from_pandas(pd.read_csv(filename))
 
     # visualisation
-    def plot(self, filename=None, text=None, edge_colors: dict = None, edge_weights: dict = None, node_clusters: dict = None, max_penwidth: int =5, show_weights: bool = False, aspect_ratio: float = -1.0, size=8.0):
+    def plot(self, filename=None, text=None, edge_colors: dict = None, edge_weights: dict = None, node_clusters: dict = None, max_penwidth: int =5, show_weights: bool = False, aspect_ratio: float = -1.0, size=8.0, keep_bidirection: bool = False):
         """
         Plot a networkx graph.
 
@@ -551,7 +551,7 @@ class Graph:
         for r,c in zip(*np.nonzero(self.incidence)):
             if  G_gvz.has_edge(self.nodes[r], self.nodes[c]):
                 edge = G_gvz.get_edge(self.nodes[r], self.nodes[c])
-                if self.incidence[c,r] and G_gvz.has_edge(self.nodes[c], self.nodes[r]):
+                if not keep_bidirection and self.incidence[c,r] and G_gvz.has_edge(self.nodes[c], self.nodes[r]):
                     G_gvz.remove_edge(self.nodes[c], self.nodes[r])
                     edge = G_gvz.get_edge(self.nodes[r], self.nodes[c])
                     edge.attr['dir'] = 'none'
