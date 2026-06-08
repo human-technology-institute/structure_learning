@@ -29,7 +29,7 @@ Functions:
 
 """
 
-from typing import Union, List
+from typing import Dict, Union, Optional, List, Tuple
 import numpy as np
 import pandas as pd
 import networkx as nx
@@ -98,7 +98,7 @@ def gibbs_probit(X, y, n_iter=2000, burn_in=500):
     
     return beta_samples
 
-def estimate_hybrid_dag(adj_matrix, data, domains, n_iter=5000, burn_in=2000):
+def estimate_hybrid_dag(adj_matrix, data, domains, n_iter=10000, burn_in=5000):
     """
     Given:
       - adj_matrix: (n x n) adjacency (0/1) of a DAG,
@@ -198,7 +198,7 @@ def denormalise_probit_sample(beta_norm, child_idx, parent_idxs, mus, sds):
     )
     return intercept_orig, slopes_orig
 
-def simulate_do_effects(adj_matrix, intervention, est_params, domains, data, do_value=1.0, multiply=False, sds = None, tol=1e-8):
+def simulate_do_effects(adj_matrix, intervention, est_params, domains, data, do_value=1.0, sds = None, tol=1e-8):
     """
     Perform do-intervention simulations on standardised data, injecting noise at each step.
     - Continuous variables are on z-scale (mean 0, sd 1).
@@ -209,12 +209,24 @@ def simulate_do_effects(adj_matrix, intervention, est_params, domains, data, do_
             shape (T, 1 + #parents) where column 0 is the intercept
     - 'sigma2': posterior samples of variance (continuous nodes only), shape (T,)
 
+    Intervention
+    - Continuous nodes: Additive shift intervention: do(X := X + do_value).
+    - Binary nodes: set do(X = 0/1).
+
     Continuous effects are rescaled back to original units;
     binary effects are left as probability differences.
+
+
+    FIX #1: baseline is generated from the fitted model (model-generated baseline), not from the observed data mean.
+
     """
     if isinstance(adj_matrix, np.ndarray):
         adj_matrix = [adj_matrix]
         est_params = [est_params]
+
+    if sds is None:
+        raise ValueError("sds must be provided (needed to convert original-unit shift to z-scale).")
+ 
     effects = []
 
     for idx,m in enumerate(adj_matrix):
@@ -226,18 +238,36 @@ def simulate_do_effects(adj_matrix, intervention, est_params, domains, data, do_
         any_node = 0
         T = est_params[idx][any_node]['beta'].shape[0]
 
-        baseline_means = data.mean(axis=0)
-
         for t in range(T):
-            effect_matrix = np.zeros((n, n))
+            # Baseline: simulate from fitted model with no intervention
+            data_base = np.zeros((N, n), dtype=float)
+            for j in topo:
+                parents = list(G.predecessors(j))
+                beta = est_params[idx][j]['beta'][t, :]
+                Xp = data_base[:, parents] if parents else np.zeros((N, 0))
+                mu = beta[0] + (Xp @ beta[1:])
+
+                if domains[j] == 'continuous':
+                    sigma2_draws = est_params[idx][j].get('sigma2', None)
+                    sigma = 1.0 if sigma2_draws is None else float(np.sqrt(sigma2_draws[t]))
+                    data_base[:, j] = mu + np.random.normal(scale=sigma, size=N)
+                else:
+                    z = np.random.normal(loc=mu, scale=1.0, size=N)
+                    data_base[:, j] = (z > 0).astype(int)
+
+            baseline_means = data_base.mean(axis=0)
+
+            # Effects: Intervene on specified node
+            effect_matrix = np.zeros((n, n), dtype=float)
 
             for i in range(n):
                 if i not in intervention:
                     continue
 
-                data_do = data.copy()
+                data_do = data_base.copy()
 
-                # Two-level (binary-like) variable: set to low or high level 
+                # Intervention on node i
+                # Binary variable: set to 0 or 1 as specified by do_value
                 if domains[i] == "binary":
                     if do_value not in (0, 1):
                         raise ValueError(
@@ -249,15 +279,16 @@ def simulate_do_effects(adj_matrix, intervention, est_params, domains, data, do_
                 else:
                     data_do[:, i] = data_do[:, i] + do_value/sds[i]
 
-                # propagate through children with noise
+
+                desc = nx.descendants(G, i)  # set of nodes affected downstream
                 for j in topo:
-                    if j == i:
+                    if j == i or j not in desc:
                         continue
                     parents = list(G.predecessors(j))
 
                     beta = est_params[idx][j]['beta'][t, :]
-                    X = data_do[:, parents] if parents else np.zeros((N, 0))
-                    mu = beta[0] + (X @ beta[1:])
+                    Xp = data_do[:, parents] if parents else np.zeros((N, 0))
+                    mu = beta[0] + (Xp @ beta[1:])
 
                     if domains[j] == 'continuous':
                         # add Gaussian noise with estimated sigma
@@ -275,13 +306,105 @@ def simulate_do_effects(adj_matrix, intervention, est_params, domains, data, do_
                 delta = data_do.mean(axis=0) - baseline_means 
                 effect_matrix[i, :] = delta                
                 # Rescaling effects if sds provided:
-                if sds is not None:
-                    for j in range(n):
-                        if domains[j] == 'continuous':
-                            effect_matrix[i, j] *= sds[j]
+                for j in range(n):
+                    if domains[j] == 'continuous':
+                        effect_matrix[i, j] *= sds[j]
             effects.append(effect_matrix)
     
     return np.array(effects)
+
+def simulate_do_effects_joint_diff(adj_matrix, do_map, est_params, domains, data, sds=None):
+    """
+    Joint intervention with possibly different shifts per node.
+    Returns one effect vector per (DAG, parameter draw): shape (total_draws, n)
+
+    do_map: dict {node_index: value}
+      - continuous: value = additive shift in ORIGINAL units (do(X := X + value))
+      - binary: value must be 0 or 1 (hard set)
+    """
+    if isinstance(adj_matrix, np.ndarray):
+        adj_matrix = [adj_matrix]
+        est_params = [est_params]
+
+    if sds is None:
+        raise ValueError("sds must be provided (needed to convert original-unit shift to z-scale).")
+
+    effects = []
+
+    for idx, m in enumerate(adj_matrix):
+        G = nx.DiGraph(m)
+        topo = list(nx.topological_sort(G))
+        n = m.shape[0]
+        N = data.shape[0]
+
+        T = est_params[idx][0]['beta'].shape[0]
+
+        intervened_nodes = list(do_map.keys())
+
+        # descendants of any intervened node are the only nodes that can change
+        affected = set()
+        for i in intervened_nodes:
+            affected.update(nx.descendants(G, i))
+        affected.difference_update(set(intervened_nodes))
+
+        for t in range(T):
+            # ---- (1) baseline from fitted model ----
+            data_base = np.zeros((N, n), dtype=float)
+            for j in topo:
+                parents = list(G.predecessors(j))
+                beta = est_params[idx][j]['beta'][t, :]
+                Xp = data_base[:, parents] if parents else np.zeros((N, 0))
+                mu = beta[0] + (Xp @ beta[1:])
+
+                if domains[j] == "continuous":
+                    sigma2_draws = est_params[idx][j].get("sigma2", None)
+                    sigma = 1.0 if sigma2_draws is None else float(np.sqrt(sigma2_draws[t]))
+                    data_base[:, j] = mu + np.random.normal(scale=sigma, size=N)
+                else:
+                    z = np.random.normal(loc=mu, scale=1.0, size=N)
+                    data_base[:, j] = (z > 0).astype(int)
+
+            base_means = data_base.mean(axis=0)
+
+            # ---- (2) apply joint intervention on top of baseline ----
+            data_do = data_base.copy()
+            for i, val in do_map.items():
+                if domains[i] == "binary":
+                    if val not in (0, 1):
+                        raise ValueError(f"Binary node {i}: intervention value must be 0 or 1.")
+                    data_do[:, i] = int(val)
+                else:
+                    # shift in ORIGINAL units -> shift in z-scale
+                    data_do[:, i] = data_do[:, i] + float(val) / sds[i]
+
+            # ---- (3) resimulate ONLY affected descendants ----
+            for j in topo:
+                if j not in affected:
+                    continue
+                parents = list(G.predecessors(j))
+                beta = est_params[idx][j]['beta'][t, :]
+                Xp = data_do[:, parents] if parents else np.zeros((N, 0))
+                mu = beta[0] + (Xp @ beta[1:])
+
+                if domains[j] == "continuous":
+                    sigma2_draws = est_params[idx][j].get("sigma2", None)
+                    sigma = 1.0 if sigma2_draws is None else float(np.sqrt(sigma2_draws[t]))
+                    data_do[:, j] = mu + np.random.normal(scale=sigma, size=N)
+                else:
+                    z = np.random.normal(loc=mu, scale=1.0, size=N)
+                    data_do[:, j] = (z > 0).astype(int)
+
+            # ---- (4) effect vector ----
+            delta = data_do.mean(axis=0) - base_means
+
+            # rescale continuous outcomes back to original units
+            for j in range(n):
+                if domains[j] == "continuous":
+                    delta[j] *= sds[j]
+
+            effects.append(delta)
+
+    return np.asarray(effects)
     
 class CausalEffects:
     def __init__(self, graphs: Union[DAG, List[DAG], MCMCDistribution], data: Data):
@@ -320,48 +443,141 @@ class CausalEffects:
 
         return effects, weights
     
-    def plot(self, effects, weights, edges):
+    def plot(self, effects, weights, targets: Optional[List[Union[int, str]]] = None,kind: str = "kde",ci: Tuple[float, float] = (0.025, 0.975) ):
+
+        """
+        Plot vector intervention effects.
+             effects.shape == (draws, n_nodes)
+             weights.shape == (draws,)
+
+        targets: list of node names or indices to display.
+        kind: "kde" or "forest"
+        ci: credible interval for forest plot (default 95%)
+        """
         effects = np.asarray(effects)
         weights = np.asarray(weights).reshape(-1)
-        effects_reshaped = pd.DataFrame(effects.reshape(effects.shape[0], -1),
-            columns=[(node1, node2) for node1 in self.data.columns for node2 in self.data.columns])
-        effects_reshaped['weights'] = weights
-        effects_melt = pd.melt(effects_reshaped, value_vars=edges, value_name='param', var_name='edge', id_vars='weights')
-        effects_melt['edge_str'] = effects_melt['edge'].apply(lambda x: f"{x[0]} -> {x[1]}")
-        sns.kdeplot(data=effects_melt, x='param', weights='weights', hue='edge', fill=True, common_norm=False)
-        plt.xlabel('Causal Effect')
-        plt.ylabel('Density')
-        plt.title('Pairwise Causal Effects')
 
-    def do(self, intervention: List[Union[int, str]], do_value: float = 1.0, multiply: bool = False) -> np.ndarray:
+        if effects.ndim != 2:
+            raise ValueError("This plot() expects vector effects with shape (draws, n_nodes).")
+
+        if len(weights) != effects.shape[0]:
+            raise ValueError(f"weights length {len(weights)} does not match number of draws {effects.shape[0]}")
+
+        if targets is None or len(targets) == 0:
+            raise ValueError("targets must be provided (or let simulate(plot=True) auto-select them).")
+
+        var_names = list(self.data.columns)
+
+        # Convert targets to names
+        if isinstance(targets[0], int):
+            target_names = [var_names[int(t)] for t in targets]
+        else:
+            missing = set(targets) - set(var_names)
+            if missing:
+                raise ValueError(f"Unknown target names: {missing}")
+            target_names = list(targets)
+
+        # Normalize weights (safe for plotting)
+        weights = weights / weights.sum()
+
+        if kind == "kde":
+            df = pd.DataFrame(effects, columns=var_names)
+            df["weights"] = weights
+            df_m = df.melt(id_vars="weights",value_vars=target_names,var_name="variable",value_name="effect")
+        
+            plt.figure(figsize=(8, 4))
+            sns.kdeplot(data=df_m,x="effect",hue="variable",weights=df_m["weights"],fill=True,common_norm=False)
+        
+            plt.axvline(0, color="black", lw=1, alpha=0.6)
+            plt.xlabel("Effect (intervention − baseline)")
+            plt.ylabel("Density")
+            plt.title("Posterior distributions of intervention effects")
+            plt.tight_layout()
+            plt.show()
+            return
+
+        if kind == "forest":
+            def weighted_quantile(x, w, qs):
+                x = np.asarray(x)
+                w = np.asarray(w)
+                order = np.argsort(x)
+                x = x[order]
+                w = w[order]
+                cw = np.cumsum(w)
+                cw = cw / cw[-1]
+                return np.interp(qs, cw, x)
+
+            rows = []
+            for name in target_names:
+                j = var_names.index(name)
+                x = effects[:, j]
+                mean = np.sum(weights * x)
+                lo, hi = weighted_quantile(x, weights, [ci[0], ci[1]])
+                rows.append((name, mean, lo, hi))
+
+            df = pd.DataFrame(rows, columns=["variable", "mean", "lo", "hi"]).sort_values("mean")
+
+            plt.figure(figsize=(7, max(3, 0.35 * len(df))))
+            y = np.arange(len(df))
+            plt.hlines(y, df["lo"], df["hi"], color="tab:blue", lw=2)
+            plt.plot(df["mean"], y, "o", color="tab:blue")
+            plt.axvline(0, color="black", lw=1, alpha=0.6)
+            plt.yticks(y, df["variable"])
+            plt.xlabel("Effect (posterior mean and credible interval)")
+            plt.title("Intervention effects (forest plot)")
+            plt.tight_layout()
+            plt.show()
+            return
+        else:
+            raise ValueError("kind must be 'kde' or 'forest'.")
+
+    def do(self, do_map: Dict[Union[int, str], Union[int, float]])-> Tuple[np.ndarray, np.ndarray]:
         """
-        Perform a do-intervention on the graph and data.
+        Perform a single or joint do-intervention on the graph and data.
 
         Parameters:
-            intervention (List[Union[int, str]]): The node indices or labels to intervene on.
-            do_value (float): The value to set for the intervention.
-            multiply (bool): If True, applies the intervention as a multiplier; otherwise, adds it.
+            do_map (Dict[Union[int, str], Union[int, float]]): A dictionary mapping node names (str) or indices (int) to their intervention values.
 
         Returns:
             np.ndarray: The effect of the intervention on the data.
         """
-        return self.simulate(intervention, do_value, multiply)
+        return self.simulate(do_map)
 
-    def simulate(self, intervention: List[Union[int, str]], do_value: float = 1.0, multiply: bool = False, plot=False, edges=None) -> np.ndarray:
+    #def simulate(self, intervention: List[Union[int, str]], do_value: float = 1.0, plot=False, edges=None) -> np.ndarray:
+    
+    def simulate(self, do_map: Dict[Union[int, str], Union[int, float]],
+             plot: bool = False, targets: Optional[List[Union[int, str]]] = None,
+             kind: str = "kde")-> Tuple[np.ndarray, np.ndarray]:
+
         """
-        Perform do-intervention on the graph and data.
+        Perform (single or joint) intervention defined by do_map on the graph and data.
 
         Parameters:
-            intervention (Union[int, str]): The node index or label to intervene on.
-            do_value (float): The value to set for the intervention.
-            multiply (bool): If True, applies the intervention as a multiplier; otherwise, adds it.
+            do_map: dict {node_name or node_index: value}
+                 - continuous: value = additive SHIFT in original units (do(X := X + value))
+                 - binary: value must be 0 or 1 (hard set)
 
         Returns:
-            np.ndarray: The effect of the intervention on the data.
+            effects: (num_draws_total, n_nodes) vector per draw
+            weights_draws: (num_draws_total,)
+
         """
+
+        if do_map is None or len(do_map) == 0:
+            raise ValueError("do_map must be a non-empty dict, e.g. {'A': 1.0} or {3: -0.5}.")
+
         est_params, adj_matrix, weights = self.estimate_effects()
-        intervention_idx = [self.data.variables.index(i) for i in intervention] if len(intervention) > 0 and isinstance(intervention[0], str) else intervention
-        effects = simulate_do_effects(adj_matrix, intervention_idx, est_params, self.domains, self.data_norm, do_value, multiply, self.sds)
+        #intervention_idx = [self.data.variables.index(i) for i in intervention] if len(intervention) > 0 and isinstance(intervention[0], str) else intervention
+
+        # Convert do_map keys to indices (allow names or indices)
+        do_map_idx: Dict[int, Union[int, float]] = {}
+        for k, v in do_map.items():
+            idx = self.data.variables.index(k) if isinstance(k, str) else int(k)
+            do_map_idx[idx] = v
+
+        #effects = simulate_do_effects(adj_matrix, do_map_idx, est_params, self.domains, self.data_norm, self.sds)
+        effects = simulate_do_effects_joint_diff(adj_matrix,do_map_idx,est_params,self.domains,self.data_norm,self.sds)
+
         
         # infer T per DAG
         K = len(adj_matrix)
@@ -379,12 +595,13 @@ class CausalEffects:
             ])
         
         if plot:
-            if edges is None:
-                edges = [(node1, node2) for node1 in intervention for node2 in self.data.columns if node1 != node2]
-            self.plot(effects, weights_draws, edges)
+            if targets is None or len(targets) == 0:
+                raise ValueError("Provide targets (node names or indices) when plot=True.")
+
+            self.plot(effects, weights_draws, targets, kind)
         return effects, weights_draws
      
-    def estimate_effects(self, n_iter=2000, burn_in=500):
+    def estimate_effects(self, n_iter=10000, burn_in=5000):
         """
         Estimate the effects of interventions using Gibbs sampling.
         Parameters:
