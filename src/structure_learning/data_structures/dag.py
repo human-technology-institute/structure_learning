@@ -50,12 +50,11 @@ class DAG(Graph):
             colors[(edge[0], edge[1])] = "#FE5600" if weight < 0 else "#5984FF"
         return weights, colors
         
-    def plot(self, filename=None, text=None, data: Union[pd.DataFrame, Data]=None, node_clusters: dict = None, max_penwidth: int =5, show_weights: bool = False, aspect_ratio: float = -1.0):
+    def plot(self, filename=None, text=None, data: Union[pd.DataFrame, Data]=None, node_clusters: dict = None, max_penwidth: int =5, show_weights: bool = False, aspect_ratio: float = -1.0, edge_colors=None, edge_weights=None):
         
-        weights, colors = None, None
         if data is not None:
-            weights, colors = self.fit(data)
-        return super().plot(filename=filename, text=text, edge_colors=colors, edge_weights=weights, node_clusters=node_clusters, max_penwidth=max_penwidth, show_weights=show_weights, aspect_ratio=aspect_ratio)
+            edge_colors, edge_weights = self.fit(data)
+        return super().plot(filename=filename, text=text, edge_colors=edge_colors, edge_weights=edge_weights, node_clusters=node_clusters, max_penwidth=max_penwidth, show_weights=show_weights, aspect_ratio=aspect_ratio)
     
     def to_cpdag(self, blocklist: np.ndarray = None, verbose=False):
         """

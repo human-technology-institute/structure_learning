@@ -546,11 +546,13 @@ class Graph:
             # G_gvz.get_node(node).attr['fontsize'] = "7pt"
             G_gvz.get_node(node).attr['fontname'] = "Helvetica"
             G_gvz.get_node(node).attr['fixedsize'] = "true"
+            G_gvz.get_node(node).attr['id'] = node
             # if node in ["Belonging", "NAPLAN", "Conduct Problems", "School Completion"]:
             #     G_gvz.get_node(node).attr['group'] = 'target'
         for r,c in zip(*np.nonzero(self.incidence)):
             if  G_gvz.has_edge(self.nodes[r], self.nodes[c]):
                 edge = G_gvz.get_edge(self.nodes[r], self.nodes[c])
+                edge.attr['id'] = f"{self.nodes[r]}->{self.nodes[c]}"
                 if not keep_bidirection and self.incidence[c,r] and G_gvz.has_edge(self.nodes[c], self.nodes[r]):
                     G_gvz.remove_edge(self.nodes[c], self.nodes[r])
                     edge = G_gvz.get_edge(self.nodes[r], self.nodes[c])
