@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "structure_learning"
-version = "1.0.0"
+version = "1.1.0"
 description = "Structure learning algorithms for Bayesian networks."
 requires-python = ">= 3.9"
 dependencies = [
@@ -27,6 +27,7 @@ license = {file = "LICENSE"}
 authors = [
     {name = "Kristofer Delas Peñas", email = "kristofer.delaspenas@uts.edu.au"},
     {name = "Roman Marchant", email = "roman.marchant@uts.edu.au"},
+    {name = "Linduni Rodrigo", email = "Linduni.Rodrigo@uts.edu.au"},
     {name = "Catarina Pinto Moreira"}
 ]
 
