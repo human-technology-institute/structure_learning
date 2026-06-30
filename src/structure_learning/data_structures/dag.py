@@ -53,7 +53,7 @@ class DAG(Graph):
     def plot(self, filename=None, text=None, data: Union[pd.DataFrame, Data]=None, node_clusters: dict = None, max_penwidth: int =5, show_weights: bool = False, aspect_ratio: float = -1.0, edge_colors=None, edge_weights=None):
         
         if data is not None:
-            edge_colors, edge_weights = self.fit(data)
+            edge_weights, edge_colors = self.fit(data)
         return super().plot(filename=filename, text=text, edge_colors=edge_colors, edge_weights=edge_weights, node_clusters=node_clusters, max_penwidth=max_penwidth, show_weights=show_weights, aspect_ratio=aspect_ratio)
     
     def to_cpdag(self, blocklist: np.ndarray = None, verbose=False):
