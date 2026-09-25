@@ -15,6 +15,7 @@ import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 import seaborn as sns
+import heapq
 from structure_learning.scores import Score
 from structure_learning.data_structures import DAG, Graph
 
@@ -66,12 +67,12 @@ class Distribution:
         self.p = self.prop(prop)
         prior = self.prop('prior')
         if len(prior) == 0:
-            prior = 1
+            prior = 0
         if log:
             self.p = self.p + prior
             self.p = np.exp(self.p - np.max(self.p))
         else:
-            self.p = self.p*np.exp(prior)
+            self.p = np.multiply(self.p, np.exp(prior))
         
         keys = list(self.particles.keys())
         weights = np.array([(1. if 'weight' not in self.particles[particle] else self.particles[particle]['weight']) for particle in keys])
@@ -93,7 +94,7 @@ class Distribution:
         Returns:
             (list)          particle data
         """
-        return np.array([v[name] for v in self.particles.values() if name in v and v[name] is not None])
+        return np.array([self.particles[k].get(name, None) for k in self.particles])
     
     def __contains__(self, particle):
         """
@@ -219,20 +220,43 @@ class Distribution:
         ax.legend(title='Samplers')
         return bars, a
     
-    def top(self, prop='freq', n=1):
+    def top(self, prop='freq', n=1, mass=None):
         """
         Retrieve the top N particles based on a specified property.
 
         Parameters:
             prop (str): The property to sort by (default is 'freq').
             n (int): The number of top particles to retrieve.
+            mass (float): If specified and prop='p', return the top particles with combined mass greater than this value.
 
         Returns:
             np.ndarray: Array of the top N particles.
         """
         k, v = self.hist(prop=prop)
         idx = np.argsort(v)
-        return np.array(k)[idx][-n:][::-1]  # Return the top N particles in descending order
+        if mass is None or prop != 'p':
+            return np.array(k)[idx][-n:][::-1]  # Return the top N particles in descending order
+        else:
+            sorted_v = np.array(v)[idx[::-1]]
+            cumulative_mass = np.cumsum(sorted_v)
+            selected_idx = mass > cumulative_mass
+            if 0 < mass < 1:
+                selected_idx[np.count_nonzero(selected_idx)+1] = True  # Ensure at least one particle is selected
+            return np.array(k)[idx[::-1][selected_idx]]
+        
+    def sample(self, size=1):
+        """
+        Sample particles from the distribution based on their probabilities.
+
+        Parameters:
+            size (int): The number of particles to sample.
+
+        Returns:
+            list: List of sampled particles.
+        """
+        particles = list(self.particles.keys())
+        probs = self.prop('p')
+        return np.random.choice(particles, size=size, p=probs).tolist()
 
     # arithmetic
     def __copy__(self):
@@ -260,9 +284,8 @@ class Distribution:
             Distribution: The resulting distribution after addition.
         """
         dsum = self.__copy__()
-        for particle, data in other.particles.items():
-            dsum.update(particle, data, iteration=data.get('iteration', []), normalise=False)
-            dsum.particles[particle]['freq'] = data['freq'] + (0 if particle not in self else self.particles[particle]['freq'])
+        dist = {k:(v if k not in dsum else {k2:(v2 if k2!='freq' else v2+dsum.particles[k]['freq']) for k2,v2 in v.items()}) for k,v in other.particles.items()}
+        dsum.update(dist)
         dsum.normalise()
         return dsum
 
@@ -296,6 +319,9 @@ class Distribution:
             Distribution: The computed distribution.
         """
         dags = DAG.generate_all_dags(len(data.columns), list(data.columns))
+        if blocklist is not None:
+            dags = [dag for dag in dags if not (dag.incidence*blocklist).any()]
+            
         if graph_type=='cpdag':
             cpdags = {}
 
@@ -309,7 +335,7 @@ class Distribution:
             if particle not in particles:
                 scorer.graph = dag
                 particles[particle] = scorer.compute(dag)['score']
-                particle_weights[particle] = {'weight': 1}
+                particle_weights[particle] = {'weight': 1, 'prior': 0}
             else:
                 particle_weights[particle]['weight'] += 1
 
@@ -343,6 +369,41 @@ class Distribution:
         with open(filename, 'rb') as f:
             import compress_pickle as pickle
             return pickle.load(f, compression=compression)
+        
+    def to_hdf5(self, filename: str):
+        import hdfdict
+
+        hdfdict.dump(self.particles, filename)
+
+    @classmethod
+    def from_hdf5(cls, filename: str):
+        import hdfdict
+
+        particles = hdfdict.load(filename)
+        dist = cls()
+        dist.particles = particles
+        return dist
+
+    # truncate in case of large distributions, keep only top n
+    @classmethod
+    def truncate(cls, dist: Type['D'], n=100, prop='p'):
+        """
+        Truncate a distribution to keep only the top N particles.
+
+        Parameters:
+            dist (Distribution): The distribution to truncate.
+            n (int): The number of top particles to keep.
+
+        Returns:
+            Distribution: The truncated distribution.
+        """
+        top_particles = dist.top(prop=prop, n=n)
+        truncated_dist = cls()
+        for particle in top_particles:
+            truncated_dist.particles[particle] = dist.particles[particle]
+        # Override normalise to do nothing since we are keeping the top particles
+        truncated_dist.normalise = lambda: truncated_dist  
+        return truncated_dist
 
 class TrueDistribution(Distribution):
 
@@ -494,7 +555,6 @@ class OPAD(MCMCDistribution):
         """
         if self.plus: # add rejected to particles
             if len(self.rejected) > 0:
-                print('Adding rejected particles')
                 for particle, data in self.rejected.particles.items():
                     super(MCMCDistribution, self).update(particle, data)
                 self.rejected.clear()
@@ -580,3 +640,77 @@ class OPAD(MCMCDistribution):
         if not self.plus:
             return super(MCMCDistribution, self).to_iterates()
         raise NotImplementedError("OPAD+ distributions cannot be converted to iterates.")
+
+class FixedSizeDistribution(OPAD):
+    """
+    This class implements a fixed-size distribution that retains only the top N particles based on their scores.
+    """
+    def __init__(self, particles: Iterable = [], logp: Iterable = [], theta: Dict = [], plus: bool = True, max_size: int = 1000000):
+        """
+        Initialise FixedSizeDistribution.
+        Parameters:
+            particles (Iterable):       List of particles to add in the distribution
+            logp (Iterable):            Scores (log probabilities) of the particles
+            theta (Dict):               Additional particles data
+            plus (bool):                If True, include rejected particles in the OPAD distribution.
+            max_size (int):             Maximum number of particles to retain in the distribution.
+        """
+        super().__init__(particles, logp, theta, plus)
+        self.max_size = max_size
+        self._top_particles = []
+
+        # build min-heap
+        for particle, data in self.particles.items():
+            self.__update_heap__((data['logp'], particle))
+
+        # rebuild particles dict
+        self._particles = {}
+        for score, particle in self._top_particles:
+            self._particles[particle] = self.particles[particle]
+
+        self.particles = self._particles
+
+    def __update_heap__(self, heapdata):  
+        """
+        Update the min-heap of top particles with new heapdata.
+        Parameters:
+            heapdata (tuple): A tuple containing (score, particle).
+        """
+        if len(self._top_particles) < self.max_size:
+            heapq.heappush(self._top_particles, heapdata)
+        else:
+            _, min_particle = heapq.heappushpop(self._top_particles, heapdata)
+            return min_particle
+
+    def update(self, particle, data, iteration, normalise=False):
+        """
+        Add new particles to the FixedSizeDistribution and optionally renormalise.
+        Parameters:
+            particle (Hashable): The particle to add.
+            iteration (int): The iteration number at which the particle was generated.
+            data (dict): Data associated with the particle.
+            normalise (bool): If True, renormalise the distribution after adding the particle.
+        """
+
+        seen = particle in self.particles
+        super().update(particle, data, iteration=iteration, normalise=False)
+        
+        if not seen:
+            particle_to_remove = self.__update_heap__((data['score_current'], particle))
+
+            if particle_to_remove is not None:
+                del self.particles[particle_to_remove]
+                
+        if self.plus and ('accepted' in data and not data['accepted']) and data['proposed_state'] is not None:
+            self._add_rejected_particles_()
+            particle2 = data['proposed_state'].to_key()
+            seen = particle2 in self.particles
+            
+            if not seen and particle != particle2:
+                particle_to_remove = self.__update_heap__((data['score_proposed'], particle2))
+
+                if particle_to_remove is not None:
+                    del self.particles[particle_to_remove]
+
+        if normalise:
+            self.normalise()

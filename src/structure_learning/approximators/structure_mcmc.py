@@ -33,7 +33,7 @@ class StructureMCMC(MCMC):
                  score_object : Union[str, Score] = None, proposal_object : StructureLearningProposal = None, prior: Prior = None,
                  pc_init = True, pc_significance_level = 0.01, pc_ci_test = 'pearsonr',
                  blacklist: np.ndarray = None, whitelist: np.ndarray = None, seed: int = None, sparse=True,
-                 result_type: str = 'distribution', graph_type='dag', burn_in: float = 0.1):
+                 result_type: str = 'distribution', graph_type='dag', burn_in: float = 0.1, verbose=True, **kwargs):
         """
         Initilialise Structure MCMC instance.
 
@@ -56,7 +56,7 @@ class StructureMCMC(MCMC):
         super().__init__(data=data, initial_state=initial_state, max_iter=max_iter, score_object=score_object,
                          proposal_object='graph' if proposal_object is None else proposal_object, 
                          pc_init=pc_init,  pc_significance_level=pc_significance_level, pc_ci_test=pc_ci_test,
-                         blacklist=blacklist, whitelist=whitelist, seed=seed, result_type=result_type, graph_type=graph_type, burn_in=burn_in)
+                         blacklist=blacklist, whitelist=whitelist, seed=seed, result_type=result_type, graph_type=graph_type, burn_in=burn_in, verbose=verbose, **kwargs)
 
         self._to_string = f"Structure_MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
         self.sparse = sparse
@@ -68,6 +68,8 @@ class StructureMCMC(MCMC):
                     self.initial_state.incidence[whitelist > 0] = True
                 if blacklist is not None:
                     self.initial_state.incidence[blacklist > 0] = False
+            elif isinstance(self.initial_state, np.ndarray):
+                self.initial_state = DAG(nodes=self.node_labels, incidence=self.initial_state)
             proposal_object = GraphProposal(initial_state=self.initial_state, blacklist=blacklist, whitelist=whitelist, seed=seed)
         elif not isinstance(proposal_object, StructureLearningProposal):
             raise Exception('Unsupported proposal', proposal_object)
@@ -123,7 +125,8 @@ class StructureMCMC(MCMC):
         else:
             is_accepted = False
             proposed_state_prior = current_state_prior
-            acceptance_prob = proposed_state_score = 0
+            acceptance_prob = 0
+            proposed_state_score = current_state_score
 
         return {'graph': current_state, 'current_state': current_state, 'proposed_state': proposed_state, 'score_current': current_state_score,
                 'proposed_state_prior': proposed_state_prior, 'current_state_prior': current_state_prior,

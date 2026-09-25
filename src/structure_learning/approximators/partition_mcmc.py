@@ -44,7 +44,7 @@ class PartitionMCMC(MCMC):
                  proposal_object : StructureLearningProposal = None, score_object : Union[str, Score] = None,
                  blacklist = None, whitelist = None, searchspace = None, plus1: bool = False, seed : int  = None, 
                  pc_significance_level = 0.01, pc_ci_test = 'pearsonr',
-                 result_type='iterations', graph_type='dag', concise=True, burn_in: float = 0.1):
+                 result_type='iterations', graph_type='dag', concise=True, burn_in: float = 0.1, verbose=True):
         """
         Initilialise Partition MCMC instance.
 
@@ -64,7 +64,7 @@ class PartitionMCMC(MCMC):
             plus1 (bool):                                           Use plus1 neighborhood
         """
         super().__init__(data=data, initial_state=initial_state, max_iter=max_iter, proposal_object=proposal_object, pc_significance_level=pc_significance_level, pc_ci_test=pc_ci_test,
-                         score_object=score_object, pc_init=(searchspace=="PC"), blacklist=blacklist, whitelist=whitelist, seed=seed, result_type=result_type, graph_type=graph_type, burn_in=burn_in)
+                         score_object=score_object, pc_init=(searchspace=="PC"), blacklist=blacklist, whitelist=whitelist, seed=seed, result_type=result_type, graph_type=graph_type, burn_in=burn_in, verbose=verbose)
         self.config_dict.update({'searchspace': searchspace, 'plus1': plus1, 'concise': concise})
         self._to_string = f"Partition_MCMC_n_{self.num_nodes}_iter_{self.max_iter}"
         self.concise = concise
@@ -122,6 +122,7 @@ class PartitionMCMC(MCMC):
         G, DAG_score = DAG(incidence=sample['incidence'], nodes=self.node_labels), sample['logscore']
         result = {
             'graph': G, 'score_current': DAG_score, 'operation': 'initial', 'accepted' : False, 'pscore_current' : self.current_state_score, 'pscore_proposed' : -1,
+            'proposed_state_prior': 0, 'current_state_prior': 0,
             'acceptance_prob' : -1, 'proposed_state': None, 'score_proposed': -1, 'timestamp': time.time() - self._start_time
         }
 
@@ -180,6 +181,7 @@ class PartitionMCMC(MCMC):
 
             result = {
                 'graph': G, 'score_current': DAG_score, 'operation': operation, 'accepted' : is_accepted, 'pscore_current' : self.current_state_score, 'pscore_proposed' : proposed_state_score,
+                'proposed_state_prior': 0, 'current_state_prior': 0,
                 'acceptance_prob' : acceptance_prob, 'proposed_state': proposed_G, 'score_proposed': proposed_DAG_score, 'timestamp': time.time() - self._start_time
             }
 

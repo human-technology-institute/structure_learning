@@ -6,7 +6,6 @@ import numpy as np
 import scipy.stats as stats
 import networkx as nx
 from scipy.stats import multivariate_normal
-from structure_learning.data_structures import DAG
 from .data import Data
 
 class SyntheticDataset(object):
@@ -41,6 +40,7 @@ class SyntheticDataset(object):
         """
         Initial setup. Simulates random dag (if not given) and data.
         """
+        from ..data_structures import DAG
         self.W, _, self.P = SyntheticDataset.simulate_random_dag(
             self.num_nodes,
             self.degree,
@@ -69,7 +69,7 @@ class SyntheticDataset(object):
         self.data = Data(self.data, self.node_labels)
 
     @staticmethod
-    def simulate_data_from_dag(dag: Union[np.ndarray, DAG], num_obs, num_nodes, node_labels, w_range, noise_scale):
+    def simulate_data_from_dag(dag, num_obs, num_nodes, node_labels, w_range, noise_scale):
         """
         Simulate samples from ground truth DAG.
 
@@ -118,6 +118,7 @@ class SyntheticDataset(object):
             None
             (numpy.ndarray): permutation matrix
         """
+        from ..data_structures import DAG
         if graph_type == "erdos-renyi":
             prob = float(degree) / (d - 1)
             B = np.tril((np.random.rand(d, d) < prob).astype(float), k=-1)
@@ -164,6 +165,7 @@ class SyntheticDataset(object):
             (numpy.ndarray): permutation matrix
             (numpy.ndarray): lower triangular matrix
         """
+        from ..data_structures import DAG
         lower_entries = np.random.normal(loc=0.0, scale=w_std, size=(d * (d - 1) // 2))
         L = np.zeros((d, d))
         # We want the ground-truth W.T to be generated from PLP^\top
@@ -174,7 +176,7 @@ class SyntheticDataset(object):
         return DAG(incidence=W), None, P, L
 
     @staticmethod
-    def simulate_data_V1(W: Union[np.ndarray, DAG], n, noise_scale=1.0, sigmas=None):
+    def simulate_data_V1(W, n, noise_scale=1.0, sigmas=None):
         """Simulate samples from SEM with specified type of noise.
 
         Parameters:
@@ -186,6 +188,7 @@ class SyntheticDataset(object):
         Returns:
             (numpy.ndarray) [n,d] sample matrix
         """
+        from ..data_structures import DAG
         if isinstance(W, DAG):
             W = W.incidence
         G = nx.DiGraph(W)
@@ -206,7 +209,7 @@ class SyntheticDataset(object):
         return X
 
     @staticmethod
-    def simulate_data(W: Union[np.ndarray, DAG], n, noise_scale=1.0, sigmas=None):
+    def simulate_data(W, n, noise_scale=1.0, sigmas=None):
         """Simulate samples from SEM with specified type of noise.
 
         Parameters:
@@ -218,6 +221,7 @@ class SyntheticDataset(object):
         Returns:
             (numpy.ndarray) [n,d] sample matrix
         """
+        from ..data_structures import DAG   
         if isinstance(W, DAG):
             w = W.weights if W.weights is not None else W.incidence
         d = w.shape[0]

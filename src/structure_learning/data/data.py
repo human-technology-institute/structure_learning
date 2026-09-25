@@ -19,7 +19,6 @@ from collections import UserDict
 from typing import Any
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.model_selection import KFold
 from pathlib import Path
 
@@ -149,10 +148,7 @@ class Data:
         """
         return self.values.shape
     
-    def normalise(self, variables: List = None):
-        return self.standardise(variables)
-    
-    def standardise(self, variables: List = None):
+    def standardise(self, variables: List = None, ddof=1):
         """
         Standardise the specified variables in the dataset.
 
@@ -162,34 +158,16 @@ class Data:
         Returns:
             Data: A new Data object with standardised variables.
         """
-        _scaler = StandardScaler()
         variables = variables if variables is not None else self.variables
+
         # only standardise continuous variables
         variables = [variable for variable in variables if variable in self.variables and self.variable_types[variable]==self.CONTINUOUS_TYPE]
-        x = _scaler.fit_transform(self.values[variables])
+        x = self.values[variables]
+        mus, sds = x.mean(axis=0), x.std(axis=0, ddof=ddof)
         transformed_data = self.__copy__()
-        for v in variables:
-            transformed_data.values[v] = transformed_data.values[v].astype(float)
-        transformed_data.values.loc[:,variables] = x
-        transformed_data._scaler = _scaler
-        return transformed_data
-
-    def min_max_scale(self, variables: List = None):
-        """
-        Scale the specified variables in the dataset to a range of [0, 1].
-
-        Parameters:
-            variables (List, optional): List of variable names to scale. Defaults to all continuous variables.
-
-        Returns:
-            Data: A new Data object with scaled variables.
-        """
-        _scaler = MinMaxScaler()
-        variables = variables if variables is not None else self.variables
-        x = _scaler.fit_transform(self.values[variables])
-        transformed_data = self.__copy__()
-        transformed_data.values.loc[:,variables] = x
-        transformed_data._scaler = _scaler
+        transformed_data.values.loc[:,variables] = (x - mus) / sds
+        transformed_data.mus = {node: m for node,m in zip(variables, mus)}
+        transformed_data.sds = {node: s for node,s in zip(variables, sds)}
         return transformed_data
 
     def k_fold(self, k=5, shuffle=True, seed=None):

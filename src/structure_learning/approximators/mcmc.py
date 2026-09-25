@@ -18,7 +18,7 @@ from matplotlib import pyplot as plt
 from structure_learning.scores import Score, BGeScore, BDeuScore
 from structure_learning.proposals import StructureLearningProposal
 from structure_learning.data import Data
-from structure_learning.distributions import MCMCDistribution, OPAD
+from structure_learning.distributions import MCMCDistribution, OPAD, FixedSizeDistribution
 from .pc import PC
 from .approximator import Approximator
 
@@ -35,11 +35,14 @@ class MCMC(Approximator):
     RESULT_TYPE_OPAD = 'opad'
     RESULT_TYPE_OPAD_PLUS = 'opad+'
     RESULT_TYPE_ITER = 'iterates'
+    RESULT_TYPE_TRUNC = 'truncated'
+    RESULT_TYPE_TRUNC_PLUS = 'truncated+'
+
     def __init__(self, data: pd.DataFrame, initial_state: State, max_iter: int = 30000, score_object: Union[str, Score] = None,
                  proposal_object: Union[str, StructureLearningProposal] = None, 
                  pc_init: bool = True, pc_significance_level = 0.01, pc_ci_test = 'pearsonr',
                  blacklist: np.ndarray = None, whitelist: np.ndarray = None, seed: int = None, 
-                 result_type: str = RESULT_TYPE_DIST, graph_type='dag', burn_in: float = 0.1):
+                 result_type: str = RESULT_TYPE_DIST, graph_type='dag', burn_in: float = 0.1, max_dist_size: int = 100000, verbose=True):
         """
         Initialize the MCMC instance.
 
@@ -58,6 +61,8 @@ class MCMC(Approximator):
             seed (int):                                                 Random seed for reproducibility. Default is 32.
             result_type (str):                                          Type of result to generate. Default is 'distribution'.
             graph_type (str):                                           Type of graph ('dag' or 'cpdag'). Default is 'dag'.
+            burn_in (float):                                            Proportion of iterations to discard as burn-in. Default is 0.1.
+            max_dist_size (int):                                        Maximum size of the distribution. Default is 100000. Only used if result_type is 'truncated'.
         """
 
         if data is None or not isinstance(data, (Data, pd.DataFrame)):
@@ -70,6 +75,7 @@ class MCMC(Approximator):
         if seed is None:
             seed = np.random.randint(100000)
         self.seed = seed
+        self.verbose = verbose
         self._rng = np.random.default_rng(seed=seed)
         self._trace = []
 
@@ -108,6 +114,10 @@ class MCMC(Approximator):
             self.results = OPAD()
         elif result_type == MCMC.RESULT_TYPE_OPAD_PLUS:
             self.results = OPAD(plus=True)
+        elif result_type == MCMC.RESULT_TYPE_TRUNC:
+            self.results = FixedSizeDistribution(max_size=max_dist_size)
+        elif result_type == MCMC.RESULT_TYPE_TRUNC_PLUS:
+            self.results = FixedSizeDistribution(max_size=max_dist_size, plus=True)
         self._start_time = time.time()
         self._cpdag_sizes = {}
         self._cpdags = {}
@@ -137,13 +147,14 @@ class MCMC(Approximator):
             Tuple[dict, float]: Results of the simulation and acceptance ratio.
         """
         results = []
-        tqdm_bar = tqdm(total=self.max_iter, desc='MCMC iterations', unit='iter')
+        if self.verbose:
+            tqdm_bar = tqdm(total=self.max_iter, desc='MCMC iterations', unit='iter')
         while True:
             if self.iteration > self.max_iter:
                 break
 
             if self.iteration>0 and self.iteration%intervals==0 and intervals > 0:
-                if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS):
+                if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS, self.RESULT_TYPE_TRUNC_PLUS):
                     self.results.normalise()
                 results.append((self.results.copy(), self.n_accepted/self.max_iter))
 
@@ -151,10 +162,12 @@ class MCMC(Approximator):
             if self.iteration >= self.burn_in:
                 self.update_results(self.iteration, result)
             self.iteration += 1
-            tqdm_bar.update(1)
-        tqdm_bar.close()
+            if self.verbose:
+                tqdm_bar.update(1)
+        if self.verbose:
+            tqdm_bar.close()
 
-        if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS):
+        if self.result_type in (self.RESULT_TYPE_DIST, self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS, self.RESULT_TYPE_TRUNC, self.RESULT_TYPE_TRUNC_PLUS):
             self.results.normalise()
         return self.results if intervals < 0 else results, self.n_accepted/self.max_iter
 
@@ -203,7 +216,7 @@ class MCMC(Approximator):
                     info['proposed_state_weight'] = self._cpdag_sizes[proposed_key]
         if self.result_type in (self.RESULT_TYPE_DIST,):
             self.results.update(particle=key, iteration=iteration, data=info.copy())
-        elif self.result_type in (self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS):
+        elif self.result_type in (self.RESULT_TYPE_OPAD, self.RESULT_TYPE_OPAD_PLUS, self.RESULT_TYPE_TRUNC, self.RESULT_TYPE_TRUNC_PLUS):
             self.results.update(particle=key, iteration=iteration, data=info.copy(), normalise=False)
         elif self.result_type == 'iterates':
             self.results[iteration] = info
@@ -297,7 +310,7 @@ class MCMC(Approximator):
         Convert the MCMC results to an OPAD object.
 
         Parameters:
-            plus (bool): Whether to use the plus1 neighborhood. Default is False.
+            plus (bool): Whether to use OPAD+. Default is False.
 
         Returns:
             OPAD: OPAD object.
