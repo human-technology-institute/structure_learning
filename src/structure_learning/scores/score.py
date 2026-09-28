@@ -7,6 +7,7 @@ import pandas as pd
 from structure_learning.data_structures import Graph
 from structure_learning.data import Data
 
+
 class Score(ABC):
     """
     Base class for graph scores for structure learning using MCMC.
@@ -14,7 +15,8 @@ class Score(ABC):
         compute() -> dict
         compute_node() -> dict
     """
-    def __init__(self, data : Union[Data, pd.DataFrame]):
+
+    def __init__(self, data: Union[Data, pd.DataFrame]):
         """
         Initialises the Score abstract class.
         All classes that inherit from this class must implement the compute method.
@@ -35,15 +37,16 @@ class Score(ABC):
         """
         pass
 
-    def compute_node(self, graph: Graph, node: str):
+    def compute_node(self, graph: Graph, node: str, compute_full_posterior: bool = False):
         """
         Implements a score function (e.g. BGe, Marginal Likelihood, etc) for a specific node
         """
         parentnodes = [i for i in graph.find_parents(node)]
-        return self.compute_node_with_edges(node, parentnodes, graph._node_to_index_dict)
+        return self.compute_node_with_edges(node, parentnodes, graph._node_to_index_dict, compute_full_posterior)
 
     @abstractmethod
-    def compute_node_with_edges(self, node : str, parents: list = None, node_index_map: dict = None):
+    def compute_node_with_edges(self, node: str, parents: list = None, node_index_map: dict = None,
+                                full_posterior: bool = False):
         """
         Implements a score function (e.g. BGe, Marginal Likelihood, etc) for a specific node and parents
         """
