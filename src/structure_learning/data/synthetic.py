@@ -233,7 +233,7 @@ class SyntheticDataset(object):
         # Generate the diagonal conditional variance matrix, diagonal values indicate sigma^2_j
         D_mat = np.eye(d) * sigmas
 
-        W_mat = w + np.eye(d)
+        W_mat = np.eye(d) - w
 
         # Covariance matrix
         sigma = np.linalg.pinv(W_mat.T) @ D_mat @ np.linalg.pinv(W_mat)
