@@ -209,7 +209,7 @@ class SyntheticDataset(object):
         return X
 
     @staticmethod
-    def simulate_data(W, n, noise_scale=1.0, sigmas=None):
+    def simulate_data(W, n, noise_std=1.0, sigmas=None):
         """Simulate samples from SEM with specified type of noise.
 
         Parameters:
@@ -228,7 +228,7 @@ class SyntheticDataset(object):
         X = np.zeros([n, d], dtype=np.float64)
 
         if sigmas is None:
-            sigmas = np.ones((d,)) * noise_scale # Assuming equal variances
+            sigmas = np.ones((d,)) * noise_std**2 # Assuming equal variances
 
         # Generate the diagonal conditional variance matrix, diagonal values indicate sigma^2_j
         D_mat = np.eye(d) * sigmas
