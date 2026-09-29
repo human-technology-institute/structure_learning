@@ -176,7 +176,7 @@ class SyntheticDataset(object):
         return DAG(incidence=W), None, P, L
 
     @staticmethod
-    def simulate_data_V1(W, n, noise_scale=1.0, sigmas=None):
+    def simulate_data_via_topological_order(W, n, noise_std=1.0, sigmas=None):
         """Simulate samples from SEM with specified type of noise.
 
         Parameters:
@@ -196,7 +196,7 @@ class SyntheticDataset(object):
         X = np.zeros([n, d], dtype=np.float64)
 
         if sigmas is None:
-            sigmas = np.ones((d,)) * noise_scale
+            sigmas = np.ones((d,)) * noise_std**2
 
         ordered_vertices = list(nx.topological_sort(G))
         assert len(ordered_vertices) == d
@@ -215,7 +215,7 @@ class SyntheticDataset(object):
         Parameters:
             W (numpy.ndarray): weigthed DAG
             n (int): number of samples
-            noise_scale (float): scale parameter of noise distribution in linear SEM
+            noise_std (float): scale parameter of noise distribution in linear SEM
             sigmas (numpy.ndarray): noise vector
 
         Returns:
