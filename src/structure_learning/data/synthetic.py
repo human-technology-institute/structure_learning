@@ -20,7 +20,7 @@ class SyntheticDataset(object):
         node_labels: list,
         degree: float,
         graph_type: str="erdos-renyi",
-        noise_scale: float=1.0, true_dag = None):
+        noise_std: float=1.0, true_dag = None):
 
         """
         Initialise SyntheticDataset instance
@@ -30,7 +30,7 @@ class SyntheticDataset(object):
         self.node_labels = node_labels
         self.degree = degree
         self.graph_type = graph_type
-        self.noise_scale = noise_scale
+        self.noise_std = noise_std
         self.w_range = (0.5, 2.5)
         self.true_dag = true_dag
 
@@ -53,7 +53,7 @@ class SyntheticDataset(object):
             self.data = pd.DataFrame(SyntheticDataset.simulate_data(
                 self.W,
                 self.num_obs,
-                self.noise_scale
+                self.noise_std
             ), columns=self.node_labels)
         else:
             self.data, self.W = SyntheticDataset.simulate_data_from_dag(
@@ -62,14 +62,14 @@ class SyntheticDataset(object):
                 self.num_nodes,
                 self.node_labels,
                 self.w_range,
-                self.noise_scale
+                self.noise_std
             )
 
         self.graph = DAG(pd.DataFrame(np.where(self.W.incidence!=0, 1, 0), columns=self.node_labels))
         self.data = Data(self.data, self.node_labels)
 
     @staticmethod
-    def simulate_data_from_dag(dag, num_obs, num_nodes, node_labels, w_range, noise_scale):
+    def simulate_data_from_dag(dag, num_obs, num_nodes, node_labels, w_range, noise_std):
         """
         Simulate samples from ground truth DAG.
 
@@ -79,7 +79,7 @@ class SyntheticDataset(object):
             num_nodes (int): number of nodes
             node_labels (list (str)): node labels
             w_range (2-tuple (float)): weight range +/- (low, high)
-            noise_scale (float): scale parameter of noise distribution
+            noise_std (float): scale parameter of noise distribution
 
         Returns:
             (numpy.ndarray): [n,d] sample matrix
@@ -91,7 +91,7 @@ class SyntheticDataset(object):
         W = (adj != 0).astype(float) * U
         W_mat = np.eye(num_nodes) + W
 
-        sigmas = np.ones((num_nodes,)) * noise_scale # Assuming equal variances
+        sigmas = np.ones((num_nodes,)) * (noise_std**2) # Assuming equal variances
 
         # Generate the diagonal conditional variance matrix, diagonal values indicate sigma^2_j
         D_mat = np.eye(num_nodes) * sigmas
@@ -196,7 +196,7 @@ class SyntheticDataset(object):
         X = np.zeros([n, d], dtype=np.float64)
 
         if sigmas is None:
-            sigmas = np.ones((d,)) * noise_std**2
+            sigmas = np.ones((d,)) * (noise_std**2)
 
         ordered_vertices = list(nx.topological_sort(G))
         assert len(ordered_vertices) == d
@@ -228,7 +228,7 @@ class SyntheticDataset(object):
         X = np.zeros([n, d], dtype=np.float64)
 
         if sigmas is None:
-            sigmas = np.ones((d,)) * noise_std**2 # Assuming equal variances
+            sigmas = np.ones((d,)) * (noise_std**2) # Assuming equal variances
 
         # Generate the diagonal conditional variance matrix, diagonal values indicate sigma^2_j
         D_mat = np.eye(d) * sigmas
