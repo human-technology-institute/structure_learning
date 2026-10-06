@@ -985,6 +985,7 @@ class NIW_BGe_GlobalPrior_Node(NIW_Node):
             )
 
             global_prior = {
+                "variables": list(data.values.columns),
                 "mu_0": np.zeros(p),
                 "a_mu": a_mu,
                 "a_w": a_w,
@@ -1021,14 +1022,28 @@ class NIW_BGe_GlobalPrior_Node(NIW_Node):
         by the global BGe prior.
         """
 
-        p = data.shape[1]
+        global_variables = global_prior.get(
+            "variables",
+            list(data.values.columns),
+        )
 
-        variables = [target_col] + list(parents)
+        p = len(global_variables)
 
+        # Check that the prior and data describe the same global variables
+        if set(global_variables) != set(data.values.columns):
+            raise ValueError(
+                "global_prior variables must match the variables in data."
+            )
+
+        local_variables = [target_col] + list(parents)
+        global_variables = global_prior.get(
+            "variables",
+            list(data.values.columns),
+        )
         # Indices relative to the global BGe variable ordering
         idx = [
-            data.values.columns.get_loc(var)
-            for var in variables
+            global_variables.index(var)
+            for var in local_variables
         ]
 
         # Local joint dimension:
@@ -1037,6 +1052,14 @@ class NIW_BGe_GlobalPrior_Node(NIW_Node):
 
         mu_0 = np.asarray(global_prior["mu_0"])
         T_0 = np.asarray(global_prior["T_0"])
+
+        # Check consistency
+        if mu_0.shape != (p,):
+            raise ValueError(...)
+
+        if T_0.shape != (p, p):
+            raise ValueError(...)
+
 
         # Marginalisation from global dimension p to local dimension q
         nu_0 = (
