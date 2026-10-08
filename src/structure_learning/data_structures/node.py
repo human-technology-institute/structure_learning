@@ -192,18 +192,20 @@ class NIW_Node(AbstractNode):
         """
 
         Z = self.data.to_numpy()
-        N = self.num_obs
+        N, d = Z.shape
 
         # ------------------------------------------------------
         # Sufficient statistics - #TODO: consider to move out so can be updated on the fly if we want to do online learning
         # ------------------------------------------------------
-
-        z_bar = Z.mean(axis=0)
-
-        Z_centered = Z - z_bar
-
-        # Scatter matrix:
-        S = Z_centered.T @ Z_centered
+        if N==0:
+            # Reverting to prior
+            z_bar = np.zeros(self.d) # As N=0, this will not have any effect, so this is done to handle numpy errors
+            S = np.zeros((d, d)) # As N=0, this will not have any effect, so this is done to handle numpy errors
+        else:
+            z_bar = Z.mean(axis=0)
+            Z_centered = Z - z_bar
+            # Scatter matrix:
+            S = Z_centered.T @ Z_centered
 
         # ------------------------------------------------------
         # Prior
