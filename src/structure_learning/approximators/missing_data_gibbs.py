@@ -4,11 +4,10 @@ import numpy as np
 from scipy.linalg import solve
 import pandas as pd
 
-from structure_learning.approximators import State
 from structure_learning.approximators.structure_mcmc import StructureMCMC
 from structure_learning.scores import Score
 from structure_learning.priors import Prior
-from structure_learning.scores import Score
+from structure_learning.scores import Score, BGeScore
 from structure_learning.proposals import StructureLearningProposal, GraphProposal
 from structure_learning.data_structures import DAG
 from structure_learning.data import Data
@@ -39,11 +38,8 @@ class GibbsMissingDataNIWSampler(StructureMCMC):
         # Step 1: Initialise graph and parameters
         if proposal_object is None or proposal_object == 'graph':
             if initial_state is None:
-                if pc_init:
-                    pc = PC(data=score_object.data, significance_level=pc_significance_level, ci_test=pc_ci_test)
-                    initial_state, _ = pc.run()
-                else:
-                    initial_state = DAG.generate_random(self.node_labels, 0.5, seed)
+
+                initial_state = DAG.generate_random(list(data.columns), 0.5, seed)
 
                 # Check compliance with blacklist and whiteliist
                 if whitelist is not None:
@@ -52,7 +48,7 @@ class GibbsMissingDataNIWSampler(StructureMCMC):
                     self.initial_state.incidence[blacklist > 0] = False
             elif isinstance(self.initial_state, np.ndarray):
                 self.initial_state = DAG(nodes=self.node_labels, incidence=self.initial_state)
-            proposal_object = GraphProposal(initial_state=self.initial_state, blacklist=blacklist, whitelist=whitelist,
+            proposal_object = GraphProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist,
                                             seed=seed)
         elif not isinstance(proposal_object, StructureLearningProposal):
             raise Exception('Unsupported proposal', proposal_object)
@@ -69,8 +65,9 @@ class GibbsMissingDataNIWSampler(StructureMCMC):
 
         #TODO: dump data in a file
 
+        #TODO: generalise as currently this is only BGe (how should we generalise to MCMC struct)
         # Init of StructureMCMC instance
-        score_object.data = data_missing_resampled
+        score_object = BGeScore(data=data_missing_resampled)
 
         #TODO: why StrctureMCMC is only pandas dataframe and not our DATA strcture.
         super().__init__(data_missing_resampled.values, initial_state, max_iter, score_object, proposal_object, prior, pc_init,
@@ -154,7 +151,6 @@ class GibbsMissingDataNIWSampler(StructureMCMC):
                 data=valid_node_data,
                 parents=parents,
                 target_col=node,
-                rng=rng,
             ).fit()
 
             params = BGeNode.sample_parameters()
@@ -174,7 +170,7 @@ class GibbsMissingDataNIWSampler(StructureMCMC):
 
         sigma = A_inv @ D @ A_inv.T
 
-        return {"mu": mu, "Ssigma": sigma}
+        return {"mu": mu, "sigma": sigma}
 
     def sample_missing_data(self, data, nan_indices, mu, sigma, rng=None):
         """
