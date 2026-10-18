@@ -65,7 +65,11 @@ class SyntheticDataset(object):
                 self.noise_std
             )
 
-        self.graph = DAG(pd.DataFrame(np.where(self.W.incidence!=0, 1, 0), columns=self.node_labels))
+        try:
+            self.graph = DAG(pd.DataFrame(np.where(self.W.incidence!=0, 1, 0), columns=self.node_labels))
+        except AttributeError:
+            self.graph = DAG(pd.DataFrame(np.where(self.W != 0, 1, 0), columns=self.node_labels))
+
         self.data = Data(self.data, self.node_labels)
 
     @staticmethod
