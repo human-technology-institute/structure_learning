@@ -30,28 +30,52 @@ class GibbsMissingDataNIWSampler(StructureMCMC):
                  blacklist: np.ndarray = None, whitelist: np.ndarray = None, seed: int = None, sparse=True,
                  result_type: str = 'distribution', graph_type='dag', burn_in: float = 0.1, verbose=True, **kwargs):
 
+        self._missing_rng = np.random.default_rng(seed)
+
         # As we have missing data, we need to wrap the initialisation of the StructureMCMC class.
         self.original_data = data.__copy__()
 
         self.nan_indices = self.original_data.values.index[self.original_data.values.isna().any(axis=1)]
 
         # Step 1: Initialise graph and parameters
-        if proposal_object is None or proposal_object == 'graph':
+
+        if proposal_object is None or proposal_object == "graph":
+
             if initial_state is None:
+                initial_state = DAG.generate_random(
+                    list(data.columns),
+                    0.5,
+                    seed
+                )
 
-                initial_state = DAG.generate_random(list(data.columns), 0.5, seed)
+            elif isinstance(initial_state, np.ndarray):
+                initial_state = DAG(
+                    nodes=list(data.columns),
+                    incidence=initial_state
+                )
 
-                # Check compliance with blacklist and whiteliist
-                if whitelist is not None:
-                    self.initial_state.incidence[whitelist > 0] = True
-                if blacklist is not None:
-                    self.initial_state.incidence[blacklist > 0] = False
-            elif isinstance(self.initial_state, np.ndarray):
-                self.initial_state = DAG(nodes=self.node_labels, incidence=self.initial_state)
-            proposal_object = GraphProposal(initial_state=initial_state, blacklist=blacklist, whitelist=whitelist,
-                                            seed=seed)
+            # Apply edge constraints
+            if whitelist is not None:
+                initial_state.incidence[whitelist > 0] = True
+
+            if blacklist is not None:
+                initial_state.incidence[blacklist > 0] = False
+
+            # Check that the constraints did not create a cycle
+            if DAG.has_cycle(initial_state):
+                raise ValueError(
+                    "Initial DAG contains a cycle after applying constraints"
+                )
+
+            proposal_object = GraphProposal(
+                initial_state=initial_state,
+                blacklist=blacklist,
+                whitelist=whitelist,
+                seed=seed
+            )
+
         elif not isinstance(proposal_object, StructureLearningProposal):
-            raise Exception('Unsupported proposal', proposal_object)
+            raise ValueError("Unsupported proposal object")
 
         # sample initial parameters given an initial graph from the prior
         self.param_state = self.sample_params(Data(data.values.head(0), variables=data.variables),
@@ -79,7 +103,8 @@ class GibbsMissingDataNIWSampler(StructureMCMC):
 
         smcmc_res = super().step()
 
-        current_structure_state = smcmc_res['graph']
+
+        current_structure_state = self.proposal_object.current_state
 
         self.param_state = self.sample_params(self.data,
                                               current_structure_state
@@ -89,8 +114,14 @@ class GibbsMissingDataNIWSampler(StructureMCMC):
         data_missing_resampled = self.sample_missing_data(self.original_data, self.nan_indices, self.param_state['mu'],
                                                           self.param_state['sigma'])
 
-        # TODO: Dump data into file
-        self.score_object.data = data_missing_resampled
+        # Update the data in the StructureMCMC instance to the newly sampled data
+        self.data = data_missing_resampled
+
+        # Flush the data in the score object to the new sampled data
+        self.score_object = BGeScore(data=data_missing_resampled)
+        state_score = self.score_object.compute(current_structure_state)
+        self.scores = {node: info['score'] for node, info in state_score['parameters'].items()}
+
 
         return {**smcmc_res, **self.param_state}
 
@@ -119,10 +150,14 @@ class GibbsMissingDataNIWSampler(StructureMCMC):
         pd.DataFrame
             Copy of data with sampleable missing values filled.
         """
-        if DAG.has_cycle(graph):
-            # TODO: this might not be neccesary in the future if we can guarantee that the graph is a DAG.
-            raise ValueError("graph must be a DAG")
+        # if DAG.has_cycle(graph):
+        #     # TODO: this might not be neccesary in the future if we can guarantee that the graph is a DAG.
+        #     raise ValueError("graph must be a DAG")
 
+        if data.values.isna().any().any():
+            raise ValueError(
+                "sample_params requires a completed dataset"
+            )
 
         node_order = list(data.columns)
         p = len(data.columns)
@@ -136,19 +171,9 @@ class GibbsMissingDataNIWSampler(StructureMCMC):
         for node, i in node_order.items():
 
             parents = list(graph.find_parents(node))
-            columns_to_sample = parents + [node]
-
-            # Only sampling missing data - TODO: missing data per node, should be captured in INIT - keep an empty list if no missing data so easy to continue. keep indices instead?
-            missing = data[columns_to_sample].isna().any(axis=1)
-
-            # ------------------------------------------------------------
-            # Determine which missing observations can actually be sampled
-            # ------------------------------------------------------------
-
-            valid_node_data = Data(data.values[~missing], variables=data.variables)
 
             BGeNode = NIW_BGe_GlobalPrior_Node(
-                data=valid_node_data,
+                data=data,
                 parents=parents,
                 target_col=node,
             ).fit()
@@ -184,7 +209,7 @@ class GibbsMissingDataNIWSampler(StructureMCMC):
         """
 
         if rng is None:
-            rng = np.random.default_rng()
+            rng = self._missing_rng
 
         sampled_data = data.values.copy()
 

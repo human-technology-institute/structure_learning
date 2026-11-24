@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 # Local imports
 from structure_learning.data.data import Data
 
+#TODO: consistent random naumber generation - reproducible generation - this is also in the MCMC parts
 
 class AbstractNode(ABC):
     """Abstract base class for nodes in a structure learning tree.
